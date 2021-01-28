@@ -13,8 +13,8 @@ public class CameraParent : MonoBehaviour
 
 
 
-    [SerializeField] private bool _cursorVisable = false;
-    [SerializeField] private bool _reversedControl = false;
+    [SerializeField] private bool cursorVisible = false;
+    [SerializeField] private bool reversedControl = false;
     //Rotation Sensitivity
     [SerializeField] public float minAngle = 0f;
     [SerializeField] public float maxAngle = 90f;
@@ -84,7 +84,7 @@ public class CameraParent : MonoBehaviour
         if (Input.GetMouseButton(1))
         {
             // Do hide the cursor when the mouse is held down
-            Cursor.visible = _cursorVisable;
+            Cursor.visible = cursorVisible;
             
             _mousePositionWhenDragging = Input.mousePosition;
 
@@ -93,10 +93,10 @@ public class CameraParent : MonoBehaviour
             float dy = (_mousePositionWhenDragging - _mousePositionWhenPressed).y * rotateSpeed;
             
             // Yaw
-            transform.rotation *= Quaternion.Euler(new Vector3(0, _reversedControl ? -dx : dx, 0));
+            transform.rotation *= Quaternion.Euler(new Vector3(0, reversedControl ? -dx : dx, 0));
 
             // Pitch
-            _yRotate = Mathf.Clamp (_reversedControl ? _yRotate + dy : _yRotate - dy, minAngle ,maxAngle);
+            _yRotate = Mathf.Clamp (reversedControl ? _yRotate + dy : _yRotate - dy, minAngle ,maxAngle);
             childCamera.localRotation = Quaternion.Euler(new Vector3(_yRotate, 0, 0));
 
         }
