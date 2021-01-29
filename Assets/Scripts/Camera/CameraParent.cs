@@ -22,55 +22,60 @@ public class CameraParent : MonoBehaviour
 
     private Vector2 _mousePositionWhenPressed;
     private Vector2 _mousePositionWhenDragging;
+    
+    private Transform _cameraParent;
+    private Transform _childCamera;
+    
+    private Vector3 _cameraParentPosition;
     // Start is called before the first frame update
     void Start()
     {
+        _cameraParent = transform;
+        _childCamera = _cameraParent.GetChild(0).transform;
         
     }
 
     // Update is called once per frame
     private void Update()
     {
-        Transform cameraParent = transform;
-        Vector3 cameraParentPosition = cameraParent.position;
         
-        float horizontalSpeed = cameraParentPosition.y * speed * Input.GetAxis("Horizontal");
-        float verticalSpeed = cameraParentPosition.y * speed * Input.GetAxis("Vertical");
-        float scrollSpeed = Mathf.Log(cameraParentPosition.y) * -zoomSpeed * Input.GetAxis("Mouse ScrollWheel");
+        // Only move the camera container around the world
+        MoveCamera(_cameraParent);
+        // Yaw: rotate camera container, pitch: rotate child camera locally
+        RotateCamera(_cameraParent, _childCamera);
+    }
 
-        if ((transform.position.y >= MAXHeight) && (scrollSpeed > 0) || (transform.position.y <= MINHeight) && (scrollSpeed < 0)) 
-        {
-            scrollSpeed = 0;
-        } 
-
-        if((transform.position.y + scrollSpeed) > MAXHeight) 
-        {
-            scrollSpeed = MAXHeight - transform.position.y;
-        }
-        else if ((transform.position.y + scrollSpeed) < MINHeight) 
-        {
-            scrollSpeed = MINHeight - transform.position.y;
-        }
-
+    private void MoveCamera(Transform cameraParent)
+    {
+        _cameraParentPosition = cameraParent.position;
+                
+        // Make the movement speed dependent on y coordinate (the more we zoom out,the faster we move)
+        float horizontalSpeed = _cameraParentPosition.y            * speed      * Input.GetAxis("Horizontal");
+        float verticalSpeed   = _cameraParentPosition.y            * speed      * Input.GetAxis("Vertical");
+        float scrollSpeed     = Mathf.Log(_cameraParentPosition.y) * -zoomSpeed * Input.GetAxis("Mouse ScrollWheel");
+                
+        
         Vector3 verticalMove = new Vector3(0, scrollSpeed, 0);
-        Vector3 lateralMove = horizontalSpeed * transform.right;
-        Vector3 forwardMove = cameraParent.forward;
-
+        Vector3 lateralMove = horizontalSpeed * _cameraParent.right;
+        Vector3 forwardMove = _cameraParent.forward;
 
         forwardMove.y = 0;
         forwardMove.Normalize();
         forwardMove *= verticalSpeed;
-
+                
         Vector3 move = verticalMove + lateralMove + forwardMove;
+        
+        _cameraParent.position = new Vector3(
+                move.x + cameraParent.position.x, 
+                Mathf.Clamp(move.y + cameraParent.position.y, 4, 40),
+                move.z + cameraParent.position.z
+            );
 
-        transform.position += move;
-
-        RotateCamera();
     }
     
-    private void RotateCamera() 
+    // Parent camera remains orthogonal to the world normal, while the child camera pitch is local to the parent camera
+    private void RotateCamera(Transform parentCamera, Transform childCamera) 
     {
-        Transform childCamera = transform.GetChild(0).transform;
         _yRotate = childCamera.eulerAngles.x;
         
         // Right click when clicked
@@ -93,20 +98,16 @@ public class CameraParent : MonoBehaviour
             float dy = (_mousePositionWhenDragging - _mousePositionWhenPressed).y * rotateSpeed;
             
             // Yaw
-            transform.rotation *= Quaternion.Euler(new Vector3(0, reversedControl ? -dx : dx, 0));
+            parentCamera.rotation *= Quaternion.Euler(new Vector3(0, reversedControl ? -dx : dx, 0));
 
             // Pitch
             _yRotate = Mathf.Clamp (reversedControl ? _yRotate + dy : _yRotate - dy, minAngle ,maxAngle);
             childCamera.localRotation = Quaternion.Euler(new Vector3(_yRotate, 0, 0));
-
         }
         else
         {
             // When the right click is no longer held down, show the cursor 
             Cursor.visible = true;
         }
-        
-
     }
-
 }
