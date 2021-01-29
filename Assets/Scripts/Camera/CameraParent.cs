@@ -64,11 +64,12 @@ public class CameraParent : MonoBehaviour
         forwardMove *= verticalSpeed;
                 
         Vector3 move = verticalMove + lateralMove + forwardMove;
+        Vector3 currentPosition = _cameraParent.position;
         
         _cameraParent.position = new Vector3(
-                move.x + cameraParent.position.x, 
-                Mathf.Clamp(move.y + cameraParent.position.y, 4, 40),
-                move.z + cameraParent.position.z
+                move.x + currentPosition.x, 
+                Mathf.Clamp(move.y + currentPosition.y, 4, 40),
+                move.z + currentPosition.z
             );
 
     }
