@@ -5,25 +5,23 @@ using System.Runtime.InteropServices;
 
 public class CameraParent : MonoBehaviour
 {
-    
     private const float MINHeight = 4f;
     private const float MAXHeight = 40f;
 
-    [SerializeField] private float speed = 0.06f;
+    [SerializeField] private float speed = 6f;
     [SerializeField] private float zoomSpeed = 10.0f;
-    [SerializeField] private float rotateSpeed = 0.01f;
-
-
+    [SerializeField] private float rotateSpeed = 0.1f;
 
     [SerializeField] private bool cursorVisible = false;
     [SerializeField] private bool reversedControl = false;
+    
     //Rotation Sensitivity
     [SerializeField] public float minAngle = 0f;
     [SerializeField] public float maxAngle = 90f;
     private float _yRotate;
 
-    private Vector2 _cursorStartPosition;
-    private Vector2 _cursorEndPosition;
+    private Vector2 _previousCursorPosition;
+    private Vector2 _currentCursorPosition;
     
     private Transform _cameraParent;
     private Transform _childCamera;
@@ -53,9 +51,9 @@ public class CameraParent : MonoBehaviour
         _cameraParentPosition = cameraParent.position;
                 
         // Make the movement speed dependent on y coordinate (the more we zoom out,the faster we move)
-        float horizontalSpeed = _cameraParentPosition.y            * speed      * Input.GetAxis("Horizontal");
-        float verticalSpeed   = _cameraParentPosition.y            * speed      * Input.GetAxis("Vertical");
-        float scrollSpeed     = Mathf.Log(_cameraParentPosition.y) * -zoomSpeed * Input.GetAxis("Mouse ScrollWheel");
+        float horizontalSpeed = _cameraParentPosition.y            * speed      * Time.deltaTime * Input.GetAxis("Horizontal");
+        float verticalSpeed   = _cameraParentPosition.y            * speed      * Time.deltaTime * Input.GetAxis("Vertical");
+        float scrollSpeed     = Mathf.Log(_cameraParentPosition.y) * -zoomSpeed * Time.deltaTime * Input.GetAxis("Mouse ScrollWheel");
                 
         
         Vector3 verticalMove = new Vector3(0, scrollSpeed, 0);
@@ -71,7 +69,7 @@ public class CameraParent : MonoBehaviour
         
         _cameraParent.position = new Vector3(
                 move.x + currentPosition.x, 
-                Mathf.Clamp(move.y + currentPosition.y, 4, 40),
+                Mathf.Clamp(move.y + currentPosition.y, MINHeight, MAXHeight),
                 move.z + currentPosition.z
             );
 
@@ -86,7 +84,7 @@ public class CameraParent : MonoBehaviour
         if (Input.GetMouseButtonDown(1)) 
         {
             // Safe the position from where right clicked where originally pressed down
-            _cursorStartPosition = Input.mousePosition;
+            _previousCursorPosition = Input.mousePosition;
         }
 
         // Right click when held
@@ -95,11 +93,11 @@ public class CameraParent : MonoBehaviour
             // Do hide the cursor when the mouse is held down
             Cursor.visible = cursorVisible;
             
-            _cursorEndPosition = Input.mousePosition;
+            _currentCursorPosition = Input.mousePosition;
 
             // The change in x and y from where the cursor was originally clicked to where the cursor is right now
-            float dx = (_cursorEndPosition - _cursorStartPosition).x * rotateSpeed; 
-            float dy = (_cursorEndPosition - _cursorStartPosition).y * rotateSpeed;
+            float dx = (_currentCursorPosition - _previousCursorPosition).x * rotateSpeed; 
+            float dy = (_currentCursorPosition - _previousCursorPosition).y * rotateSpeed;
             
             // Yaw
             parentCamera.rotation *= Quaternion.Euler(new Vector3(0, reversedControl ? -dx : dx, 0));
@@ -108,8 +106,7 @@ public class CameraParent : MonoBehaviour
             _yRotate = Mathf.Clamp (reversedControl ? _yRotate + dy : _yRotate - dy, minAngle ,maxAngle);
             childCamera.localRotation = Quaternion.Euler(new Vector3(_yRotate, 0, 0));
 
-
-            _cursorStartPosition = _cursorEndPosition;
+            _previousCursorPosition = _currentCursorPosition;
         }
         else
         {
