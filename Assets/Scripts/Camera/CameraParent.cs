@@ -32,7 +32,7 @@ public class CameraParent : MonoBehaviour
     private bool _rightMouseButtonHeld = false;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         _parentCamera = transform;
         _childCamera = _parentCamera.GetChild(0).transform;
@@ -45,19 +45,15 @@ public class CameraParent : MonoBehaviour
         // Checks if you clicked the button 
         if (Input.GetMouseButtonDown(1))
         {
-            _previousCursorPosition = Input.mousePosition;
-            
-
             // Saves the position where you originally clicked the button
+            _previousCursorPosition = Input.mousePosition;
         }
         
         if (Input.GetMouseButton(1))
         {
-
             _currentCursorPosition = Input.mousePosition;
             // Hide the cursor when the mouse is held down
             _rightMouseButtonHeld = true;
-
         }
         
         // Only move the camera container around the world
