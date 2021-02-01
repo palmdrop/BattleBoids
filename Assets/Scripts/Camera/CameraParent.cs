@@ -8,9 +8,9 @@ public class CameraParent : MonoBehaviour
     private const float MINHeight = 4f;
     private const float MAXHeight = 40f;
 
-    [SerializeField] private float speed = 6f;
+    [SerializeField] private float speed = 10f;
     [SerializeField] private float zoomSpeed = 10.0f;
-    [SerializeField] private float rotateSpeed = 0.1f;
+    [SerializeField] private float rotateSpeed = 5f;
 
     [SerializeField] private bool cursorVisible = false;
     [SerializeField] private bool reversedControl = false;
@@ -51,9 +51,9 @@ public class CameraParent : MonoBehaviour
         _cameraParentPosition = cameraParent.position;
                 
         // Make the movement speed dependent on y coordinate (the more we zoom out,the faster we move)
-        float horizontalSpeed = _cameraParentPosition.y            * speed      * Time.deltaTime * Input.GetAxis("Horizontal");
-        float verticalSpeed   = _cameraParentPosition.y            * speed      * Time.deltaTime * Input.GetAxis("Vertical");
-        float scrollSpeed     = Mathf.Log(_cameraParentPosition.y) * -zoomSpeed * Time.deltaTime * Input.GetAxis("Mouse ScrollWheel");
+        float horizontalSpeed = _cameraParentPosition.y            * speed      * Input.GetAxis("Horizontal")        * Time.deltaTime ;
+        float verticalSpeed   = _cameraParentPosition.y            * speed      * Input.GetAxis("Vertical")          * Time.deltaTime ;
+        float scrollSpeed     = Mathf.Log(_cameraParentPosition.y) * -zoomSpeed * Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime ;
                 
         
         Vector3 verticalMove = new Vector3(0, scrollSpeed, 0);
@@ -66,12 +66,12 @@ public class CameraParent : MonoBehaviour
                 
         Vector3 move = verticalMove + lateralMove + forwardMove;
         Vector3 currentPosition = _cameraParent.position;
-        
+
         _cameraParent.position = new Vector3(
-                move.x + currentPosition.x, 
-                Mathf.Clamp(move.y + currentPosition.y, MINHeight, MAXHeight),
-                move.z + currentPosition.z
-            );
+            move.x + currentPosition.x,
+            Mathf.Clamp(move.y + currentPosition.y, MINHeight, MAXHeight),
+            move.z + currentPosition.z
+        );
 
     }
     
@@ -96,8 +96,8 @@ public class CameraParent : MonoBehaviour
             _currentCursorPosition = Input.mousePosition;
 
             // The change in x and y from where the cursor was originally clicked to where the cursor is right now
-            float dx = (_currentCursorPosition - _previousCursorPosition).x * rotateSpeed; 
-            float dy = (_currentCursorPosition - _previousCursorPosition).y * rotateSpeed;
+            float dx = (_currentCursorPosition - _previousCursorPosition).x * rotateSpeed * Time.deltaTime; 
+            float dy = (_currentCursorPosition - _previousCursorPosition).y * rotateSpeed * Time.deltaTime;
             
             // Yaw
             parentCamera.rotation *= Quaternion.Euler(new Vector3(0, reversedControl ? -dx : dx, 0));
