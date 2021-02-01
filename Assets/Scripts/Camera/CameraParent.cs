@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using UnityEngine;
 using System.Runtime.InteropServices;
 
@@ -8,11 +10,10 @@ public class CameraParent : MonoBehaviour
     private const float MINHeight = 4f;
     private const float MAXHeight = 40f;
 
-    [SerializeField] private float speed = 6f;
-    [SerializeField] private float zoomSpeed = 1000.0f;
-    [SerializeField] private float rotateSpeed = 40f;
+    [SerializeField] private float speed = .1f;
+    [SerializeField] private float zoomSpeed = 5f;
+    [SerializeField] private float rotateSpeed = .1f;
 
-    [SerializeField] private bool cursorVisible = false;
     [SerializeField] private bool reversedControl = false;
     
     //Rotation Sensitivity
@@ -23,95 +24,103 @@ public class CameraParent : MonoBehaviour
     private Vector2 _previousCursorPosition;
     private Vector2 _currentCursorPosition;
     
-    private Transform _cameraParent;
+    private Transform _parentCamera;
     private Transform _childCamera;
     
     private Vector3 _cameraParentPosition;
+
+    private bool _rightMouseButtonHeld = false;
+
     // Start is called before the first frame update
     void Start()
     {
-        _cameraParent = transform;
-        _childCamera = _cameraParent.GetChild(0).transform;
+        _parentCamera = transform;
+        _childCamera = _parentCamera.GetChild(0).transform;
         
     }
 
     // Update is called once per frame
     private void Update()
     {
+        // Checks if you clicked the button 
+        if (Input.GetMouseButtonDown(1))
+        {
+            _previousCursorPosition = Input.mousePosition;
+            
+
+            // Saves the position where you originally clicked the button
+        }
+        
+        if (Input.GetMouseButton(1))
+        {
+
+            _currentCursorPosition = Input.mousePosition;
+            // Hide the cursor when the mouse is held down
+            _rightMouseButtonHeld = true;
+
+        }
         
         // Only move the camera container around the world
-        MoveCamera(_cameraParent);
         // Yaw: rotate camera container, pitch: rotate child camera locally
-        RotateCamera(_cameraParent, _childCamera);
+    }
+    
+    private void FixedUpdate()
+    {
+        MoveCamera(_parentCamera);
+        RotateCamera(_parentCamera, _childCamera);
     }
 
     private void MoveCamera(Transform cameraParent)
     {
-        
         _cameraParentPosition = cameraParent.position;
                 
         // Make the movement speed dependent on y coordinate (the more we zoom out,the faster we move)
-        float horizontalSpeed = _cameraParentPosition.y            * speed      * Input.GetAxis("Horizontal")        * Time.deltaTime ;
-        float verticalSpeed   = _cameraParentPosition.y            * speed      * Input.GetAxis("Vertical")          * Time.deltaTime ;
-        float scrollSpeed     = Mathf.Log(_cameraParentPosition.y) * -zoomSpeed * Input.GetAxis("Mouse ScrollWheel") * Time.deltaTime ;
+        float horizontalSpeed = _cameraParentPosition.y * speed * Input.GetAxis("Horizontal");
+        float verticalSpeed = _cameraParentPosition.y * speed * Input.GetAxis("Vertical");
+        float scrollSpeed = Mathf.Log(_cameraParentPosition.y) * -zoomSpeed * Input.GetAxis("Mouse ScrollWheel");
                 
         
         Vector3 verticalMove = new Vector3(0, scrollSpeed, 0);
-        Vector3 lateralMove = horizontalSpeed * _cameraParent.right;
-        Vector3 forwardMove = _cameraParent.forward;
+        Vector3 lateralMove = horizontalSpeed * _parentCamera.right;
+        Vector3 forwardMove = _parentCamera.forward;
 
         forwardMove.y = 0;
         forwardMove.Normalize();
         forwardMove *= verticalSpeed;
                 
         Vector3 move = verticalMove + lateralMove + forwardMove;
-        Vector3 currentPosition = _cameraParent.position;
+        Vector3 currentPosition = _parentCamera.position;
 
-        _cameraParent.position = new Vector3(
+        _parentCamera.position = new Vector3(
             move.x + currentPosition.x,
             Mathf.Clamp(move.y + currentPosition.y, MINHeight, MAXHeight),
             move.z + currentPosition.z
         );
 
     }
+
     
     // Parent camera remains orthogonal to the world normal, while the child camera pitch is local to the parent camera
-    private void RotateCamera(Transform parentCamera, Transform childCamera) 
+    private void RotateCamera(Transform parentCamera, Transform childCamera)
     {
-        _yRotate = childCamera.eulerAngles.x;
+        if (!_rightMouseButtonHeld)
+        {
+            return;
+        }
+
+        // The change in x and y from where the cursor was originally clicked to where the cursor is right now
+        float dx = (_currentCursorPosition.x - _previousCursorPosition.x) * rotateSpeed; 
+        float dy = (_currentCursorPosition.y - _previousCursorPosition.y) * rotateSpeed;
         
-        // Right click when clicked
-        if (Input.GetMouseButtonDown(1)) 
-        {
-            // Safe the position from where right clicked where originally pressed down
-            _previousCursorPosition = Input.mousePosition;
-        }
+        // Yaw
+        parentCamera.rotation *= Quaternion.Euler(new Vector3(0, reversedControl ? -dx : dx, 0));
 
-        // Right click when held
-        if (Input.GetMouseButton(1))
-        {
-            // Do hide the cursor when the mouse is held down
-            Cursor.visible = cursorVisible;
-            
-            _currentCursorPosition = Input.mousePosition;
-
-            // The change in x and y from where the cursor was originally clicked to where the cursor is right now
-            float dx = (_currentCursorPosition - _previousCursorPosition).x * rotateSpeed * Time.deltaTime; 
-            float dy = (_currentCursorPosition - _previousCursorPosition).y * rotateSpeed * Time.deltaTime;
-            
-            // Yaw
-            parentCamera.rotation *= Quaternion.Euler(new Vector3(0, reversedControl ? -dx : dx, 0));
-
-            // Pitch
-            _yRotate = Mathf.Clamp (reversedControl ? _yRotate + dy : _yRotate - dy, minAngle ,maxAngle);
-            childCamera.localRotation = Quaternion.Euler(new Vector3(_yRotate, 0, 0));
-
-            _previousCursorPosition = _currentCursorPosition;
-        }
-        else
-        {
-            // When the right click is no longer held down, show the cursor 
-            Cursor.visible = true;
-        }
+        // Pitch
+        _yRotate = childCamera.eulerAngles.x;
+        _yRotate = Mathf.Clamp (reversedControl ? _yRotate + dy : _yRotate - dy, minAngle ,maxAngle);
+        
+        childCamera.localRotation = Quaternion.Euler(new Vector3(_yRotate, 0, 0));
+        
+        _previousCursorPosition = _currentCursorPosition;
     }
 }
