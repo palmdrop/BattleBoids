@@ -154,7 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 6
   zoomSpeed: 1000
-  rotateSpeed: 0.1
+  rotateSpeed: 40
   cursorVisible: 0
   reversedControl: 0
   minAngle: 0

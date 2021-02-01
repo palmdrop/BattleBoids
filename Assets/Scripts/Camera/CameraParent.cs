@@ -8,9 +8,9 @@ public class CameraParent : MonoBehaviour
     private const float MINHeight = 4f;
     private const float MAXHeight = 40f;
 
-    [SerializeField] private float speed = 10f;
-    [SerializeField] private float zoomSpeed = 10.0f;
-    [SerializeField] private float rotateSpeed = 5f;
+    [SerializeField] private float speed = 6f;
+    [SerializeField] private float zoomSpeed = 1000.0f;
+    [SerializeField] private float rotateSpeed = 40f;
 
     [SerializeField] private bool cursorVisible = false;
     [SerializeField] private bool reversedControl = false;
