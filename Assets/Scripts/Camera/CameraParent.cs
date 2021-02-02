@@ -66,6 +66,7 @@ public class CameraParent : MonoBehaviour
         RotateCamera(_parentCamera, _childCamera);
     }
 
+
     private void MoveCamera(Transform cameraParent)
     {
         _cameraParentPosition = cameraParent.position;
@@ -89,7 +90,7 @@ public class CameraParent : MonoBehaviour
 
         _parentCamera.position = new Vector3(
             move.x + currentPosition.x,
-            Mathf.Clamp(move.y + currentPosition.y, MINHeight, MAXHeight),
+            Mathf.Lerp(currentPosition.y, Mathf.Clamp(move.y + currentPosition.y, MINHeight, MAXHeight), .7f * Time.deltaTime ),
             move.z + currentPosition.z
         );
 
