@@ -45,7 +45,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 409898901d3013e47a66979ad5de660f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  manager: {fileID: 0}
   viewRadius: 2
   separationRadius: 1
   alignmentStrength: 0.2

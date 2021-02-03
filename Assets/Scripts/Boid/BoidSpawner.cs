@@ -5,10 +5,11 @@ using UnityEngine;
 public class BoidSpawner : MonoBehaviour
 {
 
-    public Boid boidPrefab;
-    public float spawnRadius = 1f;
-    public int spawnCount = 10;
+    [SerializeField] private Boid boidPrefab;
+    [SerializeField] private float spawnRadius = 1f;
+    [SerializeField] private int spawnCount = 10;
 
+    // Awake is called when the script instance is being loaded
     private void Awake()
     {
         for (int i = 0; i < spawnCount; i++)
@@ -20,12 +21,6 @@ public class BoidSpawner : MonoBehaviour
             Vector2 randomHeading = Random.insideUnitCircle;
             boid.transform.forward = new Vector3(randomHeading.x, 0, randomHeading.y);
         }
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
     }
 
 }

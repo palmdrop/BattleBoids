@@ -5,7 +5,7 @@ using UnityEngine;
 public class BoidManager : MonoBehaviour
 {
     // To be replaced by some other data structure
-    public Boid[] boids;
+    private Boid[] boids;
 
     // Start is called before the first frame update
     void Start()
@@ -23,13 +23,6 @@ public class BoidManager : MonoBehaviour
     {
         // Here we will build or update the data structure that we will use for efficiently finding boids within some radius
 
-        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Boid");
-        boids = new Boid[gameObjects.Length];
-        for (int i = 0; i < boids.Length; i++)
-        {
-            boids[i] = gameObjects[i].GetComponent<Boid>();
-        }
-
         foreach (Boid b in boids)
         {
             b.UpdateBoid();
@@ -44,14 +37,10 @@ public class BoidManager : MonoBehaviour
         List<Boid> result = new List<Boid>();
         foreach (Boid b in boids)
         {
-            if ((b.transform.position - boid.transform.position).magnitude < radius && b != boid)
+            if ((b.getPos() - boid.getPos()).magnitude < radius && b != boid)
             {
                 result.Add(b);
-                //Debug.Log("In range: " + (b.transform.position - boid.transform.position).magnitude);
-            } /*else
-            {
-                Debug.Log("Not in range");
-            }*/
+            }
         }
         return result.ToArray();
     }
