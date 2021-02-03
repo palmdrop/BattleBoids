@@ -86,7 +86,7 @@ public class Boid : MonoBehaviour
         }
 
         if (n == 0) return new Vector3(0, 0, 0);
-        return (avgPos - getPos()).normalized;
+        return ((avgPos / n) - getPos()).normalized;
     }
 
 
@@ -95,7 +95,7 @@ public class Boid : MonoBehaviour
         Vector3 avgPos = new Vector3(0, 0, 0);
         int n = 0;
 
-        Boid[] neighbours = manager.findBoidsWithinRadius(this, viewRadius);
+        Boid[] neighbours = manager.findBoidsWithinRadius(this, separationRadius);
 
         foreach (Boid b in neighbours)
         {
@@ -104,6 +104,6 @@ public class Boid : MonoBehaviour
         }
 
         if (n == 0) return new Vector3(0, 0, 0);
-        return (getPos() - avgPos).normalized;
+        return (getPos() - (avgPos / n)).normalized;
     }
 }
