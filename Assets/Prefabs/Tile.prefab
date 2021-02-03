@@ -303,6 +303,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cac35e384ddd54c40b1d5f86f3955caf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  topSize: 0.1
-  middleSize: 0.6
+  topSize: 0.5
+  middleSize: 0.2
   bottomSize: 0.3
