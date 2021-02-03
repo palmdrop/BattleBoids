@@ -90,7 +90,7 @@ public class CameraParent : MonoBehaviour
 
         _parentCamera.position = new Vector3(
             move.x + currentPosition.x,
-            Mathf.Lerp(currentPosition.y, Mathf.Clamp(move.y + currentPosition.y, MINHeight, MAXHeight), .7f * Time.deltaTime ),
+            Mathf.Clamp(move.y + currentPosition.y, MINHeight, MAXHeight),
             move.z + currentPosition.z
         );
 
