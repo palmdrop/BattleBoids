@@ -11,7 +11,7 @@ public class CameraParent : MonoBehaviour
     private const float MAXHeight = 40f;
 
     [SerializeField] private float speed = .1f;
-    [SerializeField] private float zoomSpeed = 5f;
+    [SerializeField] private float zoomSpeed = 100f;
     [SerializeField] private float rotateSpeed = .1f;
 
     [SerializeField] private bool reversedControl = false;
@@ -65,6 +65,7 @@ public class CameraParent : MonoBehaviour
         MoveCamera(_parentCamera);
         RotateCamera(_parentCamera, _childCamera);
     }
+
 
     private void MoveCamera(Transform cameraParent)
     {
