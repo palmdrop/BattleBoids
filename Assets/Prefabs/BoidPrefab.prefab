@@ -46,11 +46,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   manager: {fileID: 0}
-  viewRadius: 5
-  separationRadius: 2
-  alignmentStrength: 0.1
-  cohesionStrength: 0.1
-  separationStrength: 0.15
+  viewRadius: 2
+  separationRadius: 1
+  alignmentStrength: 0.2
+  cohesionStrength: 0.2
+  separationStrength: 0.25
 --- !u!54 &26594132553738016
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -60,12 +60,12 @@ Rigidbody:
   m_GameObject: {fileID: 7175138290131011101}
   serializedVersion: 2
   m_Mass: 1
-  m_Drag: 0
+  m_Drag: 0.05
   m_AngularDrag: 0.05
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 4
+  m_Constraints: 84
   m_CollisionDetection: 0
 --- !u!1001 &248111865555155743
 PrefabInstance:

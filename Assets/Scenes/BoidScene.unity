@@ -290,8 +290,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boidPrefab: {fileID: -1091215051074117226, guid: f12ecb59033b92b46909099a9e479d25, type: 3}
-  spawnRadius: 1
-  spawnCount: 10
+  spawnRadius: 2
+  spawnCount: 50
 --- !u!4 &1243731635
 Transform:
   m_ObjectHideFlags: 0
