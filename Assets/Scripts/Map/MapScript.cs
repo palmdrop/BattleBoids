@@ -21,11 +21,11 @@ namespace Map
             _corners = transform.GetChild(2).gameObject;
 
             // Get some of the corners in order to calculate dimensions
-            Component cornerNW = _corners.transform.GetChild(0);
+            /*Component cornerNW = _corners.transform.GetChild(0);
             Component cornerNE = _corners.transform.GetChild(1);
-            Component cornerSW = _corners.transform.GetChild(2);
+            Component cornerSW = _corners.transform.GetChild(2);*/
 
-            _bounds = new Rect(
+            /*_bounds = new Rect(
                 // Upper left corner is same as the position of the north west corner
                 cornerNW.transform.localPosition,
                 // Width and height is calculated using the difference in x and z 
@@ -33,7 +33,11 @@ namespace Map
                     cornerNW.transform.localPosition.x - cornerNE.transform.localPosition.x,
                     cornerSW.transform.localPosition.z - cornerNW.transform.localPosition.z
                 )
-            );
+            );*/
+            for(int i = 0; i < _ground.transform.childCount; i++)
+            {
+                GameObject child = _ground.transform.GetChild(i).gameObject;
+            }
         }
 
         public Rect GetBounds()
