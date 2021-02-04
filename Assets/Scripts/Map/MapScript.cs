@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace Map
@@ -23,13 +24,13 @@ namespace Map
             Component cornerNW = _corners.transform.GetChild(0);
             Component cornerNE = _corners.transform.GetChild(1);
             Component cornerSW = _corners.transform.GetChild(2);
-            
+
             _bounds = new Rect(
                 // Upper left corner is same as the position of the north west corner
                 cornerNW.transform.localPosition,
                 // Width and height is calculated using the difference in x and z 
                 new Vector2(
-                    cornerNE.transform.localPosition.x - cornerNW.transform.localPosition.x,
+                    cornerNW.transform.localPosition.x - cornerNE.transform.localPosition.x,
                     cornerSW.transform.localPosition.z - cornerNW.transform.localPosition.z
                 )
             );
