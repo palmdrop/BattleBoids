@@ -1,35 +1,28 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Map;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.TestTools;
-using UnityEditor;
 using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
 
 public class MapTestScript
 {
+    [SetUp]
+    public void Setup()
+    {
+        // Load scene
+        SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+        new WaitForSeconds(1);
+    }
+    
+    
     // Makes sure every tile is contained within the bounds
     [UnityTest]
     public IEnumerator TestIfBoundsContainAllGroundTiles()
     {
-        // Load scene
-        SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
-        Scene scene = SceneManager.GetActiveScene();
-        GameObject[] gameObjects = scene.GetRootGameObjects();
-        
-        Debug.Log(scene.name);
-
-        for (int i = 0; i < gameObjects.Length; i++)
-        {
-            Debug.Log(gameObjects[i].name);
-        }
-        
-
         // Find map
         GameObject map = GameObject.Find("Map");
-        Debug.Log(map);
         
         // Retrieve map script, required to calculate bounds
         MapScript mapScript = map.GetComponent<MapScript>();
@@ -38,26 +31,26 @@ public class MapTestScript
         Rect bounds = mapScript.GetBounds();
         
         // Get min and max coordinates of x and z axes
-        float _minX = bounds.x;
-        float _minZ = bounds.y;
-        float _maxX = _minX + bounds.width;
-        float _maxZ = _minZ + bounds.height;
+        float minX = bounds.x;
+        float minZ = bounds.y;
+        float maxX = minX + bounds.width;
+        float maxZ = minZ + bounds.height;
         
         // Get ground component, used to iterate over child tiles
-        Component _ground = map.transform.Find("Ground");
+        Component ground = map.transform.Find("Ground");
         
         yield return new WaitForEndOfFrame();
         
         // Iterate over all children and make sure they are contained within the bounds
-        for(int i = 0; i < _ground.transform.childCount; i++)
+        for(int i = 0; i < ground.transform.childCount; i++)
         {
             // Get child position
-            Vector3 position = _ground.transform.GetChild(i).localPosition;
+            Vector3 position = ground.transform.GetChild(i).localPosition;
             double cX = position.x;
             double cZ = position.z;
             
             // If child x
-            if (cX < _minX || cX > _maxX || cZ < _minZ || cZ > _maxZ)
+            if (cX < minX || cX > maxX || cZ < minZ || cZ > maxZ)
             {
                 Assert.Fail();
             }
@@ -66,34 +59,52 @@ public class MapTestScript
     }
     
     // This test ensures that the bounds is the smallest rectangle possible which contains the children 
-    /*[UnityTest]
+    [UnityTest]
     public IEnumerator TestIfThereIsATileAtEachEdgeOfBounds()
     {
+        // Find map
+        GameObject map = GameObject.Find("Map");
         
+        // Retrieve map script, required to calculate bounds
+        MapScript mapScript = map.GetComponent<MapScript>();
+        
+        // Get bounds, will be used to check if all ground tiles are contained
+        Rect bounds = mapScript.GetBounds();
+        
+        // Get min and max coordinates of x and z axes
+        float minX = bounds.x;
+        float minZ = bounds.y;
+        float maxX = minX + bounds.width;
+        float maxZ = minZ + bounds.height;
+        
+        // Get ground component, used to iterate over child tiles
+        Component ground = map.transform.Find("Ground");
+        
+        // Each boolean signifies if a tile has been encountered which coincides with that edge 
         bool topEdge = false, leftEdge = false, bottomEdge = false, rightEdge = false;
         
         // Iterate over all children and make sure they are contained within the bounds
-        for(int i = 0; i < _ground.transform.childCount; i++)
+        for(int i = 0; i < ground.transform.childCount; i++)
         {
             // Get child position
-            Vector3 position = _ground.transform.GetChild(i).localPosition;
+            Vector3 position = ground.transform.GetChild(i).localPosition;
             double cX = position.x;
             double cZ = position.z;
 
             // Check if child position coincides with edge of bounds
-            if (!topEdge && cZ == _minZ)
+            if (!topEdge && cZ == minZ)
             {
                 topEdge = true;
             }
-            if (!leftEdge && cX == _minX)
+            if (!leftEdge && cX == minX)
             {
                 leftEdge = true;
             }
-            if (!bottomEdge && cZ == _maxZ)
+            if (!bottomEdge && cZ == maxZ)
             {
                 bottomEdge = true;
             }
-            if (!rightEdge && cX == _maxX)
+            if (!rightEdge && cX == maxX)
             {
                 rightEdge = true;
             }
@@ -103,5 +114,8 @@ public class MapTestScript
         Assert.True(topEdge && leftEdge && bottomEdge && rightEdge);
 
         yield return null;
-    }*/
+    }
+
+ 
+    
 }
