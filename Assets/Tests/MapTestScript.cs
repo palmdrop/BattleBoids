@@ -12,7 +12,7 @@ public class MapTestScript
     {
         // Load scene
         SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
-        new WaitForSeconds(1);
+        new WaitForSeconds(2);
     }
     
     // Makes sure every tile is contained within the bounds
@@ -21,9 +21,13 @@ public class MapTestScript
     {
         // Find map
         GameObject map = GameObject.Find("Map");
+        
+        yield return new WaitForEndOfFrame();
 
         // Retrieve map script, required to calculate bounds
         MapScript mapScript = map.GetComponent<MapScript>();
+        
+        yield return new WaitForEndOfFrame();
         
         // Get bounds, will be used to check if all ground tiles are contained
         Rect bounds = mapScript.GetBounds();
@@ -63,6 +67,8 @@ public class MapTestScript
     {
         // Find map
         GameObject map = GameObject.Find("Map");
+
+        yield return new WaitForEndOfFrame();
         
         // Retrieve map script, required to calculate bounds
         MapScript mapScript = map.GetComponent<MapScript>();
@@ -78,6 +84,8 @@ public class MapTestScript
         
         // Get ground component, used to iterate over child tiles
         Component ground = map.transform.Find("Ground");
+        
+        yield return new WaitForEndOfFrame();
         
         // Each boolean signifies if a tile has been encountered which coincides with that edge 
         bool topEdge = false, leftEdge = false, bottomEdge = false, rightEdge = false;
@@ -111,7 +119,5 @@ public class MapTestScript
         
         // If a tile coincides with each bound 
         Assert.True(topEdge && leftEdge && bottomEdge && rightEdge);
-
-        yield return null;
     }
 }
