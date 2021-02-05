@@ -15,12 +15,20 @@ public class MapTestScript
     public IEnumerator TestIfBoundsContainAllGroundTiles()
     {
         // Load scene
-        SceneManager.LoadScene("SampleScene");
-
-        yield return new WaitForEndOfFrame();
+        SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+        Scene scene = SceneManager.GetActiveScene();
+        GameObject[] gameObjects = scene.GetRootGameObjects();
         
+        Debug.Log(scene.name);
+
+        for (int i = 0; i < gameObjects.Length; i++)
+        {
+            Debug.Log(gameObjects[i].name);
+        }
+        
+
         // Find map
-        GameObject map = GameObject.Find("SampleScene/Map");
+        GameObject map = GameObject.Find("Map");
         Debug.Log(map);
         
         // Retrieve map script, required to calculate bounds
