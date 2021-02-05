@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using Map;
 using NUnit.Framework;
 using UnityEngine;
@@ -16,14 +15,13 @@ public class MapTestScript
         new WaitForSeconds(1);
     }
     
-    
     // Makes sure every tile is contained within the bounds
     [UnityTest]
     public IEnumerator TestIfBoundsContainAllGroundTiles()
     {
         // Find map
         GameObject map = GameObject.Find("Map");
-        
+
         // Retrieve map script, required to calculate bounds
         MapScript mapScript = map.GetComponent<MapScript>();
         
@@ -46,6 +44,7 @@ public class MapTestScript
         {
             // Get child position
             Vector3 position = ground.transform.GetChild(i).localPosition;
+            
             double cX = position.x;
             double cZ = position.z;
             
@@ -115,7 +114,4 @@ public class MapTestScript
 
         yield return null;
     }
-
- 
-    
 }
