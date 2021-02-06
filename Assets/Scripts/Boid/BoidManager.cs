@@ -5,16 +5,16 @@ using UnityEngine;
 public class BoidManager : MonoBehaviour
 {
     // To be replaced by some other data structure
-    private Boid[] boids;
+    private Boid[] _boids;
 
     // Start is called before the first frame update
     void Start()
     {
         GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Boid");
-        boids = new Boid[gameObjects.Length];
-        for (int i = 0; i < boids.Length; i++)
+        _boids = new Boid[gameObjects.Length];
+        for (int i = 0; i < _boids.Length; i++)
         {
-            boids[i] = gameObjects[i].GetComponent<Boid>();
+            _boids[i] = gameObjects[i].GetComponent<Boid>();
         }
     }
 
@@ -23,21 +23,21 @@ public class BoidManager : MonoBehaviour
     {
         // Here we will build or update the data structure that we will use for efficiently finding boids within some radius
 
-        foreach (Boid b in boids)
+        foreach (Boid b in _boids)
         {
             b.UpdateBoid();
         }
     }
 
     // Finds all boids within the given radius from the given boid (excludes the given boid itself)
-    public Boid[] findBoidsWithinRadius(Boid boid, float radius)
+    public Boid[] FindBoidsWithinRadius(Boid boid, float radius)
     {
         // For now, just loop over all boids and check distance
         // In the future, make use of an efficient data structure
         List<Boid> result = new List<Boid>();
-        foreach (Boid b in boids)
+        foreach (Boid b in _boids)
         {
-            if ((b.getPos() - boid.getPos()).magnitude < radius && b != boid)
+            if ((b.GetPos() - boid.GetPos()).sqrMagnitude < (radius * radius) && b != boid)
             {
                 result.Add(b);
             }
