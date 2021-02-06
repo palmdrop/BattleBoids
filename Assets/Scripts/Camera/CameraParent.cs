@@ -4,14 +4,17 @@ using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
 using System.Runtime.InteropServices;
+using Map;
 
 public class CameraParent : MonoBehaviour
 {
-    private const float MINHeight = 4f;
+    private const float MINHeight = 5f;
     private const float MAXHeight = 40f;
 
+    private const float CameraOffset = 15f;
+
     [SerializeField] private float speed = .1f;
-    [SerializeField] private float zoomSpeed = 100f;
+    [SerializeField] private float zoomSpeed = 1f;
     [SerializeField] private float rotateSpeed = .1f;
 
     [SerializeField] private bool reversedControl = false;
@@ -19,7 +22,7 @@ public class CameraParent : MonoBehaviour
     //Rotation Sensitivity
     [SerializeField] public float minAngle = 0f;
     [SerializeField] public float maxAngle = 90f;
-    private float _yRotate;
+    private float _cameraPitch;
 
     private Vector2 _previousCursorPosition;
     private Vector2 _currentCursorPosition;
@@ -51,13 +54,14 @@ public class CameraParent : MonoBehaviour
         
         if (Input.GetMouseButton(1))
         {
+            // Saves the position where the cursor currently is when holding right click down
             _currentCursorPosition = Input.mousePosition;
-            // Hide the cursor when the mouse is held down
             _rightMouseButtonHeld = true;
         }
+
+        ZoomCamera(_parentCamera);
+
         
-        // Only move the camera container around the world
-        // Yaw: rotate camera container, pitch: rotate child camera locally
     }
     
     private void FixedUpdate()
@@ -74,10 +78,8 @@ public class CameraParent : MonoBehaviour
         // Make the movement speed dependent on y coordinate (the more we zoom out,the faster we move)
         float horizontalSpeed = _cameraParentPosition.y * speed * Input.GetAxis("Horizontal");
         float verticalSpeed = _cameraParentPosition.y * speed * Input.GetAxis("Vertical");
-        float scrollSpeed = Mathf.Log(_cameraParentPosition.y) * -zoomSpeed * Input.GetAxis("Mouse ScrollWheel");
                 
         
-        Vector3 verticalMove = new Vector3(0, scrollSpeed, 0);
         Vector3 lateralMove = horizontalSpeed * _parentCamera.right;
         Vector3 forwardMove = _parentCamera.forward;
 
@@ -85,15 +87,37 @@ public class CameraParent : MonoBehaviour
         forwardMove.Normalize();
         forwardMove *= verticalSpeed;
                 
-        Vector3 move = verticalMove + lateralMove + forwardMove;
+        // How much the camera should move in the x and z plane
+        Vector3 move = lateralMove + forwardMove;
+
+        // Makes sure that there is no continous movement when right mouse button is held down
         Vector3 currentPosition = _parentCamera.position;
 
+        Rect bounds = gameObject.GetComponentInParent<Map.MapScript>().GetBounds();
+
         _parentCamera.position = new Vector3(
-            move.x + currentPosition.x,
-            Mathf.Clamp(move.y + currentPosition.y, MINHeight, MAXHeight),
-            move.z + currentPosition.z
+            Mathf.Clamp(move.x + currentPosition.x, bounds.xMin - CameraOffset, bounds.xMax + CameraOffset),
+            currentPosition.y,
+            Mathf.Clamp(move.z + currentPosition.z, bounds.yMin - CameraOffset, bounds.yMax + CameraOffset)
         );
 
+    }
+
+    private void ZoomCamera(Transform parentCamera)
+    {
+        float scrollSpeed = -zoomSpeed * NormalizeScrollMultiplier(Input.GetAxis("Mouse ScrollWheel"));
+
+        // If the user is not scrolling, do nothing
+        if (scrollSpeed == 0) return;
+        _cameraParentPosition = parentCamera.position;
+        Vector3 currentPosition = _parentCamera.position;
+
+        // else increment the height of the camera with the zoomSpeed and limit its height
+        _parentCamera.position = new Vector3(
+            currentPosition.x,
+            Mathf.Clamp(scrollSpeed + currentPosition.y, MINHeight, MAXHeight),
+            currentPosition.z
+        );
     }
 
     
@@ -113,11 +137,20 @@ public class CameraParent : MonoBehaviour
         parentCamera.rotation *= Quaternion.Euler(new Vector3(0, reversedControl ? -dx : dx, 0));
 
         // Pitch
-        _yRotate = childCamera.eulerAngles.x;
-        _yRotate = Mathf.Clamp (reversedControl ? _yRotate + dy : _yRotate - dy, minAngle ,maxAngle);
+        _cameraPitch = childCamera.eulerAngles.x;
+        _cameraPitch = Mathf.Clamp (reversedControl ? _cameraPitch + dy : _cameraPitch - dy, minAngle ,maxAngle);
         
-        childCamera.localRotation = Quaternion.Euler(new Vector3(_yRotate, 0, 0));
+        childCamera.localRotation = Quaternion.Euler(new Vector3(_cameraPitch, 0, 0));
         
         _previousCursorPosition = _currentCursorPosition;
     }
+
+    // This is used to make sure mouse scroll speed is consistent between a trackpad and an external mouse 
+    private float NormalizeScrollMultiplier(float value) 
+    {
+        if (value > 0) return 1f;
+        else if (value < 0) return -1f;
+        else return 0;
+    }
 }
+
