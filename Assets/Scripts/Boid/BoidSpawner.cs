@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class BoidSpawner : MonoBehaviour
 {
-
     [SerializeField] private Boid boidPrefab;
     [SerializeField] private float spawnRadius = 1f;
     [SerializeField] private int spawnCount = 10;
@@ -16,12 +15,15 @@ public class BoidSpawner : MonoBehaviour
     {
         for (int i = 0; i < spawnCount; i++)
         {
+            Boid boid = Instantiate(boidPrefab, manager.transform);
+            Transform boidTransform = boid.transform;
+            
             Vector2 randomPos = Random.insideUnitCircle;
             Vector3 pos = transform.position + new Vector3(randomPos.x, 0, randomPos.y) * spawnRadius;
-            Boid boid = Instantiate(boidPrefab, manager.transform);
-            boid.transform.position = pos;
+            boidTransform.position = pos;
+            
             Vector2 randomHeading = Random.insideUnitCircle;
-            boid.transform.forward = new Vector3(randomHeading.x, 0, randomHeading.y);
+            boidTransform.forward = new Vector3(randomHeading.x, 0, randomHeading.y);
         }
     }
 
