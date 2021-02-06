@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Boid : MonoBehaviour
 {
-
     [SerializeField] private float viewRadius = 5f;
     [SerializeField] private float separationRadius = 2f;
     [SerializeField] private float alignmentStrength = 0.1f;
@@ -17,7 +16,7 @@ public class Boid : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _manager = GameObject.FindGameObjectWithTag("BoidManager").GetComponent<BoidManager>();
+        _manager = gameObject.GetComponentInParent<BoidManager>();
         _rigidbody = GetComponent<Rigidbody>();
     }
 
@@ -26,17 +25,9 @@ public class Boid : MonoBehaviour
     public void UpdateBoid()
     {
         Boid[] neighbours = _manager.FindBoidsWithinRadius(this, viewRadius);
-        
-        Vector3 alignmentForce = Alignment(neighbours) * alignmentStrength;
-        Vector3 cohesionForce = Cohesion(neighbours) * cohesionStrength;
-
-        neighbours = _manager.FindBoidsWithinRadius(this, separationRadius);
-        Vector3 separationForce = Separation(neighbours) * separationStrength;
-
-        Vector3 force = alignmentForce + cohesionForce + separationForce;
+        Vector3 force = CalculateSteeringForce(neighbours);
 
         _rigidbody.AddForce(force, ForceMode.Acceleration);
-
         transform.forward = _rigidbody.velocity;
     }
 
@@ -52,51 +43,62 @@ public class Boid : MonoBehaviour
         return _rigidbody.velocity;
     }
 
-    // Returns a direction vector for the alignment part of the flocking behaviour
-    private Vector3 Alignment(Boid[] neighbours)
+    private Vector3 CalculateSteeringForce(Boid[] neighbours)
     {
+        // Average velocity is used to calculate alignment force
         Vector3 avgVel = new Vector3(0, 0, 0);
-        int n = 0;
+        
+        // Average neighbour position used to calculate cohesion
+        Vector3 avgPosCohesion = new Vector3(0, 0, 0);
+        
+        // Average neighbour position used to calculate cohesion
+        Vector3 avgPosSeparation = new Vector3(0, 0, 0);
 
-        foreach (Boid b in neighbours)
+        // Iterate over all the neighbours
+        int viewCount = 0;
+        int separationViewCount = 0;
+        for (int i = 0; i < neighbours.Length; i++)
         {
-            avgVel += b.GetVel();
-            n++;
+            Boid b = neighbours[i];
+
+            // Compare the distance between this boid and the neighbour using the
+            // square of the distance and radius. This avoids costly square root operations
+            float sqrDist = (this.GetPos() - b.GetPos()).sqrMagnitude;
+            if (sqrDist < viewRadius * viewRadius)
+            {
+                // Add to average velocity
+                avgVel += b.GetVel();
+                viewCount++;
+
+                // Add to average position for cohesion
+                avgPosCohesion += b.GetPos();
+
+                // And if close enough, add to average position for separation
+                if (sqrDist < separationRadius * separationRadius)
+                {
+                    avgPosSeparation += b.GetPos();
+                    separationViewCount++;
+                }
+
+            }
         }
+            
 
-        if (n == 0) return new Vector3(0, 0, 0);
-        return avgVel.normalized;
-    }
+        // Calculate alignment force
+        Vector3 alignmentForce;
+        if (viewCount == 0) alignmentForce = new Vector3(0, 0, 0);
+        else alignmentForce = avgVel.normalized * alignmentStrength;
+        
+        // Calculate cohesion force
+        Vector3 cohesionForce;
+        if (viewCount == 0) cohesionForce = new Vector3(0, 0, 0);
+        else cohesionForce = ((avgPosCohesion / viewCount) - GetPos()).normalized * cohesionStrength;
+        
+        // Calculate separation force
+        Vector3 separationForce;
+        if (separationViewCount == 0) separationForce = new Vector3(0, 0, 0);
+        else separationForce = (GetPos() - (avgPosSeparation / separationViewCount)).normalized * separationStrength;
 
-    // Returns a direction vector for the cohesion part of the flocking behaviour
-    private Vector3 Cohesion(Boid[] neighbours)
-    {
-        Vector3 avgPos = new Vector3(0, 0, 0);
-        int n = 0;
-
-        foreach (Boid b in neighbours)
-        {
-            avgPos += b.GetPos();
-            n++;
-        }
-
-        if (n == 0) return new Vector3(0, 0, 0);
-        return ((avgPos / n) - GetPos()).normalized;
-    }
-
-    // Returns a direction vector for the separation part of the flocking behaviour
-    private Vector3 Separation(Boid[] neighbours)
-    {
-        Vector3 avgPos = new Vector3(0, 0, 0);
-        int n = 0;
-
-        foreach (Boid b in neighbours)
-        {
-            avgPos += b.GetPos();
-            n++;
-        }
-
-        if (n == 0) return new Vector3(0, 0, 0);
-        return (GetPos() - (avgPos / n)).normalized;
+        return alignmentForce + cohesionForce + separationForce;
     }
 }
