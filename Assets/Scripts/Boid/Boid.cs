@@ -7,9 +7,9 @@ using Unity.Burst;
 public class Boid : MonoBehaviour
 {
     [SerializeField] private float viewRadius = 5f;
-    [SerializeField] private float separationRadius = 2f;
-    [SerializeField] private float alignmentStrength = 0.1f;
-    [SerializeField] private float cohesionStrength = 0.2f;
+    [SerializeField] private float separationRadius = 1f;
+    [SerializeField] private float alignmentStrength = 1.1f;
+    [SerializeField] private float cohesionStrength = 1.2f;
     [SerializeField] private float separationStrength = 3f;
     
     private BoidManager _manager;

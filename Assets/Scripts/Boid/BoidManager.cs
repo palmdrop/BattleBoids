@@ -11,7 +11,7 @@ public class BoidManager : MonoBehaviour
     // To be replaced by some other data structure
     private Boid[] _boids;
 
-    private bool _usingJobs = true;
+    public bool usingBurst = true;
 
     // Start is called before the first frame update
     void Start()
@@ -29,7 +29,7 @@ public class BoidManager : MonoBehaviour
     {
         // Here we will build or update the data structure that we will use for efficiently finding boids within some radius
 
-        if (_usingJobs) 
+        if (usingBurst) 
         {
             NativeArray<float3> posArray = new NativeArray<float3>(_boids.Length, Allocator.TempJob);
             NativeArray<float3> velArray = new NativeArray<float3>(_boids.Length, Allocator.TempJob);
@@ -66,7 +66,7 @@ public class BoidManager : MonoBehaviour
             };
 
 
-            JobHandle jobHandle = boidJob.Schedule(_boids.Length, _boids.Length / 20);
+            JobHandle jobHandle = boidJob.Schedule(_boids.Length, _boids.Length / 10);
             jobHandle.Complete();
 
             for (int i = 0; i < _boids.Length; i++)
