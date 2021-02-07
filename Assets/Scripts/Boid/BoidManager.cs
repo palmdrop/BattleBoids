@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Mathematics;
 using Unity.Jobs;
 using Unity.Collections;
+using Unity.Burst;
 
 public class BoidManager : MonoBehaviour
 {
@@ -70,7 +71,6 @@ public class BoidManager : MonoBehaviour
 
             for (int i = 0; i < _boids.Length; i++)
             {
-                Debug.Log(forceArray[i].x);
                 _boids[i].AddForce(forceArray[i]);
                 _boids[i].UpdateDirection();
             }
@@ -113,6 +113,7 @@ public class BoidManager : MonoBehaviour
         return _boids;
     }
 
+    [BurstCompile]
     public struct BoidStructJob : IJobParallelFor
     {
         [ReadOnly] public NativeArray<float3> vel;
