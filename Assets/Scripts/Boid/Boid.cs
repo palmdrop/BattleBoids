@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Jobs;
 using UnityEngine;
+using Unity.Burst;
+using static Unity.Mathematics.math;
 
 public class Boid : MonoBehaviour
 {
@@ -32,6 +35,16 @@ public class Boid : MonoBehaviour
         transform.forward = _rigidbody.velocity;
     }
 
+    public void AddForce(Vector3 force)
+    {
+       _rigidbody.AddForce(force, ForceMode.Acceleration);
+    }
+
+    public void UpdateDirection()
+    {
+        transform.forward = _rigidbody.velocity;
+    }
+
     // Returns the position of this boid
     public Vector3 GetPos()
     {
@@ -42,6 +55,26 @@ public class Boid : MonoBehaviour
     public Vector3 GetVel()
     {
         return _rigidbody.velocity;
+    }
+    public float GetViewRadius()
+    {
+        return viewRadius;
+    }
+    public float GetSeparationRadius()
+    {
+        return separationRadius;
+    }
+    public float GetAlignmentStrength()
+    {
+        return alignmentStrength;
+    }
+    public float GetCohesionStrength()
+    {
+        return cohesionStrength;
+    }
+    public float GetSeparationStrength()
+    {
+        return separationStrength;
     }
 
     private Vector3 CalculateSteeringForce(Boid[] neighbours)
@@ -108,4 +141,7 @@ public class Boid : MonoBehaviour
 
         return alignmentForce + cohesionForce + separationForce;
     }
+
+
+    
 }
