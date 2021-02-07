@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Unity.Jobs;
 using UnityEngine;
 using Unity.Burst;
-using static Unity.Mathematics.math;
 
 public class Boid : MonoBehaviour
 {
