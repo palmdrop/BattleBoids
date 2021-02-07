@@ -24,7 +24,7 @@ public class Boid : MonoBehaviour
     // Updates the boid according to the standard flocking behaviour
     public void UpdateBoid()
     {
-        Boid[] neighbours = _manager.FindBoidsWithinRadius(this, viewRadius);
+        Boid[] neighbours = _manager.FindBoidsWithinRadius(this, Mathf.Max(viewRadius, separationRadius));
         Vector3 force = CalculateSteeringForce(neighbours);
 
         _rigidbody.AddForce(force, ForceMode.Acceleration);
@@ -73,13 +73,12 @@ public class Boid : MonoBehaviour
                 // Add to average position for cohesion
                 avgPosCohesion += b.GetPos();
 
-                // And if close enough, add to average position for separation
-                if (sqrDist < separationRadius * separationRadius)
-                {
-                    avgPosSeparation += b.GetPos();
-                    separationViewCount++;
-                }
-
+            }
+            // And if close enough, add to average position for separation
+            if (sqrDist < separationRadius * separationRadius)
+            {
+                avgPosSeparation += b.GetPos();
+                separationViewCount++;
             }
         }
             
