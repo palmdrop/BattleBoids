@@ -10,7 +10,7 @@ public class BoidManager : MonoBehaviour
     // To be replaced by some other data structure
     private Boid[] _boids;
 
-    private bool _usingJobs = false;
+    private bool _usingJobs = true;
 
     // Start is called before the first frame update
     void Start()
@@ -43,7 +43,7 @@ public class BoidManager : MonoBehaviour
             {
                 posArray[i] = _boids[i].GetPos();
                 velArray[i] = _boids[i].GetVel();
-                forceArray[i] = 0;
+                forceArray[i] = new float3(1,1,1);
                 separationRadiusArray[i] = _boids[i].GetSeparationRadius();
                 viewRadiusArray[i] = _boids[i].GetViewRadius();
                 alignmentStrengthArray[i] = _boids[i].GetAlignmentStrength();
@@ -60,15 +60,17 @@ public class BoidManager : MonoBehaviour
                 viewRadius = viewRadiusArray,
                 alignmentStrength = alignmentStrengthArray,
                 cohesionStrength = cohesionStrengthArray,
-                separationStrength = separationRadiusArray
+                separationStrength = separationStrengthArray
 
             };
+
 
             JobHandle jobHandle = boidJob.Schedule(_boids.Length, _boids.Length / 20);
             jobHandle.Complete();
 
             for (int i = 0; i < _boids.Length; i++)
             {
+                Debug.Log(forceArray[i].x);
                 _boids[i].AddForce(forceArray[i]);
                 _boids[i].UpdateDirection();
             }
@@ -113,14 +115,14 @@ public class BoidManager : MonoBehaviour
 
     public struct BoidStructJob : IJobParallelFor
     {
-        public NativeArray<float3> vel;
-        public NativeArray<float3> pos;
+        [ReadOnly] public NativeArray<float3> vel;
+        [ReadOnly] public NativeArray<float3> pos;
         public NativeArray<float3> force;
-        public NativeArray<float> separationRadius;
-        public NativeArray<float> viewRadius;
-        public NativeArray<float> alignmentStrength;
-        public NativeArray<float> cohesionStrength;
-        public NativeArray<float> separationStrength;
+        [ReadOnly] public NativeArray<float> separationRadius;
+        [ReadOnly] public NativeArray<float> viewRadius;
+        [ReadOnly] public NativeArray<float> alignmentStrength;
+        [ReadOnly] public NativeArray<float> cohesionStrength;
+        [ReadOnly] public NativeArray<float> separationStrength;
 
         public void Execute(int index)
         {
@@ -170,10 +172,9 @@ public class BoidManager : MonoBehaviour
                 }
             }
 
-
             // Calculate alignment force
             Vector3 alignmentForce;
-            if (viewCount == 0) alignmentForce = new float3(0, 0, 0);
+            if (viewCount == 0 || avgVel.Equals(new float3(0,0,0))) alignmentForce = new float3(0, 0, 0);
             else alignmentForce = math.normalize(avgVel) * alignmentStrength[index];
 
             // Calculate cohesion force
@@ -185,6 +186,7 @@ public class BoidManager : MonoBehaviour
             Vector3 separationForce;
             if (separationViewCount == 0) separationForce = new float3(0, 0, 0);
             else separationForce = math.normalize(pos[index] - (avgPosSeparation / separationViewCount)) * separationStrength[index];
+
 
             force[index] = alignmentForce + cohesionForce + separationForce;
 
