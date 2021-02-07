@@ -44,4 +44,9 @@ public class BoidManager : MonoBehaviour
         }
         return result.ToArray();
     }
+
+    public Boid[] getBoids()
+    {
+        return _boids;
+    }
 }

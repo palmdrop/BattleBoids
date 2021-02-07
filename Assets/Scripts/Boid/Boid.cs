@@ -24,8 +24,9 @@ public class Boid : MonoBehaviour
     // Updates the boid according to the standard flocking behaviour
     public void UpdateBoid()
     {
-        Boid[] neighbours = _manager.FindBoidsWithinRadius(this, viewRadius);
-        Vector3 force = CalculateSteeringForce(neighbours);
+        //Boid[] neighbours = _manager.FindBoidsWithinRadius(this, viewRadius);
+        Boid[] neighbors = _manager.getBoids();
+        Vector3 force = CalculateSteeringForce(neighbors);
 
         _rigidbody.AddForce(force, ForceMode.Acceleration);
         transform.forward = _rigidbody.velocity;
@@ -57,14 +58,15 @@ public class Boid : MonoBehaviour
         // Iterate over all the neighbours
         int viewCount = 0;
         int separationViewCount = 0;
-        for (int i = 0; i < neighbours.Length; i++)
+        foreach (Boid b in neighbours)
         {
-            Boid b = neighbours[i];
 
             // Compare the distance between this boid and the neighbour using the
             // square of the distance and radius. This avoids costly square root operations
+            // And if close enough, add to average position for separation
             float sqrDist = (this.GetPos() - b.GetPos()).sqrMagnitude;
-            if (sqrDist < viewRadius * viewRadius)
+
+            if (sqrDist < separationRadius * separationRadius)
             {
                 // Add to average velocity
                 avgVel += b.GetVel();
@@ -73,12 +75,17 @@ public class Boid : MonoBehaviour
                 // Add to average position for cohesion
                 avgPosCohesion += b.GetPos();
 
-                // And if close enough, add to average position for separation
-                if (sqrDist < separationRadius * separationRadius)
-                {
-                    avgPosSeparation += b.GetPos();
-                    separationViewCount++;
-                }
+                avgPosSeparation += b.GetPos();
+                separationViewCount++;
+            }
+            else if (sqrDist < viewRadius * viewRadius)
+            {
+                // Add to average velocity
+                avgVel += b.GetVel();
+                viewCount++;
+
+                // Add to average position for cohesion
+                avgPosCohesion += b.GetPos();
 
             }
         }
