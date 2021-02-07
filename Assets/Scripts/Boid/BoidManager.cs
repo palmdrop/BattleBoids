@@ -30,7 +30,56 @@ public class BoidManager : MonoBehaviour
 
         if (_usingJobs) 
         {
-           
+            NativeArray<float3> posArray = new NativeArray<float3>(_boids.Length, Allocator.TempJob);
+            NativeArray<float3> velArray = new NativeArray<float3>(_boids.Length, Allocator.TempJob);
+            NativeArray<float3> forceArray = new NativeArray<float3>(_boids.Length, Allocator.TempJob);
+            NativeArray<float> separationRadiusArray = new NativeArray<float>(_boids.Length, Allocator.TempJob);
+            NativeArray<float> viewRadiusArray = new NativeArray<float>(_boids.Length, Allocator.TempJob);
+            NativeArray<float> alignmentStrengthArray = new NativeArray<float>(_boids.Length, Allocator.TempJob);
+            NativeArray<float> cohesionStrengthArray = new NativeArray<float>(_boids.Length, Allocator.TempJob);
+            NativeArray<float> separationStrengthArray = new NativeArray<float>(_boids.Length, Allocator.TempJob);
+
+            for (int i = 0; i < _boids.Length; i++)
+            {
+                posArray[i] = _boids[i].GetPos();
+                velArray[i] = _boids[i].GetVel();
+                forceArray[i] = 0;
+                separationRadiusArray[i] = _boids[i].GetSeparationRadius();
+                viewRadiusArray[i] = _boids[i].GetViewRadius();
+                alignmentStrengthArray[i] = _boids[i].GetAlignmentStrength();
+                cohesionStrengthArray[i] = _boids[i].GetCohesionStrength();
+                separationStrengthArray[i] = _boids[i].GetSeparationStrength();
+            }
+
+            BoidStructJob boidJob = new BoidStructJob
+            {
+                vel = velArray,
+                pos = posArray,
+                force = forceArray,
+                separationRadius = separationRadiusArray,
+                viewRadius = viewRadiusArray,
+                alignmentStrength = alignmentStrengthArray,
+                cohesionStrength = cohesionStrengthArray,
+                separationStrength = separationRadiusArray
+
+            };
+
+            JobHandle jobHandle = boidJob.Schedule(_boids.Length, _boids.Length / 20);
+            jobHandle.Complete();
+
+            for (int i = 0; i < _boids.Length; i++)
+            {
+                _boids[i].AddForce(forceArray[i]);
+                _boids[i].UpdateDirection();
+            }
+            posArray.Dispose();
+            velArray.Dispose();
+            forceArray.Dispose();
+            separationRadiusArray.Dispose();
+            viewRadiusArray.Dispose();
+            alignmentStrengthArray.Dispose();
+            cohesionStrengthArray.Dispose();
+            separationStrengthArray.Dispose();
         }
         else
         {
