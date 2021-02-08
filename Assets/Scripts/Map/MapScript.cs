@@ -15,8 +15,8 @@ namespace Map
         private Rect _bounds;
         
         // A heightmap representation of the map
-        private int _heightmapWidth;
-        private int _heightmapHeight;
+        private int _heightMapWidth;
+        private int _heightMapHeight;
         private float[] _heightmap;
         
         void Start()
@@ -25,7 +25,7 @@ namespace Map
             _ground = transform.Find("Ground").gameObject;
 
             CalculateBounds();
-            CalculateHeightmap();
+            CalculateHeightMap();
         }
         
         private void CalculateBounds()
@@ -59,23 +59,23 @@ namespace Map
             );
         }
 
-        private int PositionToIndex(Vector2 position)
+        private int PositionToIndex(Vector3 point)
         {
-            int x = (int) (position.x - _bounds.x);
-            int y = (int) (position.y - _bounds.y);
-            return x + y * _heightmapWidth;
+            int x = (int) (point.x - _bounds.x - 0.5);
+            int y = (int) (point.z - _bounds.y - 0.5);
+            return x + y * _heightMapWidth;
         }
         
-        private void CalculateHeightmap() 
+        private void CalculateHeightMap() 
         {
             // Since the map is tiled based, the heightmap doesn't need any more detail 
             // than the number of tiles direction 
             // NOTE: this assumes that each tile is of unit size and none overlap
-            _heightmapWidth = Mathf.CeilToInt(_bounds.width);
-            _heightmapHeight = Mathf.CeilToInt(_bounds.height);
+            _heightMapWidth = Mathf.CeilToInt(_bounds.width) + 1;
+            _heightMapHeight = Mathf.CeilToInt(_bounds.height) + 1;
             
             // Instantiate heightmap
-            _heightmap = new float[_heightmapWidth * _heightmapHeight];
+            _heightmap = new float[_heightMapWidth * _heightMapHeight];
 
             for (int i = 0; i < _heightmap.Length; i++) _heightmap[i] = float.MinValue;
             
@@ -86,6 +86,7 @@ namespace Map
                 
                 // Calculate height and assign value to heightmap index
                 float y = child.transform.localPosition.y + child.transform.localScale.y / 2.0f;
+                
                 _heightmap[PositionToIndex(child.transform.position)] = y;
             }
         }
@@ -96,7 +97,13 @@ namespace Map
             return _bounds;
         }
 
-        public double HeightMapLookup(Vector2 position)
+        public bool PointInsideBounds(Vector3 point)
+        {
+            return point.x > _bounds.x && point.x < _bounds.x + _bounds.width 
+                && point.z > _bounds.y && point.z < _bounds.y + _bounds.height;
+        }
+
+        public float HeightmapLookup(Vector3 position)
         {
             // Get the corresponding index of the position
             int index = PositionToIndex(position);
@@ -106,7 +113,6 @@ namespace Map
             // the minimum value.
             if (index < 0 || index >= _heightmap.Length) return float.MinValue;
             
-            // Otherwise, return the height value of the corresponding index
             return _heightmap[index];
         }
     }

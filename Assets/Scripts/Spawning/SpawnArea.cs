@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Map;
 using UnityEngine;
 
 public class SpawnArea : MonoBehaviour
@@ -7,6 +8,7 @@ public class SpawnArea : MonoBehaviour
     public GameObject entityToSpawn;
     public Camera camera;
     public Player owner;
+    public MapScript map;
 
     int instanceNumber = 1;
 
@@ -45,15 +47,27 @@ public class SpawnArea : MonoBehaviour
                 GameObject currentEntity = holding[i];
                 // Find ground height
                 Vector3 position = new Vector3(gridCenter.x + x * unitWidth - width / 2, 1000f, gridCenter.z + z * unitWidth - width / 2);
-                RaycastHit hit;
+                
+                /*RaycastHit hit;
                 LayerMask mask = LayerMask.GetMask("Ground");
+                
                 if (Physics.Raycast(position, transform.TransformDirection(Vector3.down), out hit, 2000f, mask)) {
                     position.y = hit.point.y;
                 } else {
                     position.y = 0;
+                }*/
+                if (map.PointInsideBounds(position))
+                {
+                    position.y = map.HeightmapLookup(position) + map.transform.position.y;
                 }
+                else
+                {
+                    position.y = 0;
+                }
+                
                 currentEntity.transform.position = position;
                 // Check if within spawn area
+                RaycastHit hit;
                 if (this.GetComponent<Collider>().Raycast(new Ray(new Vector3(position.x, 1000f, position.z), transform.TransformDirection(Vector3.down)), out hit, 2000f)) {
                     currentEntity.GetComponent<Renderer>().material.color = new Color(1, 1, 1, 0.5f);
                 } else {
