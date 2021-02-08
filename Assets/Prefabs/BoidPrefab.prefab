@@ -53,6 +53,7 @@ MonoBehaviour:
   collisionMask:
     serializedVersion: 2
     m_Bits: 512
+  mesh: {fileID: -2432090755550338912, guid: dd4896dba589b0b4b841c820e793e1a3, type: 3}
 --- !u!54 &26594132553738016
 Rigidbody:
   m_ObjectHideFlags: 0
