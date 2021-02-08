@@ -16,7 +16,7 @@ public class Boid : MonoBehaviour
 
     public LayerMask collisionMask;
     private Vector3 _localScale;
-    private float _rayCastTheta = 30;
+    private float _rayCastTheta = 10;
 
     public Mesh mesh;
     private float _sphereRadius = .1f;
@@ -65,14 +65,18 @@ public class Boid : MonoBehaviour
     {
         for (int i = 0; i < 270/_rayCastTheta; i++)
         {
-            float angle = ((i + 1) / 2) * _rayCastTheta;
-            int sign = i % 2 == 0 ? 1 : -1;
-            float cos = math.cos(angle * sign);
-            float sin = math.sin(angle * sign);
+            float angle = ((i + 1) / 2) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
+            int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
+
+            float cos = math.cos(angle  *math.PI / 180 * sign);
+            float sin = math.sin(angle * math.PI / 180 * sign);
+
             Vector3 dir = transform.forward;
-            dir = new Vector3(dir.x*cos - dir.z*sin, 0, dir.x*sin + dir.z*cos);
-            Ray ray = new Ray(GetPos() + getCenterForwardPoint(), dir);
-            Debug.DrawLine(ray.origin, ray.origin + ray.direction * _collisionAvoidanceDistance);
+            dir = new Vector3(dir.x*cos - dir.z*sin, 0, dir.x*sin + dir.z*cos); //Rotation matrix formula
+
+
+
+            return dir;
 
         }
 
