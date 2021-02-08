@@ -50,6 +50,9 @@ MonoBehaviour:
   alignmentStrength: 0.2
   cohesionStrength: 0.2
   separationStrength: 0.25
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!54 &26594132553738016
 Rigidbody:
   m_ObjectHideFlags: 0
