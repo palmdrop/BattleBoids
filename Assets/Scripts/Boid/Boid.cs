@@ -9,7 +9,8 @@ public class Boid : MonoBehaviour
     [SerializeField] private float separationRadius = 2f;
     [SerializeField] private float alignmentStrength = 0.1f;
     [SerializeField] private float cohesionStrength = 0.2f;
-    [SerializeField] private float separationStrength = 3f;
+    [SerializeField] private float separationStrength = 1f;
+    [SerializeField] private float avoidCollisionWeight = 10f;
     
     private BoidManager _manager;
     private Rigidbody _rigidbody;
@@ -37,9 +38,9 @@ public class Boid : MonoBehaviour
         Boid[] neighbours = _manager.FindBoidsWithinRadius(this, Mathf.Max(viewRadius, separationRadius));
         Vector3 force = CalculateSteeringForce(neighbours);
 
-        HeadedForCollisionWithMapBoundary();
-        AvoidCollisionDir();
-
+        if (HeadedForCollisionWithMapBoundary())
+            force += AvoidCollisionDir() * avoidCollisionWeight;
+        force = force.normalized * 0.1f;
         _rigidbody.AddForce(force, ForceMode.Acceleration);
         transform.forward = _rigidbody.velocity;
     }
@@ -63,7 +64,7 @@ public class Boid : MonoBehaviour
 
     private Vector3 AvoidCollisionDir()
     {
-        for (int i = 0; i < 270/_rayCastTheta; i++)
+        for (int i = 0; i < 300/_rayCastTheta; i++)
         {
             float angle = ((i + 1) / 2) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
             int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
@@ -74,16 +75,21 @@ public class Boid : MonoBehaviour
             Vector3 dir = transform.forward;
             dir = new Vector3(dir.x*cos - dir.z*sin, 0, dir.x*sin + dir.z*cos); //Rotation matrix formula
 
+            Ray ray = new Ray(GetPos() + GetCenterForwardPoint(), dir);
 
+            if (!Physics.Raycast(ray, out _, _collisionAvoidanceDistance, collisionMask))   //Cast rays to nearby boundaries
+            {
+                Debug.DrawLine(ray.origin, ray.origin + ray.direction * _collisionAvoidanceDistance, Color.green);
+                return dir;
+            }
 
-            return dir;
-
+            Debug.DrawLine(ray.origin, ray.origin + ray.direction * _collisionAvoidanceDistance, Color.red);
         }
 
-        return new Vector3(0,0,0);
+        return transform.forward;
     }
 
-    private Vector3 getCenterForwardPoint()
+    private Vector3 GetCenterForwardPoint()
     {
         return new Vector3(transform.forward.x * _localScale.x * mesh.bounds.size.z / 2, mesh.bounds.size.z * _localScale.y, transform.forward.z * _localScale.z * mesh.bounds.size.z / 2);
     }
