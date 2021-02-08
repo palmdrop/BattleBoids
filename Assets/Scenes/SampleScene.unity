@@ -3847,6 +3847,7 @@ MonoBehaviour:
   entityToSpawn: {fileID: 5855907963988897263, guid: 40ef05f5e186364679760557df39c743, type: 3}
   camera: {fileID: 963194227}
   owner: {fileID: 495055329}
+  map: {fileID: 850325149}
 --- !u!64 &559709281
 MeshCollider:
   m_ObjectHideFlags: 0

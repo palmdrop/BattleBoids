@@ -6,15 +6,13 @@ namespace Map
 {
     public class MapScript : MonoBehaviour
     {
-        //[SerializeField] private int heightMapDetail;
-        
         // The ground plane of the map
         private GameObject _ground;        
         
         // The dimensions of the map. 
         private Rect _bounds;
         
-        // A heightmap representation of the map
+        // A heightmap representation of the map. The heightmap only contains values for the tiles in "Ground"
         private int _heightMapWidth;
         private int _heightMapHeight;
         private float[] _heightmap;
@@ -24,7 +22,10 @@ namespace Map
             // Get ground child, used to calculate bounds and heightmap
             _ground = transform.Find("Ground").gameObject;
 
+            // Calculate the bounds of the map. 
             CalculateBounds();
+            
+            // Calculate the heightmap representation of the ground of the map 
             CalculateHeightMap();
         }
         
@@ -90,13 +91,7 @@ namespace Map
                 _heightmap[PositionToIndex(child.transform.position)] = y;
             }
         }
-
-
-        public Rect GetBounds()
-        {
-            return _bounds;
-        }
-
+        // Calculates if a given point is inside the map bounds
         public bool PointInsideBounds(Vector3 point)
         {
             return point.x > _bounds.x && point.x < _bounds.x + _bounds.width 
@@ -113,7 +108,13 @@ namespace Map
             // the minimum value.
             if (index < 0 || index >= _heightmap.Length) return float.MinValue;
             
+            // Otherwise, if valid index, return corresponding heightmap value
             return _heightmap[index];
+        }
+
+        public Rect GetBounds()
+        {
+            return _bounds;
         }
     }
 }
