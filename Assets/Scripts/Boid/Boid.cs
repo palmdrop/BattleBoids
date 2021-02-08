@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 public class Boid : MonoBehaviour
 {
@@ -13,11 +14,20 @@ public class Boid : MonoBehaviour
     private BoidManager _manager;
     private Rigidbody _rigidbody;
 
+    public LayerMask collisionMask;
+    private Vector3 _localScale;
+    private float _rayCastTheta = 30;
+
+    public Mesh mesh;
+    private float _sphereRadius = .1f;
+    private float _collisionAvoidanceDistance = 1f;
+
     // Start is called before the first frame update
     void Start()
     {
         _manager = gameObject.GetComponentInParent<BoidManager>();
         _rigidbody = GetComponent<Rigidbody>();
+        _localScale = transform.GetChild(0).transform.localScale;
     }
 
     // Called by the boid manager
@@ -27,8 +37,51 @@ public class Boid : MonoBehaviour
         Boid[] neighbours = _manager.FindBoidsWithinRadius(this, Mathf.Max(viewRadius, separationRadius));
         Vector3 force = CalculateSteeringForce(neighbours);
 
+        HeadedForCollisionWithMapBoundary();
+        AvoidCollisionDir();
+
         _rigidbody.AddForce(force, ForceMode.Acceleration);
         transform.forward = _rigidbody.velocity;
+    }
+
+    private bool HeadedForCollisionWithMapBoundary()
+    {
+
+
+        //Ray ray = new Ray(GetPos() + getCenterForwardPoint(), transform.forward);
+        //Debug.DrawLine(ray.origin, ray.origin + ray.direction* _collisionAvoidanceDistance);
+
+        if (Physics.SphereCast(GetPos(), _sphereRadius, transform.forward, out _, _collisionAvoidanceDistance, collisionMask))
+        {
+            //Debug.Log("colliding");
+            return true;
+        }
+        else
+            //Debug.Log("not colliding");
+            return false;
+    }
+
+    private Vector3 AvoidCollisionDir()
+    {
+        for (int i = 0; i < 270/_rayCastTheta; i++)
+        {
+            float angle = ((i + 1) / 2) * _rayCastTheta;
+            int sign = i % 2 == 0 ? 1 : -1;
+            float cos = math.cos(angle * sign);
+            float sin = math.sin(angle * sign);
+            Vector3 dir = transform.forward;
+            dir = new Vector3(dir.x*cos - dir.z*sin, 0, dir.x*sin + dir.z*cos);
+            Ray ray = new Ray(GetPos() + getCenterForwardPoint(), dir);
+            Debug.DrawLine(ray.origin, ray.origin + ray.direction * _collisionAvoidanceDistance);
+
+        }
+
+        return new Vector3(0,0,0);
+    }
+
+    private Vector3 getCenterForwardPoint()
+    {
+        return new Vector3(transform.forward.x * _localScale.x * mesh.bounds.size.z / 2, mesh.bounds.size.z * _localScale.y, transform.forward.z * _localScale.z * mesh.bounds.size.z / 2);
     }
 
     // Returns the position of this boid
