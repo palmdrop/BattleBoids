@@ -22,6 +22,7 @@ public class Boid : MonoBehaviour
     float maxSpeed = 4;
     float minSpeed = 0.2f;
     float maxSteerForce = 1f;
+    float impulseDamageThreshold = 0.2f;
 
     public Mesh mesh;
     private float collisionAvoidanceDistance; 
@@ -44,13 +45,13 @@ public class Boid : MonoBehaviour
         //Collision Avoidance, uses collisionMask
 
         if (HeadedForCollisionWithMapBoundary())
-            force += SteerTowards( AvoidCollisionDir() ) * avoidCollisionWeight;
+          force += SteerTowards( AvoidCollisionDir() ) * avoidCollisionWeight;
 
 
 
 
         //Velocity change not using AddForce
-
+        
         _rigidbody.velocity += force * Time.deltaTime;
         float speed = _rigidbody.velocity.magnitude;
         Vector3 dir = _rigidbody.velocity / speed;
@@ -222,5 +223,32 @@ public class Boid : MonoBehaviour
         else separationForce = SteerTowards(((avgPosSeparation ))) * separationStrength;
 
         return alignmentForce + cohesionForce + separationForce;
+    }
+
+    private void takeCollisionDamage(float impulse)
+    {
+        //Take damage according to some formula
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Rigidbody b = collision.gameObject.GetComponent<Rigidbody>();
+        if (b != null)
+        {
+            float collisionImpulse = collision.impulse.magnitude;
+            if (collisionImpulse > impulseDamageThreshold)
+            {
+                takeCollisionDamage(collisionImpulse);
+            }
+
+        }
+        else
+        {
+            float collisionImpulse = collision.impulse.magnitude;
+            if (collisionImpulse > impulseDamageThreshold)
+            {
+                takeCollisionDamage(collisionImpulse);
+            }
+        }
     }
 }
