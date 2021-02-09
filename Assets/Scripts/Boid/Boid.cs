@@ -27,6 +27,8 @@ public class Boid : MonoBehaviour
     public Mesh mesh;
     private float collisionAvoidanceDistance; 
 
+    public NeighborData computeShaderData;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -77,7 +79,7 @@ public class Boid : MonoBehaviour
         float vel = _rigidbody.velocity.magnitude;
 
         //Function for improved velocity change at low speeds. Linear
-        float m = minSpeed * 3;             //Min value at m
+        float m = 0;             //Min value at m
         float dy = (maxSpeed - m);          //Max value at maxSpeed
         float dx = (maxSpeed - minSpeed);
 
@@ -167,23 +169,23 @@ public class Boid : MonoBehaviour
         collisionAvoidanceDistance = val;
     }
 
-    private Vector3 CalculateSteeringForce(Boid[] neighbours)
+    private NeighborData CalculateNeighbors(Boid[] neighbors)
     {
         // Average velocity is used to calculate alignment force
         Vector3 avgVel = new Vector3(0, 0, 0);
-        
+
         // Average neighbour position used to calculate cohesion
         Vector3 avgPosCohesion = new Vector3(0, 0, 0);
-        
+
         // Average neighbour position used to calculate cohesion
         Vector3 avgPosSeparation = new Vector3(0, 0, 0);
 
         // Iterate over all the neighbours
         int viewCount = 0;
         int separationViewCount = 0;
-        for (int i = 0; i < neighbours.Length; i++)
+        for (int i = 0; i < neighbors.Length; i++)
         {
-            Boid b = neighbours[i];
+            Boid b = neighbors[i];
 
             // Compare the distance between this boid and the neighbour using the
             // square of the distance and radius. This avoids costly square root operations
@@ -201,26 +203,50 @@ public class Boid : MonoBehaviour
             // And if close enough, add to average position for separation
             if (sqrDist < separationRadius * separationRadius)
             {
-                avgPosSeparation += (GetPos() - b.GetPos())/sqrDist;
+                avgPosSeparation += (GetPos() - b.GetPos()) / sqrDist;
                 separationViewCount++;
             }
         }
-            
+
+        return new NeighborData(avgVel, avgPosCohesion, avgPosSeparation, viewCount, separationViewCount);
+    }
+
+    public struct NeighborData
+    {
+        public Vector3 avgVel;
+        public Vector3 avgPosCohesion;
+        public Vector3 avgPosSeparation;
+        public int viewCount;
+        public int separationViewCount;
+
+        public NeighborData(Vector3 avgVel, Vector3 avgPosCohesion, Vector3 avgPosSeparation, int viewCount, int separationViewCount)
+        {
+            this.avgVel = avgVel;
+            this.avgPosCohesion = avgPosCohesion;
+            this.avgPosSeparation = avgPosSeparation;
+            this.viewCount = viewCount;
+            this.separationViewCount = separationViewCount;
+        }
+    }
+
+    private Vector3 CalculateSteeringForce(Boid[] neighbours)
+    {
+        NeighborData data = CalculateNeighbors(neighbours);
 
         // Calculate alignment force
         Vector3 alignmentForce;
-        if (viewCount == 0) alignmentForce = new Vector3(0, 0, 0);
-        else alignmentForce = SteerTowards( avgVel / viewCount ) * alignmentStrength;
+        if (data.viewCount == 0) alignmentForce = new Vector3(0, 0, 0);
+        else alignmentForce = SteerTowards(data.avgVel / data.viewCount ) * alignmentStrength;
         
         // Calculate cohesion force
         Vector3 cohesionForce;
-        if (viewCount == 0) cohesionForce = new Vector3(0, 0, 0);
-        else cohesionForce = SteerTowards((avgPosCohesion / viewCount) - GetPos()) * cohesionStrength;
+        if (data.viewCount == 0) cohesionForce = new Vector3(0, 0, 0);
+        else cohesionForce = SteerTowards((data.avgPosCohesion / data.viewCount) - GetPos()) * cohesionStrength;
         
         // Calculate separation force
         Vector3 separationForce;
-        if (separationViewCount == 0) separationForce = new Vector3(0, 0, 0);
-        else separationForce = SteerTowards(((avgPosSeparation ))) * separationStrength;
+        if (data.separationViewCount == 0) separationForce = new Vector3(0, 0, 0);
+        else separationForce = SteerTowards(((data.avgPosSeparation ))) * separationStrength;
 
         return alignmentForce + cohesionForce + separationForce;
     }
