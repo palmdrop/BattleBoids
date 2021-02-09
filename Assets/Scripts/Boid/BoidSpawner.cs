@@ -9,6 +9,9 @@ public class BoidSpawner : MonoBehaviour
     [SerializeField] private int spawnCount = 10;
 
     [SerializeField] private BoidManager manager;
+    [SerializeField] private float defaultCollisionAvoidanceDistance = 2f;
+
+    private float variance = 1.1f;
 
     // Awake is called when the script instance is being loaded
     private void Awake()
@@ -21,6 +24,8 @@ public class BoidSpawner : MonoBehaviour
             Vector2 randomPos = Random.insideUnitCircle;
             Vector3 pos = transform.position + new Vector3(randomPos.x, 0, randomPos.y) * spawnRadius;
             boidTransform.position = pos;
+
+            boid.setCollisionAvoidanceDistance(defaultCollisionAvoidanceDistance * Random.Range(1/variance, variance));
             
             Vector2 randomHeading = Random.insideUnitCircle;
             boidTransform.forward = new Vector3(randomHeading.x, 0, randomHeading.y);
