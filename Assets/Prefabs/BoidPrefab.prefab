@@ -45,11 +45,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 409898901d3013e47a66979ad5de660f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewRadius: 2
-  separationRadius: 1
-  alignmentStrength: 0.2
-  cohesionStrength: 0.2
-  separationStrength: 0.25
+  viewRadius: 1.46
+  separationRadius: 0.59
+  alignmentStrength: 1.08
+  cohesionStrength: 0.51
+  separationStrength: 2.67
+  avoidCollisionWeight: 6.98
   collisionMask:
     serializedVersion: 2
     m_Bits: 512
