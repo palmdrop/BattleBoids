@@ -4,7 +4,7 @@ using UnityEngine.WSA;
 
 namespace Map
 {
-    public class MapScript : MonoBehaviour
+    public class Map : MonoBehaviour
     {
         // The ground plane of the map
         private GameObject _ground;        
