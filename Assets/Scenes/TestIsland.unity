@@ -41842,7 +41842,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boidPrefab: {fileID: -1091215051074117226, guid: f12ecb59033b92b46909099a9e479d25, type: 3}
   spawnRadius: 0.5
-  spawnCount: 3
+  spawnCount: 50
   manager: {fileID: 1774907200}
 --- !u!4 &1433541665 stripped
 Transform:
