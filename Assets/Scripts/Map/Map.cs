@@ -14,7 +14,8 @@ namespace Map
         private GameObject _ground;        
         
         // Generated walls around the map edges
-        private List<GameObject> _wallTiles;
+        //private List<GameObject> _wallTiles;
+        private GameObject _walls;
         
         // The dimensions of the map. 
         private Rect _bounds;
@@ -117,7 +118,10 @@ namespace Map
 
         private void CreateWallTiles()
         {
-            _wallTiles = new List<GameObject>();
+            //_wallTiles = new List<GameObject>();
+            //_walls = Instantiate()
+            _walls = new GameObject("Walls");
+            _walls.transform.parent = this.gameObject.transform;
             
             // Hashset for holding those positions that are already occupied by an invisible tile
             HashSet<Vector3> occupied = new HashSet<Vector3>();
@@ -148,7 +152,8 @@ namespace Map
                         GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity,
                             this.transform);
 
-                        _wallTiles.Add(wall);
+                        //_wallTiles.Add(wall);
+                        wall.transform.parent = _walls.transform;
                         
                         // And mark the position as occupied
                         occupied.Add(wallPosition);
