@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.WSA;
 
@@ -6,8 +7,14 @@ namespace Map
 {
     public class Map : MonoBehaviour
     {
+        // Prefab for generated walls
+        [SerializeField] private GameObject wallPrefab;
+        
         // The ground plane of the map
         private GameObject _ground;        
+        
+        // Generated walls around the map edges
+        private List<GameObject> _wallTiles;
         
         // The dimensions of the map. 
         private Rect _bounds;
@@ -25,11 +32,14 @@ namespace Map
             // Get ground child, used to calculate bounds and heightmap
             _ground = transform.Find("Ground").gameObject;
 
-            // Calculate the bounds of the map. 
+            // Calculate the bounds of the map
             CalculateBounds();
             
             // Calculate the heightmap representation of the ground of the map 
             CalculateHeightmap();
+            
+            // Create wall tiles
+            CreateWallTiles();
         }
         
         private void CalculateBounds()
@@ -63,6 +73,7 @@ namespace Map
             );
         }
 
+        
         // Transforms a 3d point into an index. Only uses the x and z component.
         private int PointToIndex(Vector3 point)
         {
@@ -103,6 +114,49 @@ namespace Map
                 _groundTiles[index] = child;
             }
         }
+
+        private void CreateWallTiles()
+        {
+            _wallTiles = new List<GameObject>();
+            
+            // Hashset for holding those positions that are already occupied by an invisible tile
+            HashSet<Vector3> occupied = new HashSet<Vector3>();
+            
+            // Iterate over all the tiles. We then check if there's a tile adjacent to that tile. If not, place an
+            // invisible tile at that location. This ensures that even maps with holes will have no places where an
+            // object on the map might fall off
+            for (int i = 0; i < _ground.transform.childCount; i++)
+            {
+                // Get child tile and position
+                GameObject child = _ground.transform.GetChild(i).gameObject;
+                Vector3 position = child.transform.localPosition;
+                
+                // Iterate over the four neighbour locations using an offset from the child position
+                for (float x = position.x - 1.0f; x <= position.x + 1.0f; x += 1.0f)
+                {
+                    for (float z = position.z - 1.0f; z <= position.z + 1.0f; z += 1.0f)
+                    {
+                        // Create the possible wall position
+                        // Note that the y coordinate is ignored by the "GetGroundTileAt" method. This means we can already
+                        // set the y coordinate of the wall to the appropriate value.
+                        Vector3 wallPosition = new Vector3(x, position.y + 1.0f, z);
+                        
+                        // Check if the tile has a neighbour at that position, or if there's already a wall placed there
+                        if(GetGroundTileAt(wallPosition) != null || occupied.Contains(wallPosition)) continue;
+                        
+                        // If not, create a new wall in this position
+                        GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity,
+                            this.transform);
+
+                        _wallTiles.Add(wall);
+                        
+                        // And mark the position as occupied
+                        occupied.Add(wallPosition);
+                    }
+                }
+            }
+        }
+        
 
         public float HeightmapLookup(Vector3 point)
         {
