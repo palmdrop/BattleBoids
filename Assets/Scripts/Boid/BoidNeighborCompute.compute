@@ -1,0 +1,52 @@
+
+#pragma kernel CSMain
+static const int threadGroupSize = 1024; //No idea, test different values
+
+struct Boid {
+    float3 pos;
+    float3 forward;
+
+    float3 avgVel;
+    float3 avgPosCohesion;
+    float3 avgPosSeparation;
+
+    int viewCount;
+//    int separationViewCount; //not needed as of now
+};
+
+RWStructuredBuffer<Boid> boids;
+
+int boidLength;
+
+//Todo: move into boid struct when nessecary.
+float viewRadius;
+float separationRadius;
+
+[numthreads(threadGroupSize, 1, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+
+    for (int i = 0; i < boidLength; i++) {
+
+        if (id.x != i) {
+
+            Boid b = boids[i];
+
+            float3 offset = boids[id.x].pos - b.pos;
+            float sqrDst = offset.x * offset.x + offset.y * offset.y + offset.z * offset.z;
+
+            if (sqrDst < viewRadius * viewRadius) {
+
+                boids[id.x].viewCount += 1;
+                boids[id.x].avgVel += b.forward;
+                boids[id.x].avgPosCohesion += b.pos;
+
+            }
+            if (sqrDst < separationRadius * separationRadius) {
+
+                boids[id.x].avgPosSeparation += offset / sqrDst;
+//                boids[id.x].separationViewCount += 1;
+            }
+        }
+    }
+}
