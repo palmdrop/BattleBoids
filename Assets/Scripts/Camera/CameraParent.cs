@@ -93,7 +93,7 @@ public class CameraParent : MonoBehaviour
         // Makes sure that there is no continous movement when right mouse button is held down
         Vector3 currentPosition = _parentCamera.position;
 
-        Rect bounds = gameObject.GetComponentInParent<Map.MapScript>().GetBounds();
+        Rect bounds = gameObject.GetComponentInParent<Map.Map>().GetBounds();
 
         _parentCamera.position = new Vector3(
             Mathf.Clamp(move.x + currentPosition.x, bounds.xMin - CameraOffset, bounds.xMax + CameraOffset),

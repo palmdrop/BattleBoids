@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using Map;
 using UnityEngine;
 
 public class SpawnArea : MonoBehaviour
@@ -8,7 +7,7 @@ public class SpawnArea : MonoBehaviour
     public GameObject entityToSpawn;
     public Camera camera;
     public Player owner;
-    public MapScript map;
+    public Map.Map map;
 
     int instanceNumber = 1;
 

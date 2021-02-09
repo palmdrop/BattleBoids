@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
-public class MapTestScript
+public class MapTest
 {
     [SetUp]
     public void Setup()
@@ -25,7 +25,7 @@ public class MapTestScript
         yield return new WaitForEndOfFrame();
 
         // Retrieve map script, required to calculate bounds
-        MapScript mapScript = map.GetComponent<MapScript>();
+        Map.Map mapScript = map.GetComponent<Map.Map>();
         
         yield return new WaitForEndOfFrame();
         
@@ -71,7 +71,7 @@ public class MapTestScript
         yield return new WaitForEndOfFrame();
         
         // Retrieve map script, required to calculate bounds
-        MapScript mapScript = map.GetComponent<MapScript>();
+        Map.Map mapScript = map.GetComponent<Map.Map>();
         
         // Get bounds, will be used to check if all ground tiles are contained
         Rect bounds = mapScript.GetBounds();
@@ -127,7 +127,7 @@ public class MapTestScript
         // Find map, map script and ground component
         GameObject map = GameObject.Find("Map");
         yield return new WaitForEndOfFrame();
-        MapScript mapScript = map.GetComponent<MapScript>();
+        Map.Map mapScript = map.GetComponent<Map.Map>();
         Component ground = map.transform.Find("Ground");
 
         // Iterate over all children
@@ -166,7 +166,7 @@ public class MapTestScript
         // Find map, mapScript and ground
         GameObject map = GameObject.Find("Map");
         yield return new WaitForEndOfFrame();
-        MapScript mapScript = map.GetComponent<MapScript>();
+        Map.Map mapScript = map.GetComponent<Map.Map>();
         Component ground = map.transform.Find("Ground");
 
         // Iterate over all children 
@@ -190,7 +190,7 @@ public class MapTestScript
         // Find map, mapScript and ground
         GameObject map = GameObject.Find("Map");
         yield return new WaitForEndOfFrame();
-        MapScript mapScript = map.GetComponent<MapScript>();
+        Map.Map mapScript = map.GetComponent<Map.Map>();
         Rect bounds = mapScript.GetBounds();
         
         // Iterate over all discrete bound positions 
