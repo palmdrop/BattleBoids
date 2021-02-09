@@ -118,8 +118,6 @@ namespace Map
 
         private void CreateWallTiles()
         {
-            //_wallTiles = new List<GameObject>();
-            //_walls = Instantiate()
             _walls = new GameObject("Walls");
             _walls.transform.parent = this.gameObject.transform;
             
@@ -129,6 +127,9 @@ namespace Map
             // Iterate over all the tiles. We then check if there's a tile adjacent to that tile. If not, place an
             // invisible tile at that location. This ensures that even maps with holes will have no places where an
             // object on the map might fall off
+            
+            // Keep a counter in order to name the wall tiles appropriately
+            int counter = 0;
             for (int i = 0; i < _ground.transform.childCount; i++)
             {
                 // Get child tile and position
@@ -149,14 +150,16 @@ namespace Map
                         if(GetGroundTileAt(wallPosition) != null || occupied.Contains(wallPosition)) continue;
                         
                         // If not, create a new wall in this position
-                        GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity,
-                            this.transform);
+                        GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity, this.transform);
+                        wall.name = wallPrefab.name + (counter == 0 ? "" : " (" + counter + ")");
 
                         //_wallTiles.Add(wall);
                         wall.transform.parent = _walls.transform;
                         
                         // And mark the position as occupied
                         occupied.Add(wallPosition);
+                        
+                        counter++;
                     }
                 }
             }
