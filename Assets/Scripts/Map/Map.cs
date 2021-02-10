@@ -137,10 +137,14 @@ namespace Map
                 Vector3 position = child.transform.localPosition;
                 
                 // Iterate over the four neighbour locations using an offset from the child position
-                for (float x = position.x - 1.0f; x <= position.x + 1.0f; x += 1.0f)
+                for (float dx = -1.0f; dx <= 1.0f; dx += 1.0f)
                 {
-                    for (float z = position.z - 1.0f; z <= position.z + 1.0f; z += 1.0f)
+                    float startStop = Math.Abs(dx) == 1.0 ? 0.0f : 1.0f;
+                    for (float dz = -startStop; dz <= startStop; dz += 1.0f)
                     {
+                        float x = position.x + dx;
+                        float z = position.z + dz;
+                        
                         // Create the possible wall position
                         // Note that the y coordinate is ignored by the "GetGroundTileAt" method. This means we can already
                         // set the y coordinate of the wall to the appropriate value.
