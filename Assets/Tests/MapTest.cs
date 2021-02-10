@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using Map;
 using NUnit.Framework;
 using UnityEngine;
@@ -208,6 +210,58 @@ public class MapTest
                     // If null, make sure the heightmap value is float.MinValue
                     float heightmapValue = mapScript.HeightmapLookup(position);
                     if (heightmapValue != float.MinValue)
+                    {
+                        Assert.Fail();
+                    }
+                }
+            }
+        }
+
+        Assert.Pass();
+    }
+
+    [UnityTest]
+    public IEnumerator TestIfEveryEdgeIsCoveredByAWall()
+    {
+        // Find map, mapScript and ground
+        GameObject map = GameObject.Find("Map");
+        yield return new WaitForEndOfFrame();
+        Map.Map mapScript = map.GetComponent<Map.Map>();
+        Component ground = map.transform.Find("Ground");
+
+        // Find walls object and create a hashset for easy wall location lookup
+        Component walls = map.transform.Find("Walls");
+        HashSet<Vector2> wallPositions = new HashSet<Vector2>();
+
+        // Iterate over all the walls and save their xz position
+        // This will be used to verify that there's a wall adjacent to any edge tile
+        for (int i = 0; i < walls.transform.childCount; i++)
+        {
+            GameObject wall = walls.transform.GetChild(i).gameObject;
+            Vector3 wallPosition = wall.transform.localPosition;
+            wallPositions.Add(new Vector2(wallPosition.x, wallPosition.z));
+        }
+        
+        // Iterate over all the children
+        for (int i = 0; i < ground.transform.childCount; i++)
+        {
+            // Get current tile and position 
+            GameObject tile = ground.transform.GetChild(i).gameObject;
+            Vector3 position = tile.transform.localPosition;
+            
+            // Iterate over neighbour positions
+            for (float dx = -1.0f; dx <= 1.0f; dx += 1.0f)
+            {
+                float startStop = Math.Abs(dx) == 1.0 ? 0.0f : 1.0f;
+                for (float dz = -startStop; dz <= startStop; dz += 1.0f)
+                {
+                    float x = position.x + dx;
+                    float z = position.z + dz;
+
+                    // Check the corresponding heightmap value of that position. If float.MinValue, this means the tile
+                    // has no neighbour at that location. Then check if a wall exists.
+                    float heightValue = mapScript.HeightmapLookup(new Vector3(x, 0, z));
+                    if (heightValue == float.MinValue && !wallPositions.Contains(new Vector2(x, z)))                       
                     {
                         Assert.Fail();
                     }
