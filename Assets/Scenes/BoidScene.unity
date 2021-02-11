@@ -288,7 +288,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c45e2f8b1d28fa94d9e7529759e0e80e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boidPrefab: {fileID: -1091215051074117226, guid: f12ecb59033b92b46909099a9e479d25, type: 3}
+  boidPrefab: {fileID: 65946813234146026, guid: f12ecb59033b92b46909099a9e479d25, type: 3}
   spawnRadius: 2
   spawnCount: 50
   manager: {fileID: 1060277397}

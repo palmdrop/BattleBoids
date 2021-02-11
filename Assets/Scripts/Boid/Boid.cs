@@ -1,32 +1,45 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 public class Boid : MonoBehaviour
 {
-    [SerializeField] private float viewRadius = 5f;
-    [SerializeField] private float separationRadius = 2f;
-    [SerializeField] private float alignmentStrength = 0.1f;
-    [SerializeField] private float cohesionStrength = 0.2f;
-    [SerializeField] private float separationStrength = 3f;
-    
-    private BoidManager _manager;
+    public struct ClassInfo {
+        public float separationRadius;
+        public float viewRadius;
+        public float alignmentStrength;
+        public float cohesionStrength;
+        public float separationStrength;
+    }
+
+    public struct BoidInfo {
+        public float3 vel;
+        public float3 pos;
+        public ClassInfo classInfo;
+    }
+
+    private ClassInfo classInfo = new ClassInfo
+    {
+        separationRadius = 1f,
+        viewRadius = 5f,
+        alignmentStrength = 1.1f,
+        cohesionStrength = 1.2f,
+        separationStrength = 3f
+    };
+
     private Rigidbody _rigidbody;
 
     // Start is called before the first frame update
     void Start()
     {
-        _manager = gameObject.GetComponentInParent<BoidManager>();
         _rigidbody = GetComponent<Rigidbody>();
     }
 
     // Called by the boid manager
     // Updates the boid according to the standard flocking behaviour
-    public void UpdateBoid()
+    public void UpdateBoid(Vector3 force)
     {
-        Boid[] neighbours = _manager.FindBoidsWithinRadius(this, Mathf.Max(viewRadius, separationRadius));
-        Vector3 force = CalculateSteeringForce(neighbours);
-
         _rigidbody.AddForce(force, ForceMode.Acceleration);
         transform.forward = _rigidbody.velocity;
     }
@@ -43,61 +56,12 @@ public class Boid : MonoBehaviour
         return _rigidbody.velocity;
     }
 
-    private Vector3 CalculateSteeringForce(Boid[] neighbours)
-    {
-        // Average velocity is used to calculate alignment force
-        Vector3 avgVel = new Vector3(0, 0, 0);
-        
-        // Average neighbour position used to calculate cohesion
-        Vector3 avgPosCohesion = new Vector3(0, 0, 0);
-        
-        // Average neighbour position used to calculate cohesion
-        Vector3 avgPosSeparation = new Vector3(0, 0, 0);
-
-        // Iterate over all the neighbours
-        int viewCount = 0;
-        int separationViewCount = 0;
-        for (int i = 0; i < neighbours.Length; i++)
-        {
-            Boid b = neighbours[i];
-
-            // Compare the distance between this boid and the neighbour using the
-            // square of the distance and radius. This avoids costly square root operations
-            float sqrDist = (this.GetPos() - b.GetPos()).sqrMagnitude;
-            if (sqrDist < viewRadius * viewRadius)
-            {
-                // Add to average velocity
-                avgVel += b.GetVel();
-                viewCount++;
-
-                // Add to average position for cohesion
-                avgPosCohesion += b.GetPos();
-
-            }
-            // And if close enough, add to average position for separation
-            if (sqrDist < separationRadius * separationRadius)
-            {
-                avgPosSeparation += b.GetPos();
-                separationViewCount++;
-            }
-        }
-            
-
-        // Calculate alignment force
-        Vector3 alignmentForce;
-        if (viewCount == 0) alignmentForce = new Vector3(0, 0, 0);
-        else alignmentForce = avgVel.normalized * alignmentStrength;
-        
-        // Calculate cohesion force
-        Vector3 cohesionForce;
-        if (viewCount == 0) cohesionForce = new Vector3(0, 0, 0);
-        else cohesionForce = ((avgPosCohesion / viewCount) - GetPos()).normalized * cohesionStrength;
-        
-        // Calculate separation force
-        Vector3 separationForce;
-        if (separationViewCount == 0) separationForce = new Vector3(0, 0, 0);
-        else separationForce = (GetPos() - (avgPosSeparation / separationViewCount)).normalized * separationStrength;
-
-        return alignmentForce + cohesionForce + separationForce;
+    public BoidInfo GetInfo() {
+        BoidInfo info;
+        info.pos = GetPos();
+        info.vel = GetVel();
+        info.classInfo = classInfo;
+        return info;
     }
+
 }
