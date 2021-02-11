@@ -148,7 +148,7 @@ namespace Map
                         // Create the possible wall position
                         // Note that the y coordinate is ignored by the "GetGroundTileAt" method. This means we can already
                         // set the y coordinate of the wall to the appropriate value.
-                        Vector3 wallPosition = new Vector3(x, position.y + 1.0f, z);
+                        Vector3 wallPosition = new Vector3(x, position.y + 0.5f + wallPrefab.transform.localScale.y / 2.0f, z);
                         
                         // Check if the tile has a neighbour at that position, or if there's already a wall placed there
                         if(GetGroundTileAt(wallPosition) != null || occupied.Contains(wallPosition)) continue;
