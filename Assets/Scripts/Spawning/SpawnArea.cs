@@ -26,10 +26,17 @@ public class SpawnArea : MonoBehaviour
 
     void UpdateGrid(Vector3 gridCenter) {
         while (holding.Count < gridWidth * gridWidth) {
-            GameObject currentEntity;
-            currentEntity = Instantiate(entityToSpawn, new Vector3(0, 0, 0), Quaternion.identity);
+            
+            GameObject currentEntity = Instantiate(
+                entityToSpawn, 
+                new Vector3(0, 0, 0), 
+                Quaternion.identity
+            );
+            
             currentEntity.name = "toSpawn" + instanceNumber++;
+            
             currentEntity.GetComponent<Renderer>().material.color = new Color(1, 1, 1, 0.5f);
+            
             holding.Add(currentEntity);
         }
         while (holding.Count > gridWidth * gridWidth) {
@@ -38,8 +45,11 @@ public class SpawnArea : MonoBehaviour
             holding.RemoveAt(0);
         }
         float unitWidth = entityToSpawn.GetComponent<MeshRenderer>().bounds.size.z;
+        
         float width = gridWidth * unitWidth;
+        
         canPlace = true;
+        
         for (int x = 0; x < gridWidth; x++) {
             for (int z = 0; z < gridWidth; z++) {
                 int i = x * gridWidth + z;
@@ -55,6 +65,7 @@ public class SpawnArea : MonoBehaviour
                 } else {
                     position.y = 0;
                 }*/
+                
                 if (map.PointInsideBounds(position))
                 {
                     position.y = map.HeightmapLookup(position) + map.transform.position.y;
@@ -89,6 +100,7 @@ public class SpawnArea : MonoBehaviour
             UpdateGrid(hit.point);
         }
 
+        // If left mouse button is pressed
         if (Input.GetMouseButtonDown(0)) {
             if (holding.Count > 0 && canPlace) {
                 // Place entity

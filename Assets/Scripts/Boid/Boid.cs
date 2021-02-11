@@ -28,7 +28,8 @@ public class Boid : MonoBehaviour
         Vector3 force = CalculateSteeringForce(neighbours);
 
         _rigidbody.AddForce(force, ForceMode.Acceleration);
-        transform.forward = _rigidbody.velocity;
+        if (_rigidbody.velocity != Vector3.zero) 
+            transform.forward = _rigidbody.velocity;
     }
 
     // Returns the position of this boid
