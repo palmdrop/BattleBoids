@@ -33,6 +33,7 @@ public class SpawnArea : MonoBehaviour
             currentEntity.name = "Player_" + owner.id + "_Unit_" + instanceNumber++;
             currentEntity.GetComponent<Renderer>().material.color = new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f);
 
+
             holding.Add(currentEntity);
         }
         
@@ -43,6 +44,7 @@ public class SpawnArea : MonoBehaviour
         }
         //float unitWidth = entityToSpawn.GetComponent<Collider>().bounds.size.z;
         float unitWidth = 0.4f;
+
 
 
         float width = gridWidth * unitWidth;

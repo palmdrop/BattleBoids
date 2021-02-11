@@ -74,6 +74,7 @@ public class Boid : MonoBehaviour
         this.owner = owner;
 
 
+
     }
 
     // Returns the position of this boid

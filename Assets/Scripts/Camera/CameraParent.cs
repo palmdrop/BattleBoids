@@ -65,7 +65,11 @@ public class CameraParent : MonoBehaviour
 
         // If left mouse click is pressed
         // Retrieve the object clicked on
+<<<<<<< HEAD
         if (selectObject.IsObjectSelected() && _cameraFollowGameObject)
+=======
+        if (selectObject.IsObjectSelected())
+>>>>>>> 4ab7d00... If added, you can toggle to follow GameObjects in the Scene by clicking 'f'
         {
             selectedObject = selectObject.GetCurrentlySelected().transform;
         }
