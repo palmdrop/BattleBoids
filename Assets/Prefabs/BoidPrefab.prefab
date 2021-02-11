@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7866285323290544107}
-  - component: {fileID: -1091215051074117226}
+  - component: {fileID: 65946813234146026}
   - component: {fileID: 26594132553738016}
   m_Layer: 0
   m_Name: BoidPrefab
@@ -33,7 +33,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-1091215051074117226
+--- !u!114 &65946813234146026
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -45,11 +45,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 409898901d3013e47a66979ad5de660f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  viewRadius: 2
-  separationRadius: 1
-  alignmentStrength: 0.2
-  cohesionStrength: 0.2
-  separationStrength: 0.25
 --- !u!54 &26594132553738016
 Rigidbody:
   m_ObjectHideFlags: 0
