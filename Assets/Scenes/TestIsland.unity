@@ -7606,7 +7606,6 @@ GameObject:
   m_Component:
   - component: {fileID: 244967803}
   - component: {fileID: 244967802}
-  - component: {fileID: 244967804}
   m_Layer: 0
   m_Name: CameraParent
   m_TagString: Untagged
@@ -7626,7 +7625,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f70f5934d2e97388aa604dbb19b34b6f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cameraOffset: 15
   speed: 0.1
   zoomSpeed: 1
   rotateSpeed: 0.1
@@ -7648,18 +7646,6 @@ Transform:
   m_Father: {fileID: 850325148}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &244967804
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 244967801}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6f3b0a2b2bf11034089e0d055f5bbea4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &245003362
 PrefabInstance:
   m_ObjectHideFlags: 0
