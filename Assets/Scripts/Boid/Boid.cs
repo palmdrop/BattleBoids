@@ -62,6 +62,7 @@ public class Boid : MonoBehaviour
             _rigidbody.velocity = _rigidbody.velocity.normalized * maxSpeed;
         }
         transform.forward = _rigidbody.velocity;
+
     }
 
     private void OnCollisionEnter(Collision collision) {

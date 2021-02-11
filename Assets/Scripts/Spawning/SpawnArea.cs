@@ -32,6 +32,7 @@ public class SpawnArea : MonoBehaviour
             currentEntity.GetComponent<Boid>().SetOwner(owner);
             currentEntity.name = "Player_" + owner.id + "_Unit_" + instanceNumber++;
             currentEntity.GetComponent<Renderer>().material.color = new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f);
+
             holding.Add(currentEntity);
         }
         while (holding.Count > gridWidth * gridWidth) {
@@ -41,8 +42,11 @@ public class SpawnArea : MonoBehaviour
         }
         //float unitWidth = entityToSpawn.GetComponent<Collider>().bounds.size.z;
         float unitWidth = 0.4f;
+
         float width = gridWidth * unitWidth;
+        
         canPlace = true;
+        
         for (int x = 0; x < gridWidth; x++) {
             for (int z = 0; z < gridWidth; z++) {
                 int i = x * gridWidth + z;
@@ -58,6 +62,7 @@ public class SpawnArea : MonoBehaviour
                 } else {
                     position.y = 0;
                 }*/
+                
                 if (map.PointInsideBounds(position))
                 {
                     position.y = map.HeightmapLookup(position) + map.transform.position.y;
@@ -104,6 +109,7 @@ public class SpawnArea : MonoBehaviour
             UpdateGrid(hit.point);
         }
 
+        // If left mouse button is pressed
         if (Input.GetMouseButtonDown(0)) {
             if (holding.Count > 0 && canPlace) {
                 // Place entity
