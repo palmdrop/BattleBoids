@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Map
 {
-    public class TileScript : MonoBehaviour
+    public class Tile : MonoBehaviour
     {
         // Variables for adjusting the size of the layers (the sum should add up to 1.0)
         [SerializeField] private float topSize    = 0.1f;

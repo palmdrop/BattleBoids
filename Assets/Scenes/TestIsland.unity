@@ -23551,6 +23551,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2bd861403946dc74db69a1044a078c6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  wallPrefab: {fileID: 4758372830198182287, guid: 17c90946e6cd91757be1496331650ec7, type: 3}
 --- !u!1001 &850618745
 PrefabInstance:
   m_ObjectHideFlags: 0
