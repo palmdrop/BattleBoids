@@ -22,36 +22,28 @@ public class Player : MonoBehaviour
         
     }
 
-/* Future methods, no Boid class exists yet
-    public bool buyBoid(Boid boid)
+    public List<GameObject> GetFlock()
     {
-        int cost = boid.GetCost();
-        bool canAfford;
-        if (canAfford = boins >= cost)
-        {
-            boins -= cost;
-        }
-        return canAfford;
+        return flock;
     }
 
-    public bool sellBoid(Boid boid)
+    public void AddBoins(int boinsToAdd)
     {
-        bool ownsBoid;
-        if (ownsBoid = flock.Contains(boid))
-        {
-            boins += boid.GetCost();
-        }
-        return ownsBoid;
+        boins += boinsToAdd;
     }
-*/
+
+    public void RemoveBoins(int boinsToRemove)
+    {
+        boins -= boinsToRemove;
+    }
+
+    public int GetBoins()
+    {
+        return boins;
+    }
 
     public void AddScore(int pointsToAdd)
     {
         score += pointsToAdd;
-    }
-
-    public List<GameObject> GetFlock()
-    {
-        return flock;
     }
 }
