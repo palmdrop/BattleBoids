@@ -189,7 +189,8 @@ public class Boid : MonoBehaviour
 
             // Compare the distance between this boid and the neighbour using the
             // square of the distance and radius. This avoids costly square root operations
-            float sqrDist = (this.GetPos() - b.GetPos()).sqrMagnitude;
+            Vector3 offset = (b.GetPos() - GetPos());
+            float sqrDist = offset.sqrMagnitude;
             if (sqrDist < viewRadius * viewRadius)
             {
                 // Add to average velocity
@@ -197,13 +198,13 @@ public class Boid : MonoBehaviour
                 viewCount++;
 
                 // Add to average position for cohesion
-                avgPosCohesion += b.GetPos();
+                avgPosCohesion += offset;
 
             }
             // And if close enough, add to average position for separation
             if (sqrDist < separationRadius * separationRadius)
             {
-                avgPosSeparation += (GetPos() - b.GetPos()) / sqrDist;
+                avgPosSeparation -= offset / sqrDist;
                 separationViewCount++;
             }
         }
