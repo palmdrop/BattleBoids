@@ -156,4 +156,26 @@ public class SpawnArea : MonoBehaviour
         }
 
     }
+/* No Boid cost field method yet
+    public bool buyBoid(Boid boid)
+    {
+        int cost = boid.GetCost();
+        bool canAfford;
+        if (canAfford = owner.GetBoins() >= cost)
+        {
+            owner.RemoveBoins(cost);
+        }
+        return canAfford;
+    }
+
+    public bool sellBoid(Boid boid)
+    {
+        bool ownsBoid;
+        if (ownsBoid = flock.Contains(boid))
+        {
+            owner.AddBoins(boid.GetCost());
+        }
+        return ownsBoid;
+    }
+*/
 }
