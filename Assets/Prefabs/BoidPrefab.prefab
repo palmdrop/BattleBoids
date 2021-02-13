@@ -45,6 +45,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 409898901d3013e47a66979ad5de660f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cost: 10
+  health: 100
+  damage: 10
+  maxSpeed: 5
 --- !u!54 &26594132553738016
 Rigidbody:
   m_ObjectHideFlags: 0
