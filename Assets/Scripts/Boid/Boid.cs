@@ -5,6 +5,11 @@ using Unity.Mathematics;
 
 public class Boid : MonoBehaviour
 {
+    [SerializeField] private int cost = 10;
+    [SerializeField] private int health = 100;
+    [SerializeField] private int damage = 10;
+    [SerializeField] private float maxSpeed = 5f;
+
     public struct ClassInfo {
         public float separationRadius;
         public float viewRadius;
@@ -41,6 +46,10 @@ public class Boid : MonoBehaviour
     public void UpdateBoid(Vector3 force)
     {
         _rigidbody.AddForce(force, ForceMode.Acceleration);
+        if (_rigidbody.velocity.sqrMagnitude > maxSpeed * maxSpeed)
+        {
+            _rigidbody.velocity = _rigidbody.velocity.normalized * maxSpeed;
+        }
         transform.forward = _rigidbody.velocity;
     }
 
@@ -62,6 +71,35 @@ public class Boid : MonoBehaviour
         info.vel = GetVel();
         info.classInfo = classInfo;
         return info;
+    }
+
+    public int GetCost()
+    {
+        return cost;
+    }
+
+    public int GetHealth()
+    {
+        return health;
+    }
+
+    public int GetDamage()
+    {
+        return damage;
+    }
+
+    public void TakeDamage(int damageTaken)
+    {
+        health = math.max(health - damageTaken, 0);
+        if (health <= 0)
+        {
+            Die();
+        }
+    }
+
+    public void Die()
+    {
+        GameObject.Destroy(this);
     }
 
 }
