@@ -7,6 +7,8 @@ public class Player : MonoBehaviour
     [SerializeField] private List<GameObject> flock = new List<GameObject>();
     [SerializeField] private int boins; // Currency to buy boids
     [SerializeField] private int score; // Points obtained during a match
+    [SerializeField] public int id; // Identifier
+    [SerializeField] public Color color; // Player color
 
     // Start is called before the first frame update
     void Start()

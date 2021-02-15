@@ -18,26 +18,33 @@ public class Boid : MonoBehaviour
         public float separationStrength;
         public float emotionalState;
         public float morale;
+        public float aggressionRadius;
+        public float aggressionStrength;
     }
 
     public struct BoidInfo {
         public float3 vel;
         public float3 pos;
         public ClassInfo classInfo;
+        public int flockId;
     }
+
+    public bool dead = false;
 
     private ClassInfo classInfo = new ClassInfo
     {
-        separationRadius = 1f,
+        separationRadius = 0.2f,
         viewRadius = 5f,
         alignmentStrength = 1.1f,
         cohesionStrength = 1.2f,
         separationStrength = 3f,
         emotionalState = 0f,
-        morale = 0f
+        morale = 0f,
+        aggressionStrength = 1f
     };
 
     private Rigidbody _rigidbody;
+    private Player owner;
 
     // Start is called before the first frame update
     void Start()
@@ -57,6 +64,14 @@ public class Boid : MonoBehaviour
         transform.forward = _rigidbody.velocity;
     }
 
+    private void OnCollisionEnter(Collision collision) {
+        TakeDamage((int) collision.impulse.magnitude * 10);
+    }
+
+    public void SetOwner(Player owner) {
+        this.owner = owner;
+    }
+
     // Returns the position of this boid
     public Vector3 GetPos()
     {
@@ -74,6 +89,7 @@ public class Boid : MonoBehaviour
         info.pos = GetPos();
         info.vel = GetVel();
         info.classInfo = classInfo;
+        info.flockId = owner.id;
         return info;
     }
 
@@ -82,7 +98,7 @@ public class Boid : MonoBehaviour
         return cost;
     }
 
-    public int GetHealth()
+    public float GetHealth()
     {
         return health;
     }
@@ -103,7 +119,7 @@ public class Boid : MonoBehaviour
 
     public void Die()
     {
-        
+        this.dead = true;
     }
 
 }
