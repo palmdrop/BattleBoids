@@ -156,9 +156,9 @@ public class SpawnArea : MonoBehaviour
         }
 
     }
-/* No Boid cost field method yet
-    public bool buyBoid(Boid boid)
+    public bool buyBoid(GameObject gameObject)
     {
+        Boid boid = gameObject.GetComponent<Boid>();
         int cost = boid.GetCost();
         bool canAfford;
         if (canAfford = owner.GetBoins() >= cost)
@@ -168,14 +168,14 @@ public class SpawnArea : MonoBehaviour
         return canAfford;
     }
 
-    public bool sellBoid(Boid boid)
+    public bool sellBoid(GameObject gameObject)
     {
+        Boid boid = gameObject.GetComponent<Boid>();
         bool ownsBoid;
-        if (ownsBoid = flock.Contains(boid))
+        if (ownsBoid = owner.GetFlock().Contains(gameObject))
         {
             owner.AddBoins(boid.GetCost());
         }
         return ownsBoid;
     }
-*/
 }
