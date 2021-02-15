@@ -33,9 +33,14 @@ public class Player : MonoBehaviour
         boins += boinsToAdd;
     }
 
-    public void RemoveBoins(int boinsToRemove)
+    public bool RemoveBoins(int boinsToRemove)
     {
-        boins -= boinsToRemove;
+        bool isSuccess;
+        if (isSuccess = boinsToRemove <= boins)
+        {
+            boins -= boinsToRemove;
+        }
+        return isSuccess;
     }
 
     public int GetBoins()
