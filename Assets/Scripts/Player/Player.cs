@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
     [SerializeField] private int score; // Points obtained during a match
     [SerializeField] public int id; // Identifier
     [SerializeField] public Color color; // Player color
+    [SerializeField] private string nickname; // Unique
 
     // Start is called before the first frame update
     void Start()
@@ -45,5 +46,10 @@ public class Player : MonoBehaviour
     public void AddScore(int pointsToAdd)
     {
         score += pointsToAdd;
+    }
+
+    public string GetNickname()
+    {
+        return nickname;
     }
 }
