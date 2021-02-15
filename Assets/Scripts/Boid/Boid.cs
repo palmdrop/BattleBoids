@@ -16,6 +16,8 @@ public class Boid : MonoBehaviour
         public float alignmentStrength;
         public float cohesionStrength;
         public float separationStrength;
+        public float emotionalState;
+        public float morale;
     }
 
     public struct BoidInfo {
@@ -30,7 +32,9 @@ public class Boid : MonoBehaviour
         viewRadius = 5f,
         alignmentStrength = 1.1f,
         cohesionStrength = 1.2f,
-        separationStrength = 3f
+        separationStrength = 3f,
+        emotionalState = 0f,
+        morale = 0f
     };
 
     private Rigidbody _rigidbody;
@@ -99,7 +103,7 @@ public class Boid : MonoBehaviour
 
     public void Die()
     {
-        GameObject.Destroy(this);
+        
     }
 
 }
