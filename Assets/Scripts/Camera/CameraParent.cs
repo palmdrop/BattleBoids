@@ -65,7 +65,7 @@ public class CameraParent : MonoBehaviour
 
         // If left mouse click is pressed
         // Retrieve the object clicked on
-        if (selectObject.IsObjectSelected())
+        if (selectObject.IsObjectSelected() && _cameraFollowGameObject)
         {
             selectedObject = selectObject.GetCurrentlySelected().transform;
         }
