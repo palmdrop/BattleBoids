@@ -23,6 +23,8 @@ public class Boid : MonoBehaviour
     float minSpeed = 0.2f;
     float maxSteerForce = 1f;
     float impulseDamageThreshold = 0.2f;
+    float targetHeight = 1f;
+    float lastdY = 0;
 
     public Mesh mesh;
     private float collisionAvoidanceDistance; 
@@ -47,19 +49,22 @@ public class Boid : MonoBehaviour
         //Collision Avoidance, uses collisionMask
 
         if (HeadedForCollisionWithMapBoundary())
-          force += SteerTowards( AvoidCollisionDir() ) * avoidCollisionWeight;
+          force += SteerTowards( AvoidCollisionDir()) * avoidCollisionWeight * _rigidbody.velocity.magnitude;
 
+
+        force += HoverForce();
 
 
 
         //Velocity change not using AddForce
-        
+
         _rigidbody.velocity += force * Time.deltaTime;
-        float speed = _rigidbody.velocity.magnitude;
-        Vector3 dir = _rigidbody.velocity / speed;
-        speed = Mathf.Clamp(speed, minSpeed, maxSpeed);
-        _rigidbody.velocity = dir * speed;
-        transform.forward = _rigidbody.velocity;
+        Vector3 velocity = _rigidbody.velocity;
+        float speed = Mathf.Sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+        Vector3 dir = new Vector3(velocity.x, 0, velocity.z) / (speed == 0 ? 1 : speed);
+        speed = Mathf.Clamp(speed, 0, maxSpeed);
+        _rigidbody.velocity = dir * speed + new Vector3(0,velocity.y,0);
+        transform.forward = new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z);
 
 
 
@@ -73,6 +78,8 @@ public class Boid : MonoBehaviour
         _rigidbody.velocity = ( _rigidbody.velocity.normalized* tmp);*/
     }
 
+
+    //TODO: should not affect y-axis
     Vector3 SteerTowards(Vector3 vector)
     {
         Vector3 v = vector.normalized * maxSpeed - _rigidbody.velocity;
@@ -83,7 +90,26 @@ public class Boid : MonoBehaviour
         float dy = (maxSpeed - m);          //Max value at maxSpeed
         float dx = (maxSpeed - minSpeed);
 
-        return Vector3.ClampMagnitude(v, maxSteerForce * (vel > 0 ? m + (dy/dx) * vel : 1)) ;   //Conditional operator if m = 0
+        return Vector3.ClampMagnitude(v, maxSteerForce * (vel > 0 ?  vel : 1)) ;   //Conditional operator if m = 0
+    }
+
+    private Vector3 HoverForce()
+    {
+        //Get map with heightmap
+        GameObject map = GameObject.FindGameObjectWithTag("Map");
+        Map.Map script = (Map.Map)map.GetComponent(typeof(Map.Map));
+
+        //Calculate difference in height
+        float targetYPos = targetHeight + script.HeightmapLookup(GetPos());
+        float currentYPos = GetPos().y;
+        float deltaY = targetYPos - currentYPos;
+
+        //Formula to determine whether to hover or fall
+        Vector3 yForce = new Vector3(0, (deltaY > 0 ? (5 * (deltaY - lastdY) / Time.fixedDeltaTime + 0.5f) : 10) * deltaY, 0);
+
+        lastdY = deltaY;
+
+        return yForce;
     }
 
 
@@ -95,15 +121,17 @@ public class Boid : MonoBehaviour
             float angle = ((i + 1) / 2) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
             int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
 
-            Vector3 dir = RotationMatrix_y(angle * sign, transform.forward);
+            Vector3 dir = RotationMatrix_y(angle * sign, _rigidbody.velocity).normalized;
 
             Ray ray = new Ray(GetPos() + GetCenterForwardPoint(), dir);
-
+            
 
             if (Physics.Raycast(ray, collisionAvoidanceDistance, collisionMask ))   //Cast rays to nearby boundaries
             {
+                //Debug.DrawLine(ray.origin, ray.origin + ray.direction * collisionAvoidanceDistance, Color.red);
                 return true;
             }
+            //Debug.DrawLine(ray.origin, ray.origin + ray.direction * collisionAvoidanceDistance, Color.green);
 
         }
         return false;
@@ -116,7 +144,7 @@ public class Boid : MonoBehaviour
             float angle = ((i + 1) / 2) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
             int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
 
-            Vector3 dir = RotationMatrix_y(angle*sign, transform.forward);
+            Vector3 dir = RotationMatrix_y(angle*sign, _rigidbody.velocity).normalized;
 
             Ray ray = new Ray(GetPos() + GetCenterForwardPoint(), dir);
 
@@ -149,6 +177,11 @@ public class Boid : MonoBehaviour
     private Vector3 GetCenterForwardPoint()
     {
         return new Vector3(transform.forward.x * _localScale.x * mesh.bounds.size.z / 2, mesh.bounds.size.z * _localScale.y, transform.forward.z * _localScale.z * mesh.bounds.size.z / 2);
+    }
+
+    private Vector3 GetMiddlePoint()
+    {
+        return new Vector3(0, mesh.bounds.size.z * _localScale.y, 0);
     }
 
     // Returns the position of this boid
@@ -190,8 +223,10 @@ public class Boid : MonoBehaviour
             // Compare the distance between this boid and the neighbour using the
             // square of the distance and radius. This avoids costly square root operations
             Vector3 offset = (b.GetPos() - GetPos());
+            Vector3 xzOffset = new Vector3(offset.x, 0, offset.z);
             float sqrDist = offset.sqrMagnitude;
-            if (sqrDist < viewRadius * viewRadius)
+            float sqrDistxz = xzOffset.sqrMagnitude;
+            if (sqrDistxz < viewRadius * viewRadius)
             {
                 // Add to average velocity
                 avgVel += b.gameObject.transform.forward;
@@ -236,16 +271,19 @@ public class Boid : MonoBehaviour
 
         // Calculate alignment force
         Vector3 alignmentForce;
+        data.avgVel = new Vector3(data.avgVel.x, 0, data.avgVel.z);
         if (data.viewCount == 0) alignmentForce = new Vector3(0, 0, 0);
         else alignmentForce = SteerTowards(data.avgVel / data.viewCount ) * alignmentStrength;
         
         // Calculate cohesion force
         Vector3 cohesionForce;
+        data.avgPosCohesion = new Vector3(data.avgPosCohesion.x, 0, data.avgPosCohesion.z);
         if (data.viewCount == 0) cohesionForce = new Vector3(0, 0, 0);
         else cohesionForce = SteerTowards((data.avgPosCohesion / data.viewCount) - GetPos()) * cohesionStrength;
         
         // Calculate separation force
         Vector3 separationForce;
+        data.avgPosSeparation = new Vector3(data.avgPosSeparation.x, 0, data.avgPosSeparation.z);
         if (data.separationViewCount == 0) separationForce = new Vector3(0, 0, 0);
         else separationForce = SteerTowards(((data.avgPosSeparation ))) * separationStrength;
 
@@ -257,6 +295,7 @@ public class Boid : MonoBehaviour
         //Take damage according to some formula
     }
 
+    //Function to run on collision as determined by unity boxcollider.
     private void OnCollisionEnter(Collision collision)
     {
         Rigidbody b = collision.gameObject.GetComponent<Rigidbody>();
