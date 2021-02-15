@@ -57,11 +57,13 @@ public class Boid : MonoBehaviour
     public void UpdateBoid(Vector3 force)
     {
         _rigidbody.AddForce(force, ForceMode.Acceleration);
+
         if (_rigidbody.velocity.sqrMagnitude > maxSpeed * maxSpeed)
         {
             _rigidbody.velocity = _rigidbody.velocity.normalized * maxSpeed;
         }
         transform.forward = _rigidbody.velocity;
+
     }
 
     private void OnCollisionEnter(Collision collision) {
@@ -70,6 +72,9 @@ public class Boid : MonoBehaviour
 
     public void SetOwner(Player owner) {
         this.owner = owner;
+
+
+
     }
 
     // Returns the position of this boid
