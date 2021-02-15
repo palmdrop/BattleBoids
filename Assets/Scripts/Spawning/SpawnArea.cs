@@ -39,11 +39,13 @@ public class SpawnArea : MonoBehaviour
             
             holding.Add(currentEntity);
         }
+        
         while (holding.Count > gridWidth * gridWidth) {
             GameObject currentEntity = holding[0];
             Destroy(currentEntity);
             holding.RemoveAt(0);
         }
+        
         float unitWidth = entityToSpawn.GetComponent<MeshRenderer>().bounds.size.z;
         
         float width = gridWidth * unitWidth;

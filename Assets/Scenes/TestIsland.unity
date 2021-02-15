@@ -40992,9 +40992,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c45e2f8b1d28fa94d9e7529759e0e80e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boidPrefab: {fileID: -1091215051074117226, guid: f12ecb59033b92b46909099a9e479d25, type: 3}
-  spawnRadius: 2
-  spawnCount: 50
+  boidPrefab: {fileID: -1091215051074117226, guid: 2f9316904f5242447b18ebb9f22cccf7, type: 3}
+  spawnRadius: 4
+  spawnCount: 30
   manager: {fileID: 22135378}
 --- !u!4 &1424064708
 Transform:
@@ -41004,7 +41004,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1424064706}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 6, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
