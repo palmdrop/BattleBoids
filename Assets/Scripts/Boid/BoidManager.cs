@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
@@ -8,27 +9,34 @@ using UnityEngine;
 
 public class BoidManager : MonoBehaviour
 {
+    [SerializeField] private List<Player> players = new List<Player>();
+
     // To be replaced by some other data structure
-    private Boid[] _boids;
+    private List<Boid> _boids = new List<Boid>();
 
     // Start is called before the first frame update
     void Start()
     {
-        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("Boid");
-        _boids = new Boid[gameObjects.Length];
-        for (int i = 0; i < _boids.Length; i++)
-        {
-            _boids[i] = gameObjects[i].GetComponent<Boid>();
-        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        NativeArray<Boid.BoidInfo> boidInfos = new NativeArray<Boid.BoidInfo>(_boids.Length, Allocator.TempJob);
-        NativeArray<float3> forces = new NativeArray<float3>(_boids.Length, Allocator.TempJob);
+        if (Input.GetKey("p")) {
+            _boids.Clear();
+            foreach (Player p in players) {
+                foreach (GameObject b in p.GetFlock()) {
+                    _boids.Add(b.GetComponent<Boid>());
+                }
+            }
+        }
 
-        for (int i = 0; i < _boids.Length; i++)
+        _boids.RemoveAll(b => b.dead);
+
+        NativeArray<Boid.BoidInfo> boidInfos = new NativeArray<Boid.BoidInfo>(_boids.Count, Allocator.TempJob);
+        NativeArray<float3> forces = new NativeArray<float3>(_boids.Count, Allocator.TempJob);
+
+        for (int i = 0; i < _boids.Count; i++)
         {
             boidInfos[i] = _boids[i].GetInfo();
         }
@@ -39,10 +47,10 @@ public class BoidManager : MonoBehaviour
                 forces = forces
             };
 
-        JobHandle jobHandle = boidJob.Schedule(_boids.Length, _boids.Length / 10);
+        JobHandle jobHandle = boidJob.Schedule(_boids.Count, _boids.Count / 10);
         jobHandle.Complete();
 
-        for (int i = 0; i < _boids.Length; i++)
+        for (int i = 0; i < _boids.Count; i++)
         {
             _boids[i].UpdateBoid(forces[i]);
         }
@@ -84,6 +92,10 @@ public class BoidManager : MonoBehaviour
             // Average neighbour position used to calculate cohesion
             float3 avgPosSeparation = new Vector3(0, 0, 0);
 
+            // Position of closest enemy
+            float3 targetPos = new Vector3(0, 0, 0);
+            float targetDist = Mathf.Infinity;
+
             Boid.BoidInfo boid = boids[index];
 
             // Iterate over all the neighbours
@@ -99,27 +111,36 @@ public class BoidManager : MonoBehaviour
                 float3 vector = (boid.pos - boids[i].pos);
                 float sqrDist = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
 
-                if (sqrDist < boid.classInfo.separationRadius * boid.classInfo.separationRadius)
-                {
-                    // Add to average velocity
-                    avgVel += boids[i].vel;
-                    viewCount++;
+                if (boids[i].flockId == boid.flockId) {
+                    // Friendly boid
+                    if (sqrDist < boid.classInfo.separationRadius * boid.classInfo.separationRadius)
+                    {
+                        // Add to average velocity
+                        avgVel += boids[i].vel;
+                        viewCount++;
 
-                    // Add to average position for cohesion
-                    avgPosCohesion += boids[i].pos;
+                        // Add to average position for cohesion
+                        avgPosCohesion += boids[i].pos;
 
-                    avgPosSeparation += boids[i].pos;
-                    separationViewCount++;
-                }
-                else if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius)
-                {
-                    // Add to average velocity
-                    avgVel += boids[i].vel;
-                    viewCount++;
+                        avgPosSeparation += boids[i].pos;
+                        separationViewCount++;
+                    }
+                    else if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius)
+                    {
+                        // Add to average velocity
+                        avgVel += boids[i].vel;
+                        viewCount++;
 
-                    // Add to average position for cohesion
-                    avgPosCohesion += boids[i].vel;
+                        // Add to average position for cohesion
+                        avgPosCohesion += boids[i].vel;
 
+                    }
+                } else {
+                    // Enemy boid
+                    if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius && sqrDist < targetDist) {
+                        targetPos = boids[i].pos;
+                        targetDist = sqrDist;
+                    }
                 }
             }
 
@@ -138,8 +159,13 @@ public class BoidManager : MonoBehaviour
             if (separationViewCount == 0) separationForce = new float3(0, 0, 0);
             else separationForce = math.normalize(boid.pos - (avgPosSeparation / separationViewCount)) * boid.classInfo.separationStrength;
 
+            // Calculate aggression force
+            Vector3 aggressionForce;
+            if (targetDist == Mathf.Infinity) aggressionForce = new float3(0, 0, 0);
+            else aggressionForce = math.normalize(targetPos - boid.pos) * boid.classInfo.aggressionStrength * targetDist;
 
-            forces[index] = alignmentForce + cohesionForce + separationForce;
+
+            forces[index] = alignmentForce + cohesionForce + separationForce + aggressionForce;
         }
     }
 }
