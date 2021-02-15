@@ -121,7 +121,7 @@ public class SpawnArea : MonoBehaviour
 
         // If left mouse button is pressed
         if (Input.GetMouseButtonDown(0)) {
-            if (holding.Count > 0 && canPlace) {
+            if (holding.Count > 0 && canPlace && PurchaseSuccess()) {
                 // Place entity
                 foreach (GameObject currentEntity in holding) {
                     spawned.Add(currentEntity);
@@ -136,6 +136,7 @@ public class SpawnArea : MonoBehaviour
                     GameObject currentEntity = hit.collider.gameObject;
                     currentEntity.GetComponent<Renderer>().material.color = new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f);
                     holding.Add(currentEntity);
+                    PurchaseReturn();
                     gridWidth = 1;
                 }
             }
@@ -160,26 +161,26 @@ public class SpawnArea : MonoBehaviour
         }
 
     }
-    public bool buyBoid(GameObject gameObject)
+
+    bool PurchaseSuccess()
     {
-        Boid boid = gameObject.GetComponent<Boid>();
-        int cost = boid.GetCost();
-        bool canAfford;
-        if (canAfford = owner.GetBoins() >= cost)
-        {
-            owner.RemoveBoins(cost);
-        }
-        return canAfford;
+        return owner.RemoveBoins(SumHoldingCost());
     }
 
-    public bool sellBoid(GameObject gameObject)
+    void PurchaseReturn()
     {
-        Boid boid = gameObject.GetComponent<Boid>();
-        bool ownsBoid;
-        if (ownsBoid = owner.GetFlock().Contains(gameObject))
+        owner.AddBoins(SumHoldingCost());
+    }
+
+    int SumHoldingCost()
+    {
+        Boid boid;
+        int sum = 0;
+        foreach (GameObject gameObject in holding)
         {
-            owner.AddBoins(boid.GetCost());
+            boid = gameObject.GetComponent<Boid>();
+            sum += boid.GetCost();
         }
-        return ownsBoid;
+        return sum;
     }
 }
