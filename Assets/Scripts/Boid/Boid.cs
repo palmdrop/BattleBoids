@@ -56,8 +56,6 @@ public class Boid : MonoBehaviour
             _rigidbody.velocity = _rigidbody.velocity.normalized * maxSpeed;
         }
         transform.forward = _rigidbody.velocity;
-        if (_rigidbody.velocity != Vector3.zero) 
-            transform.forward = _rigidbody.velocity;
     }
 
     // Returns the position of this boid
