@@ -73,6 +73,7 @@ public class Boid : MonoBehaviour
     public void SetOwner(Player owner) {
         this.owner = owner;
 
+
     }
 
     // Returns the position of this boid
