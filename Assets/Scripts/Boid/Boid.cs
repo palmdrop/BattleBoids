@@ -50,16 +50,14 @@ public class Boid : MonoBehaviour
     public void UpdateBoid(Vector3 force)
     {
         _rigidbody.AddForce(force, ForceMode.Acceleration);
-<<<<<<< HEAD
+        
         if (_rigidbody.velocity.sqrMagnitude > maxSpeed * maxSpeed)
         {
             _rigidbody.velocity = _rigidbody.velocity.normalized * maxSpeed;
         }
         transform.forward = _rigidbody.velocity;
-=======
         if (_rigidbody.velocity != Vector3.zero) 
             transform.forward = _rigidbody.velocity;
->>>>>>> 81941b8... If added, you can toggle to follow GameObjects in the Scene by clicking 'f'
     }
 
     // Returns the position of this boid
