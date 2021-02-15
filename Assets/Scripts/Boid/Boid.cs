@@ -102,7 +102,9 @@ public class Boid : MonoBehaviour
         //Calculate difference in height
         float targetYPos = targetHeight + script.HeightmapLookup(GetPos());
         float currentYPos = GetPos().y;
-        float deltaY = targetYPos - currentYPos;
+
+        //If boid exits map
+        float deltaY = targetYPos > -1000? targetYPos - currentYPos : -100;
 
         //Formula to determine whether to hover or fall
         Vector3 yForce = new Vector3(0, (deltaY > 0 ? (5 * (deltaY - lastdY) / Time.fixedDeltaTime + 0.5f) : 10) * deltaY, 0);
