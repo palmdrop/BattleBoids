@@ -44,18 +44,23 @@ public class Boid : MonoBehaviour
     };
 
     private Rigidbody _rigidbody;
+    private Vector3 _localScale;
     private Player owner;
+    public Mesh mesh;
 
     // Start is called before the first frame update
     void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
+        _localScale = transform.GetChild(0).transform.localScale;
     }
 
     // Called by the boid manager
     // Updates the boid according to the standard flocking behaviour
     public void UpdateBoid(Vector3 force)
     {
+
+
         _rigidbody.AddForce(force, ForceMode.Acceleration);
 
         if (_rigidbody.velocity.sqrMagnitude > maxSpeed * maxSpeed)
@@ -125,6 +130,34 @@ public class Boid : MonoBehaviour
     public void Die()
     {
         this.dead = true;
+    }
+
+    private Vector3 GetCenterForwardPoint()
+    {
+        return new Vector3(transform.forward.x * _localScale.x * mesh.bounds.size.z / 2, mesh.bounds.size.z * _localScale.y, transform.forward.z * _localScale.z * mesh.bounds.size.z / 2);
+    }
+
+    private Vector3 GetMiddlePoint()
+    {
+        return new Vector3(0, mesh.bounds.size.z * _localScale.y, 0);
+    }
+
+    private Vector3 RotationMatrix_y(float angle, Vector3 vector)
+    {
+        float cos = math.cos(angle * math.PI / 180);
+        float sin = math.sin(angle * math.PI / 180);
+
+        return new Vector3(vector.x * cos - vector.z * sin, 0, vector.x * sin + vector.z * cos);
+    }
+
+    private Vector3 RemoveYComp(Vector3 v)
+    {
+        return new Vector3(v.x, 0, v.z);
+    }
+
+    private Vector3 GetYComp(Vector3 v)
+    {
+        return new Vector3(0, v.y, 0);
     }
 
 }
