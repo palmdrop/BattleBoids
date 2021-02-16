@@ -9,6 +9,7 @@ public class Boid : MonoBehaviour
     [SerializeField] private int health = 100;
     [SerializeField] private int damage = 10;
     [SerializeField] private float maxSpeed = 5f;
+    [SerializeField] float targetHeight = 1f;
 
     public struct ClassInfo {
         public float separationRadius;
@@ -30,6 +31,8 @@ public class Boid : MonoBehaviour
     }
 
     public bool dead = false;
+    public Mesh mesh;
+    public Map.Map map;
 
     private ClassInfo classInfo = new ClassInfo
     {
@@ -46,13 +49,15 @@ public class Boid : MonoBehaviour
     private Rigidbody _rigidbody;
     private Vector3 _localScale;
     private Player owner;
-    public Mesh mesh;
+    private float lastdY = 0;
 
     // Start is called before the first frame update
     void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
         _localScale = transform.GetChild(0).transform.localScale;
+        GameObject map = GameObject.FindGameObjectWithTag("Map");
+        this.map = (Map.Map)map.GetComponent(typeof(Map.Map));
     }
 
     // Called by the boid manager
@@ -69,6 +74,24 @@ public class Boid : MonoBehaviour
         }
         transform.forward = _rigidbody.velocity;
 
+    }
+
+    private Vector3 HoverForce()
+    {
+
+        //Calculate difference in height
+        float targetYPos = targetHeight + map.HeightmapLookup(GetPos());
+        float currentYPos = GetPos().y;
+
+        //If boid exits map
+        float deltaY = targetYPos > -1000 ? targetYPos - currentYPos : -100;
+
+        //Formula to determine whether to hover or fall
+        Vector3 yForce = new Vector3(0, (deltaY > 0 ? (5 * (deltaY - lastdY) / Time.fixedDeltaTime + 0.5f * deltaY) : 10) * deltaY, 0);
+
+        lastdY = deltaY;
+
+        return yForce;
     }
 
     private void OnCollisionEnter(Collision collision) {
