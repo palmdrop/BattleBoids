@@ -119,6 +119,26 @@ public class Boid : MonoBehaviour
         return false;
     }
 
+    private Vector3 AvoidCollisionDir()
+    {
+        for (int i = 3; i < 300 / _rayCastTheta; i++)
+        {
+            float angle = ((i + 1) / 2) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
+            int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
+
+            Vector3 dir = RotationMatrix_y(angle * sign, _rigidbody.velocity).normalized;
+
+            Ray ray = new Ray(GetPos() + GetCenterForwardPoint(), dir);
+
+            if (!Physics.Raycast(ray, collisionAvoidanceDistance, collisionMask))   //Cast rays to nearby boundaries
+            {
+                //Should only affect turn component of velocity. Should not accellerate forwards or backwards.
+                return sign < 0 ? transform.right : -transform.right;
+            }
+        }
+        return transform.forward;
+    }
+
     private void OnCollisionEnter(Collision collision) {
         TakeDamage((int) collision.impulse.magnitude * 10);
     }
