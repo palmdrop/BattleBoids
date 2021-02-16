@@ -10,6 +10,7 @@ using UnityEngine;
 public class BoidManager : MonoBehaviour
 {
     [SerializeField] private List<Player> players = new List<Player>();
+    [SerializeField] private GameUI canvas;
 
     // To be replaced by some other data structure
     private List<Boid> _boids = new List<Boid>();
@@ -22,7 +23,8 @@ public class BoidManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey("p")) {
+        if (canvas.AllPlayersReady()) {
+            canvas.GetReadyButton().gameObject.SetActive(false);
             _boids.Clear();
             foreach (Player p in players) {
                 foreach (GameObject b in p.GetFlock()) {
