@@ -13,8 +13,9 @@ GameObject:
   - component: {fileID: 26594132553738016}
   - component: {fileID: 65946813234146026}
   - component: {fileID: 8824354153650340697}
+  - component: {fileID: -4898967308504619583}
   m_Layer: 0
-  m_Name: BoidPrefab
+  m_Name: Melee
   m_TagString: Boid
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29,7 +30,7 @@ Transform:
   m_GameObject: {fileID: 7175138290131011101}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children:
   - {fileID: 359092870378167540}
   m_Father: {fileID: 0}
@@ -122,6 +123,14 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &-4898967308504619583
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7175138290131011101}
+  m_Mesh: {fileID: -2432090755550338912, guid: dd4896dba589b0b4b841c820e793e1a3, type: 3}
 --- !u!1001 &248111865555155743
 PrefabInstance:
   m_ObjectHideFlags: 0

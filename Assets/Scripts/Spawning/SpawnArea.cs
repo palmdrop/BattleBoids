@@ -17,7 +17,6 @@ public class SpawnArea : MonoBehaviour
     int gridWidth = 0;
     bool canPlace = true;
 
-    bool holdingKey = false;
     bool active = false;
 
     // Start is called before the first frame update
@@ -143,23 +142,13 @@ public class SpawnArea : MonoBehaviour
 
         }
 
-        if (Input.GetKey("n")) {
-            if (!holdingKey) {
-                // Create new entity
-                gridWidth += 1;
-            }
-            holdingKey = true;
-        } else if (Input.GetKey("x")) {
+        if (Input.GetKeyDown("n")) {
+            // Create new entity
+            ChangeGridWidth(1);
+        } else if (Input.GetKeyDown("x")) {
             // Remove entity
-            if (!holdingKey) {
-                if (gridWidth > 0)
-                    gridWidth -= 1;
-            }
-            holdingKey = true;
-        } else {
-            holdingKey = false;
+            ChangeGridWidth(-1);
         }
-
     }
 
     bool PurchaseSuccess()
@@ -182,5 +171,22 @@ public class SpawnArea : MonoBehaviour
             sum += boid.GetCost();
         }
         return sum;
+    }
+
+    public void ChangeGridWidth(int modifier)
+    {
+        if (gridWidth + modifier < 0)
+        {
+            gridWidth = 0;
+        }
+        else
+        {
+            gridWidth += modifier;
+        }
+    }
+
+    public void SetEntityToSpawn(GameObject entity)
+    {
+        entityToSpawn = entity;
     }
 }
