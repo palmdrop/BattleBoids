@@ -9,11 +9,15 @@ public class GameUI : MonoBehaviour
     [SerializeField] private Text boins;
     [SerializeField] private Dropdown playerSelect;
     [SerializeField] private Player activePlayer;
+    [SerializeField] private Canvas buttons;
+    [SerializeField] private GameObject buttonPrefab;
+    [SerializeField] private List<GameObject> unitPrefabs;
 
     // Start is called before the first frame update
     void Start()
     {
         InitPlayerDropdown();
+        InitButtons();
         activePlayer = SetActivePlayer();
         UpdateBoins();
     }
@@ -36,10 +40,50 @@ public class GameUI : MonoBehaviour
         }
     }
 
+    void InitButtons()
+    {
+        for (int i = 0; i < unitPrefabs.Count; i++)
+        {
+            GameObject button = Instantiate(buttonPrefab);
+            button.transform.SetParent(buttons.transform);
+            button.name = unitPrefabs[i].name;
+            RectTransform buttonRectTransform = button.transform.GetComponent<RectTransform>();
+            float width = buttonRectTransform.sizeDelta.x * buttonRectTransform.localScale.x;
+            float height = buttonRectTransform.sizeDelta.y * buttonRectTransform.localScale.y;
+            button.transform.localPosition = new Vector3(
+                -(i % 3) * width,
+                (i % 2) * height,
+                0
+            );
+
+            button.GetComponent<Button>().onClick.AddListener(() => UnitButtonClick(button));
+
+            button.GetComponent<Button>().GetComponentInChildren<Text>().text = button.name;
+        }
+    }
+
+    void UnitButtonClick(GameObject button)
+    {
+        activePlayer.GetSpawnArea().SetEntityToSpawn(FindUnitByName(button.name));
+        activePlayer.GetSpawnArea().ChangeGridWidth(1);
+    }
+
+    GameObject FindUnitByName(string name)
+    {
+        foreach (GameObject unit in unitPrefabs)
+        {
+            if (unit.name.Equals(name))
+            {
+                return unit;
+            }
+        }
+        return null;
+    }
+
     Player SetActivePlayer()
     {
         string nickname = playerSelect.options[playerSelect.value].text;
-        foreach (var player in players)
+        foreach (Player player in players)
         {
             if (player.GetNickname().Equals(nickname))
             {
