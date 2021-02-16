@@ -22,6 +22,8 @@ public class BoidManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // When game is started, clear boids and fetch all the new boids from the 
+        // corresponding players
         if (Input.GetKey("p")) {
             _boids.Clear();
             foreach (Player p in players) {
@@ -31,58 +33,120 @@ public class BoidManager : MonoBehaviour
             }
         }
 
+        // Remove all dead boids
         _boids.RemoveAll(b => b.dead);
 
+        // Allocate arrays for all the data required to calculate the boid behaviors
+        // In data
         NativeArray<Boid.BoidInfo> boidInfos = new NativeArray<Boid.BoidInfo>(_boids.Count, Allocator.TempJob);
+        
+        // Out data 
         NativeArray<float3> forces = new NativeArray<float3>(_boids.Count, Allocator.TempJob);
+        NativeArray<Player.FlockInfo> flockInfos = new NativeArray<Player.FlockInfo>(players.Count, Allocator.TempJob);
 
+        // Get all the boid info from the boids
         for (int i = 0; i < _boids.Count; i++)
         {
             boidInfos[i] = _boids[i].GetInfo();
         }
-
-        BoidStructJob boidJob = new BoidStructJob
-            {
-                boids = boidInfos,
-                forces = forces
-            };
-
-        JobHandle jobHandle = boidJob.Schedule(_boids.Count, _boids.Count / 10);
+        
+        // Allocate a struct job for calculating flock info
+        FlockStructJob flockJob = new FlockStructJob()
+        {
+            boids = boidInfos,
+            flockInfos = flockInfos
+        };
+        
+        // Schedule job 
+        JobHandle jobHandle = flockJob.Schedule();
         jobHandle.Complete();
 
+        // Allocate a struct job for calculating boid forces
+        BoidStructJob boidJob = new BoidStructJob
+        {
+            flocks = flockInfos,
+            boids = boidInfos,
+            forces = forces,
+        };
+
+        // Schedule job 
+        jobHandle = boidJob.Schedule(_boids.Count, _boids.Count / 10);
+        jobHandle.Complete();
+
+        // Update all the data 
+        for (int i = 0; i < flockInfos.Length; i++)
+        {
+            players[i].SetFlockInfo(flockInfos[i]);
+        }
+        
         for (int i = 0; i < _boids.Count; i++)
         {
             _boids[i].UpdateBoid(forces[i]);
         }
 
+        // Dispose of all data
+        //flockInfos.Dispose();
         boidInfos.Dispose();
         forces.Dispose();
+        flockInfos.Dispose();
     }
 
-    // Finds all boids within the given radius from the given boid (excludes the given boid itself)
-    public Boid[] FindBoidsWithinRadius(Boid boid, float radius)
+    // This job calculates information specific for the entire flock, such as 
+    // average velocity, average position and entity count
+    [BurstCompile]
+    public struct FlockStructJob : IJob
     {
-        // For now, just loop over all boids and check distance
-        // In the future, make use of an efficient data structure
-        List<Boid> result = new List<Boid>();
-        foreach (Boid b in _boids)
+        [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
+        [WriteOnly] public NativeArray<Player.FlockInfo> flockInfos;
+
+        public void Execute()
         {
-            if ((b.GetPos() - boid.GetPos()).sqrMagnitude < (radius * radius) && b != boid)
+            NativeArray<Player.FlockInfo> tempFlockInfos = new NativeArray<Player.FlockInfo>(flockInfos.Length, Allocator.Temp);
+            
+            for (int i = 0; i < flockInfos.Length; i++)
             {
-                result.Add(b);
+                tempFlockInfos[i] = new Player.FlockInfo();
             }
+
+            for (int i = 0; i < boids.Length; i++)
+            {
+                Boid.BoidInfo boid = boids[i];
+                Player.FlockInfo flockInfo = tempFlockInfos[boid.flockId - 1];
+                flockInfo.avgPos += boid.pos;
+                flockInfo.avgVel += boid.vel;
+                flockInfo.boidCount++;
+
+                tempFlockInfos[boid.flockId - 1] = flockInfo;
+            }
+
+
+            for (int i = 0; i < tempFlockInfos.Length; i++)
+            {
+                Player.FlockInfo flockInfo = tempFlockInfos[i];
+                if (flockInfo.boidCount != 0)
+                {
+                    flockInfo.avgPos /= flockInfo.boidCount;
+                    flockInfo.avgVel /= flockInfo.boidCount;
+                }
+
+                flockInfos[i] = flockInfo;
+            }
+
+            tempFlockInfos.Dispose();
         }
-        return result.ToArray();
     }
 
+    // This job calculates all the forces acting on the boids
     [BurstCompile]
     public struct BoidStructJob : IJobParallelFor
     {
+        [ReadOnly] public NativeArray<Player.FlockInfo> flocks;
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
         [WriteOnly] public NativeArray<float3> forces;
 
         public void Execute(int index)
         {
+            /*** BOID BEHAVIOR VARIABLES ***/
             // Average velocity is used to calculate alignment force
             float3 avgVel = new Vector3(0, 0, 0);
 
@@ -160,12 +224,30 @@ public class BoidManager : MonoBehaviour
             else separationForce = math.normalize(boid.pos - (avgPosSeparation / separationViewCount)) * boid.classInfo.separationStrength;
 
             // Calculate aggression force
+            Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
+            float3 enemyFlockPos = enemyFlock.avgPos;
             Vector3 aggressionForce;
-            if (targetDist == Mathf.Infinity) aggressionForce = new float3(0, 0, 0);
-            else aggressionForce = math.normalize(targetPos - boid.pos) * boid.classInfo.aggressionStrength * targetDist;
+            //if (targetDist == Mathf.Infinity) aggressionForce = new float3(0, 0, 0);
+            if (enemyFlock.boidCount == 0) aggressionForce = new float3(0, 0, 0);
+            else
+                aggressionForce =
+                    //math.normalize(targetPos - boid.pos) * boid.classInfo.aggressionStrength * targetDist;
+                    math.normalize(enemyFlockPos - boid.pos) * boid.classInfo.aggressionStrength;
+            
+            // Calculate fear force
+            Vector3 fearForce;
+            if (targetDist == math.INFINITY) fearForce = new float3(0, 0, 0);
+            else
+                fearForce = math.normalize(boid.pos - enemyFlockPos) * boid.classInfo.fearStrength *
+                            math.pow(targetDist, boid.classInfo.fearExponent);
 
-
-            forces[index] = alignmentForce + cohesionForce + separationForce + aggressionForce;
+            forces[index] = 
+                        alignmentForce 
+                            + cohesionForce 
+                            + separationForce
+                            + aggressionForce
+                            + fearForce
+            ;
         }
     }
 }

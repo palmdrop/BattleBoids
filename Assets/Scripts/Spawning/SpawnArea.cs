@@ -31,7 +31,8 @@ public class SpawnArea : MonoBehaviour
             currentEntity = Instantiate(entityToSpawn, new Vector3(0, 0, 0), Quaternion.identity);
             currentEntity.GetComponent<Boid>().SetOwner(owner);
             currentEntity.name = "Player_" + owner.id + "_Unit_" + instanceNumber++;
-            currentEntity.GetComponent<Renderer>().material.color = new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f);
+            //currentEntity.GetComponent<Renderer>().material.color = new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f);
+            currentEntity.GetComponent<Renderer>().material.SetColor("_Color", owner.color);
 
 
 
@@ -121,7 +122,8 @@ public class SpawnArea : MonoBehaviour
                 // Place entity
                 foreach (GameObject currentEntity in holding) {
                     spawned.Add(currentEntity);
-                    currentEntity.GetComponent<Renderer>().material.color = new Color(owner.color.r, owner.color.g, owner.color.b, 1);
+                    currentEntity.GetComponent<Renderer>().material.SetColor("_Color", owner.color);
+                        //color = new Color(owner.color.r, owner.color.g, owner.color.b, 1);
                 }
                 holding.Clear();
                 gridWidth = 0;

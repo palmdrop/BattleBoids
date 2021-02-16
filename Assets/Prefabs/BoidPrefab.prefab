@@ -79,7 +79,7 @@ MonoBehaviour:
   cost: 10
   health: 100
   damage: 10
-  maxSpeed: 100
+  maxSpeed: 2
   dead: 0
 --- !u!23 &8824354153650340697
 MeshRenderer:

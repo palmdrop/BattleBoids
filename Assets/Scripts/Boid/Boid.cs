@@ -8,18 +8,22 @@ public class Boid : MonoBehaviour
     [SerializeField] private int cost = 10;
     [SerializeField] private int health = 100;
     [SerializeField] private int damage = 10;
-    [SerializeField] private float maxSpeed = 5f;
+    [SerializeField] private float maxSpeed = 2f;
 
     public struct ClassInfo {
         public float separationRadius;
         public float viewRadius;
+        
         public float alignmentStrength;
         public float cohesionStrength;
         public float separationStrength;
+        
         public float emotionalState;
         public float morale;
         public float aggressionRadius;
         public float aggressionStrength;
+
+        public float fearStrength, fearExponent;
     }
 
     public struct BoidInfo {
@@ -33,14 +37,17 @@ public class Boid : MonoBehaviour
 
     private ClassInfo classInfo = new ClassInfo
     {
-        separationRadius = 0.2f,
+        separationRadius = 0.3f,
         viewRadius = 5f,
-        alignmentStrength = 1.1f,
-        cohesionStrength = 1.2f,
-        separationStrength = 3f,
+        alignmentStrength = 0.5f,
+        cohesionStrength = 0.3f,
+        separationStrength = 1f,
         emotionalState = 0f,
         morale = 0f,
-        aggressionStrength = 1f
+        aggressionStrength = 0.8f,
+        
+        fearStrength = 0.5f,
+        fearExponent = -0.4f
     };
 
     private Rigidbody _rigidbody;
@@ -67,7 +74,7 @@ public class Boid : MonoBehaviour
     }
 
     private void OnCollisionEnter(Collision collision) {
-        TakeDamage((int) collision.impulse.magnitude * 10);
+        //TakeDamage((int) collision.impulse.magnitude * 10);
     }
 
     public void SetOwner(Player owner) {
