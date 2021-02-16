@@ -12,13 +12,15 @@ public class GameUI : MonoBehaviour
     [SerializeField] private Canvas buttons;
     [SerializeField] private GameObject buttonPrefab;
     [SerializeField] private List<GameObject> unitPrefabs;
+    [SerializeField] private Button ready;
 
     // Start is called before the first frame update
     void Start()
     {
         InitPlayerDropdown();
-        InitButtons();
         activePlayer = SetActivePlayer();
+        InitUnitButtons();
+        InitReadyButton();
         UpdateBoins();
     }
 
@@ -27,6 +29,7 @@ public class GameUI : MonoBehaviour
     {
         activePlayer = SetActivePlayer();
         UpdateBoins();
+        UpdateReady();
     }
 
     void InitPlayerDropdown()
@@ -40,7 +43,7 @@ public class GameUI : MonoBehaviour
         }
     }
 
-    void InitButtons()
+    void InitUnitButtons()
     {
         for (int i = 0; i < unitPrefabs.Count; i++)
         {
@@ -59,6 +62,40 @@ public class GameUI : MonoBehaviour
             button.GetComponent<Button>().onClick.AddListener(() => UnitButtonClick(button));
 
             button.GetComponent<Button>().GetComponentInChildren<Text>().text = button.name;
+        }
+    }
+
+    void InitReadyButton()
+    {
+        foreach (Player player in players)
+        {
+            player.Unready();
+        }
+        UpdateReady();
+        ready.onClick.AddListener(ToggleReady);
+    }
+
+    void UpdateReady()
+    {
+        if (activePlayer.IsReady())
+        {
+            ready.GetComponentInChildren<Text>().text = "Unready";
+        }
+        else
+        {
+            ready.GetComponentInChildren<Text>().text = "Ready";
+        }
+    }
+
+    void ToggleReady()
+    {
+        if (activePlayer.IsReady())
+        {
+            activePlayer.Unready();
+        }
+        else
+        {
+            activePlayer.Ready();
         }
     }
 
@@ -101,5 +138,22 @@ public class GameUI : MonoBehaviour
     public Player GetActivePlayer()
     {
         return activePlayer;
+    }
+
+    public bool AllPlayersReady()
+    {
+        foreach (Player player in players)
+        {
+            if (!player.IsReady())
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public Button GetReadyButton()
+    {
+        return ready;
     }
 }

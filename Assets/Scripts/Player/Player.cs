@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     [SerializeField] public Color color; // Player color
     [SerializeField] private string nickname; // Unique
     [SerializeField] private SpawnArea spawnArea;
+    [SerializeField] private bool ready;
 
     // Start is called before the first frame update
     void Start()
@@ -62,5 +63,20 @@ public class Player : MonoBehaviour
     public SpawnArea GetSpawnArea()
     {
         return spawnArea;
+    }
+
+    public bool IsReady()
+    {
+        return ready;
+    }
+
+    public void Ready()
+    {
+        ready = true;
+    }
+
+    public void Unready()
+    {
+        ready = false;
     }
 }
