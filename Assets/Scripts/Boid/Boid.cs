@@ -11,6 +11,11 @@ public class Boid : MonoBehaviour
     [SerializeField] private float maxSpeed = 5f;
     [SerializeField] private float targetHeight = 1f;
     [SerializeField] private float collisionAvoidanceDistance;
+    [SerializeField] private float avoidCollisionWeight = 5f;
+    [SerializeField] private float hover_Ki = 5f;
+    [SerializeField] private float hover_Kp = 0.5f;
+    [SerializeField] private float hover_gravity = 10f;
+
 
     public struct ClassInfo {
         public float separationRadius;
@@ -60,14 +65,21 @@ public class Boid : MonoBehaviour
         _rigidbody = GetComponent<Rigidbody>();
         _localScale = transform.GetChild(0).transform.localScale;
         GameObject map = GameObject.FindGameObjectWithTag("Map");
-        this.map = (Map.Map)map.GetComponent(typeof(Map.Map));
+        if (map != null)
+        {
+            this.map = (Map.Map)map.GetComponent(typeof(Map.Map));
+        }
     }
 
     // Called by the boid manager
     // Updates the boid according to the standard flocking behaviour
     public void UpdateBoid(Vector3 force)
     {
+        //example implementation, should be improved
+        //if (HeadedForCollisionWithMapBoundary())
+        //    force += AvoidCollisionDir() * avoidCollisionWeight;
 
+        //force += HoverForce();
 
         _rigidbody.AddForce(force, ForceMode.Acceleration);
 
@@ -89,8 +101,8 @@ public class Boid : MonoBehaviour
         //If boid exits map
         float deltaY = targetYPos > -1000 ? targetYPos - currentYPos : -100;
 
-        //Formula to determine whether to hover or fall
-        Vector3 yForce = new Vector3(0, (deltaY > 0 ? (5 * (deltaY - lastdY) / Time.fixedDeltaTime + 0.5f * deltaY) : 10) * deltaY, 0);
+        //Formula to determine whether to hover or fall, uses a PI-regulator with values Ki and Kp
+        Vector3 yForce = new Vector3(0, (deltaY > 0 ? (hover_Ki * (deltaY - lastdY) / Time.fixedDeltaTime + hover_Kp * deltaY) : hover_gravity) * deltaY, 0);
 
         lastdY = deltaY;
 
