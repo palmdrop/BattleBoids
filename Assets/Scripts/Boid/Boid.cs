@@ -9,7 +9,8 @@ public class Boid : MonoBehaviour
     [SerializeField] private int health = 100;
     [SerializeField] private int damage = 10;
     [SerializeField] private float maxSpeed = 5f;
-    [SerializeField] float targetHeight = 1f;
+    [SerializeField] private float targetHeight = 1f;
+    [SerializeField] private float collisionAvoidanceDistance;
 
     public struct ClassInfo {
         public float separationRadius;
@@ -32,7 +33,7 @@ public class Boid : MonoBehaviour
 
     public bool dead = false;
     public Mesh mesh;
-    public Map.Map map;
+    public LayerMask collisionMask;
 
     private ClassInfo classInfo = new ClassInfo
     {
@@ -50,6 +51,8 @@ public class Boid : MonoBehaviour
     private Vector3 _localScale;
     private Player owner;
     private float lastdY = 0;
+    private float _rayCastTheta = 10;
+    private Map.Map map;
 
     // Start is called before the first frame update
     void Start()
@@ -92,6 +95,28 @@ public class Boid : MonoBehaviour
         lastdY = deltaY;
 
         return yForce;
+    }
+
+    private bool HeadedForCollisionWithMapBoundary()
+    {
+
+        for (int i = 0; i < 3; i++) //Send 3 rays. This is to avoid tangentially going too close to an obstacle.
+        {
+            float angle = ((i + 1) / 2) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
+            int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
+
+            Vector3 dir = RotationMatrix_y(angle * sign, _rigidbody.velocity).normalized;
+
+            Ray ray = new Ray(GetPos() + GetCenterForwardPoint(), dir);
+
+
+            if (Physics.Raycast(ray, collisionAvoidanceDistance, collisionMask))   //Cast rays to nearby boundaries
+            {
+                return true;
+            }
+
+        }
+        return false;
     }
 
     private void OnCollisionEnter(Collision collision) {
