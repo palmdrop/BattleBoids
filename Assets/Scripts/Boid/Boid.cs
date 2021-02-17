@@ -75,11 +75,6 @@ public class Boid : MonoBehaviour
     // Updates the boid according to the standard flocking behaviour
     public void UpdateBoid(Vector3 force)
     {
-        //example implementation, should be improved
-        //if (HeadedForCollisionWithMapBoundary())
-        //    force += AvoidCollisionDir() * avoidCollisionWeight;
-
-        //force += HoverForce();
 
         _rigidbody.AddForce(force, ForceMode.Acceleration);
 
@@ -93,7 +88,10 @@ public class Boid : MonoBehaviour
 
     private Vector3 HoverForce()
     {
-
+        if (map == null)
+        {
+            return Vector3.zero;
+        }
         //Calculate difference in height
         float targetYPos = targetHeight + map.HeightmapLookup(GetPos());
         float currentYPos = GetPos().y;
@@ -112,12 +110,17 @@ public class Boid : MonoBehaviour
     private bool HeadedForCollisionWithMapBoundary()
     {
 
+        if (collisionMask == null)
+        {
+            return false;
+        }
+
         for (int i = 0; i < 3; i++) //Send 3 rays. This is to avoid tangentially going too close to an obstacle.
         {
             float angle = ((i + 1) / 2) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
             int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
 
-            Vector3 dir = RotationMatrix_y(angle * sign, _rigidbody.velocity).normalized;
+            Vector3 dir = RotationMatrix_y(angle * sign, GetVel()).normalized;
 
             Ray ray = new Ray(GetPos() + GetCenterForwardPoint(), dir);
 
@@ -133,12 +136,17 @@ public class Boid : MonoBehaviour
 
     private Vector3 AvoidCollisionDir()
     {
+        if (collisionMask == null)
+        {
+            return transform.forward;
+        }
+
         for (int i = 3; i < 300 / _rayCastTheta; i++)
         {
             float angle = ((i + 1) / 2) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
             int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
 
-            Vector3 dir = RotationMatrix_y(angle * sign, _rigidbody.velocity).normalized;
+            Vector3 dir = RotationMatrix_y(angle * sign, GetVel()).normalized;
 
             Ray ray = new Ray(GetPos() + GetCenterForwardPoint(), dir);
 
@@ -214,11 +222,15 @@ public class Boid : MonoBehaviour
 
     private Vector3 GetCenterForwardPoint()
     {
+        if (mesh == null || _localScale == null)
+            return Vector3.zero;
         return new Vector3(transform.forward.x * _localScale.x * mesh.bounds.size.z / 2, mesh.bounds.size.z * _localScale.y, transform.forward.z * _localScale.z * mesh.bounds.size.z / 2);
     }
 
     private Vector3 GetMiddlePoint()
     {
+        if (mesh == null || _localScale == null)
+            return Vector3.zero;
         return new Vector3(0, mesh.bounds.size.z * _localScale.y, 0);
     }
 
