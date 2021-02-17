@@ -136,6 +136,7 @@ public class Boid : MonoBehaviour
 
     public void SetColor(Color color)
     {
+        //NOTE: ugly solution, assumes prefab structure... TODO improve somehow
         transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material.SetColor("_Color", color);
     }
 

@@ -19,36 +19,48 @@ public class BoidManager : MonoBehaviour
     {
     }
 
+    // Fetches the boids from the respective players and places them in the boids list
+    private void AddPlayerBoids()
+    {
+        _boids.Clear();
+        foreach (Player p in players) {
+            foreach (GameObject b in p.GetFlock()) {
+                _boids.Add(b.GetComponent<Boid>());
+            }
+        }
+    }
+
+    // Clear dead boids
+    private void ClearDeadBoids()
+    {
+        _boids.RemoveAll(b => b.dead);
+    }
+
     // Update is called once per frame
     void Update()
     {
         // When game is started, clear boids and fetch all the new boids from the 
         // corresponding players
         if (Input.GetKey("p")) {
-            _boids.Clear();
-            foreach (Player p in players) {
-                foreach (GameObject b in p.GetFlock()) {
-                    _boids.Add(b.GetComponent<Boid>());
-                }
-            }
+            AddPlayerBoids();
         }
 
         // Remove all dead boids
-        _boids.RemoveAll(b => b.dead);
+        ClearDeadBoids();
 
         // Allocate arrays for all the data required to calculate the boid behaviors
-        // In data
-        NativeArray<Boid.BoidInfo> boidInfos = new NativeArray<Boid.BoidInfo>(_boids.Count, Allocator.TempJob);
+        NativeArray<Boid.BoidInfo> boidInfos = new NativeArray<Boid.BoidInfo>(_boids.Count, Allocator.TempJob); // In data
         
-        // Out data 
-        NativeArray<float3> forces = new NativeArray<float3>(_boids.Count, Allocator.TempJob);
-        NativeArray<Player.FlockInfo> flockInfos = new NativeArray<Player.FlockInfo>(players.Count, Allocator.TempJob);
-
         // Get all the boid info from the boids
         for (int i = 0; i < _boids.Count; i++)
         {
             boidInfos[i] = _boids[i].GetInfo();
         }
+        
+        // A force is calculated for each boid and then later applied 
+        NativeArray<float3> forces = new NativeArray<float3>(_boids.Count, Allocator.TempJob); // Out data
+        // Information about the entire flocks is gathered
+        NativeArray<Player.FlockInfo> flockInfos = new NativeArray<Player.FlockInfo>(players.Count, Allocator.TempJob); // Out and in data
         
         // Allocate a struct job for calculating flock info
         FlockStructJob flockJob = new FlockStructJob()
@@ -73,19 +85,19 @@ public class BoidManager : MonoBehaviour
         jobHandle = boidJob.Schedule(_boids.Count, _boids.Count / 10);
         jobHandle.Complete();
 
-        // Update all the data 
+        // Update player data with new flock info
         for (int i = 0; i < flockInfos.Length; i++)
         {
             players[i].SetFlockInfo(flockInfos[i]);
         }
         
+        // Update boids using the calculated forces
         for (int i = 0; i < _boids.Count; i++)
         {
             _boids[i].UpdateBoid(forces[i]);
         }
 
         // Dispose of all data
-        //flockInfos.Dispose();
         boidInfos.Dispose();
         forces.Dispose();
         flockInfos.Dispose();
@@ -177,19 +189,9 @@ public class BoidManager : MonoBehaviour
 
                 if (boids[i].flockId == boid.flockId) {
                     // Friendly boid
-                    if (sqrDist < boid.classInfo.separationRadius * boid.classInfo.separationRadius)
-                    {
-                        // Add to average velocity
-                        avgVel += boids[i].vel;
-                        viewCount++;
-
-                        // Add to average position for cohesion
-                        avgPosCohesion += boids[i].pos;
-
-                        avgPosSeparation += boids[i].pos;
-                        separationViewCount++;
-                    }
-                    else if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius)
+                    
+                    // If friendly boid is within viewRadius...
+                    if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius)
                     {
                         // Add to average velocity
                         avgVel += boids[i].vel;
@@ -197,7 +199,14 @@ public class BoidManager : MonoBehaviour
 
                         // Add to average position for cohesion
                         avgPosCohesion += boids[i].vel;
-
+                    }
+                    
+                    // If friendly boid is within separationRadius...
+                    if (sqrDist < boid.classInfo.separationRadius * boid.classInfo.separationRadius)
+                    {
+                        // Add to average position for separation
+                        avgPosSeparation += boids[i].pos;
+                        separationViewCount++;
                     }
                 } else {
                     // Enemy boid
@@ -235,12 +244,15 @@ public class BoidManager : MonoBehaviour
                     math.normalize(enemyFlockPos - boid.pos) * boid.classInfo.aggressionStrength;
             
             // Calculate fear force
+            // The strength of the force is calculated using the closest enemy
+            // TODO use closeness of entire enemy flock instead?
             Vector3 fearForce;
             if (targetDist == math.INFINITY) fearForce = new float3(0, 0, 0);
             else
                 fearForce = math.normalize(boid.pos - enemyFlockPos) * boid.classInfo.fearStrength *
                             math.pow(targetDist, boid.classInfo.fearExponent);
 
+            // Sum all the forces
             forces[index] = 
                         alignmentForce 
                             + cohesionForce 
