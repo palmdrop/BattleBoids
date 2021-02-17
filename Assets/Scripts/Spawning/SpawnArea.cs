@@ -31,11 +31,7 @@ public class SpawnArea : MonoBehaviour
             currentEntity = Instantiate(entityToSpawn, new Vector3(0, 0, 0), Quaternion.identity);
             currentEntity.GetComponent<Boid>().SetOwner(owner);
             currentEntity.name = "Player_" + owner.id + "_Unit_" + instanceNumber++;
-            currentEntity.GetComponent<Renderer>().material
-                .SetColor("_Color", new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f));
-
-
-
+            currentEntity.GetComponent<Boid>().SetColor(new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f));
             holding.Add(currentEntity);
         }
         
@@ -47,9 +43,6 @@ public class SpawnArea : MonoBehaviour
         //float unitWidth = entityToSpawn.GetComponent<Collider>().bounds.size.z;
         float unitWidth = 0.4f;
 
-
-
-
         float width = gridWidth * unitWidth;
         
         canPlace = true;
@@ -60,15 +53,6 @@ public class SpawnArea : MonoBehaviour
                 GameObject currentEntity = holding[i];
                 // Find ground height
                 Vector3 position = new Vector3(gridCenter.x + x * unitWidth - width / 2, 1000f, gridCenter.z + z * unitWidth - width / 2);
-                
-                /*RaycastHit hit;
-                LayerMask mask = LayerMask.GetMask("Ground");
-                
-                if (Physics.Raycast(position, transform.TransformDirection(Vector3.down), out hit, 2000f, mask)) {
-                    position.y = hit.point.y;
-                } else {
-                    position.y = 0;
-                }*/
                 
                 if (map.PointInsideBounds(position))
                 {
@@ -84,11 +68,10 @@ public class SpawnArea : MonoBehaviour
                 RaycastHit hit;
                 if (this.GetComponent<Collider>().Raycast(new Ray(new Vector3(position.x, 1000f, position.z), transform.TransformDirection(Vector3.down)), out hit, 2000f))
                 {
-                    currentEntity.GetComponent<Renderer>().material
-                        .SetColor("_Color", new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f));
+                    currentEntity.GetComponent<Boid>().SetColor(new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f));
                 } else
                 {
-                    currentEntity.GetComponent<Renderer>().material.SetColor("_Color", new Color(1, 0, 0, 0.5f));
+                    currentEntity.GetComponent<Boid>().SetColor(new Color(1.0f, 1.0f, 1.0f, 0.5f));
                     canPlace = false;
                 }
             }
@@ -125,8 +108,6 @@ public class SpawnArea : MonoBehaviour
                 // Place entity
                 foreach (GameObject currentEntity in holding) {
                     spawned.Add(currentEntity);
-                    currentEntity.GetComponent<Renderer>().material.SetColor("_Color", owner.color);
-                        //color = new Color(owner.color.r, owner.color.g, owner.color.b, 1);
                 }
                 holding.Clear();
                 gridWidth = 0;
@@ -135,8 +116,6 @@ public class SpawnArea : MonoBehaviour
                 if (spawned.Contains(hit.collider.gameObject)) {
                     spawned.Remove(hit.collider.gameObject);
                     GameObject currentEntity = hit.collider.gameObject;
-                    currentEntity.GetComponent<Renderer>().material.SetColor("_Color",
-                        new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f));
                     holding.Add(currentEntity);
                     gridWidth = 1;
                 }

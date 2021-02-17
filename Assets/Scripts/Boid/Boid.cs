@@ -134,4 +134,9 @@ public class Boid : MonoBehaviour
         this.dead = true;
     }
 
+    public void SetColor(Color color)
+    {
+        transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+    }
+
 }
