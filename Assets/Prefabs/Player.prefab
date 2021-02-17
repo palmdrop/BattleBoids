@@ -46,3 +46,8 @@ MonoBehaviour:
   flock: []
   boins: 0
   score: 0
+  id: 0
+  color: {r: 0, g: 0, b: 0, a: 0}
+  nickname: Player
+  spawnArea: {fileID: 0}
+  ready: 0
