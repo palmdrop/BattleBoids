@@ -113,25 +113,28 @@ public class BoidManager : MonoBehaviour
 
         public void Execute()
         {
+            // Temporary array for holding flock info data
             NativeArray<Player.FlockInfo> tempFlockInfos = new NativeArray<Player.FlockInfo>(flockInfos.Length, Allocator.Temp);
             
-            for (int i = 0; i < flockInfos.Length; i++)
-            {
-                tempFlockInfos[i] = new Player.FlockInfo();
-            }
-
+            // Iterate over all of the boids in order to calculate flock info data
             for (int i = 0; i < boids.Length; i++)
             {
                 Boid.BoidInfo boid = boids[i];
+                
+                // Translate the flockid to an index in the array
                 Player.FlockInfo flockInfo = tempFlockInfos[boid.flockId - 1];
+                
+                // Contribute to flock data
                 flockInfo.avgPos += boid.pos;
                 flockInfo.avgVel += boid.vel;
                 flockInfo.boidCount++;
 
+                // Save new data in array (necessary since "flockInfo" is a temporary value)
                 tempFlockInfos[boid.flockId - 1] = flockInfo;
             }
 
-
+            // Iterate over all the temporary flock info structs and average the results
+            // Also assign the data to the output array
             for (int i = 0; i < tempFlockInfos.Length; i++)
             {
                 Player.FlockInfo flockInfo = tempFlockInfos[i];
@@ -144,6 +147,7 @@ public class BoidManager : MonoBehaviour
                 flockInfos[i] = flockInfo;
             }
 
+            // Dispose of temporary data
             tempFlockInfos.Dispose();
         }
     }
