@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2024155122454189306}
   - component: {fileID: 26594132553738016}
   - component: {fileID: 65946813234146026}
-  - component: {fileID: 8824354153650340697}
+  - component: {fileID: 1138123228175950044}
   m_Layer: 0
   m_Name: BoidPrefab
   m_TagString: Boid
@@ -81,7 +81,7 @@ MonoBehaviour:
   damage: 10
   maxSpeed: 2
   dead: 0
---- !u!23 &8824354153650340697
+--- !u!23 &1138123228175950044
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -100,7 +100,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1737f1c9cb8ffdfcf96d57b37bacf551, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -185,6 +185,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7635826562936255635, guid: dd4896dba589b0b4b841c820e793e1a3, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: -3033667219593020291, guid: dd4896dba589b0b4b841c820e793e1a3, type: 3}
     - target: {fileID: 919132149155446097, guid: dd4896dba589b0b4b841c820e793e1a3, type: 3}
       propertyPath: m_Name
       value: boid

@@ -31,8 +31,8 @@ public class SpawnArea : MonoBehaviour
             currentEntity = Instantiate(entityToSpawn, new Vector3(0, 0, 0), Quaternion.identity);
             currentEntity.GetComponent<Boid>().SetOwner(owner);
             currentEntity.name = "Player_" + owner.id + "_Unit_" + instanceNumber++;
-            //currentEntity.GetComponent<Renderer>().material.color = new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f);
-            currentEntity.GetComponent<Renderer>().material.SetColor("_Color", owner.color);
+            currentEntity.GetComponent<Renderer>().material
+                .SetColor("_Color", new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f));
 
 
 
@@ -82,10 +82,13 @@ public class SpawnArea : MonoBehaviour
                 currentEntity.transform.position = position;
                 // Check if within spawn area
                 RaycastHit hit;
-                if (this.GetComponent<Collider>().Raycast(new Ray(new Vector3(position.x, 1000f, position.z), transform.TransformDirection(Vector3.down)), out hit, 2000f)) {
-                    currentEntity.GetComponent<Renderer>().material.color = new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f);
-                } else {
-                    currentEntity.GetComponent<Renderer>().material.color = new Color(1, 0, 0, 0.5f);
+                if (this.GetComponent<Collider>().Raycast(new Ray(new Vector3(position.x, 1000f, position.z), transform.TransformDirection(Vector3.down)), out hit, 2000f))
+                {
+                    currentEntity.GetComponent<Renderer>().material
+                        .SetColor("_Color", new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f));
+                } else
+                {
+                    currentEntity.GetComponent<Renderer>().material.SetColor("_Color", new Color(1, 0, 0, 0.5f));
                     canPlace = false;
                 }
             }
@@ -132,7 +135,8 @@ public class SpawnArea : MonoBehaviour
                 if (spawned.Contains(hit.collider.gameObject)) {
                     spawned.Remove(hit.collider.gameObject);
                     GameObject currentEntity = hit.collider.gameObject;
-                    currentEntity.GetComponent<Renderer>().material.color = new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f);
+                    currentEntity.GetComponent<Renderer>().material.SetColor("_Color",
+                        new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f));
                     holding.Add(currentEntity);
                     gridWidth = 1;
                 }
