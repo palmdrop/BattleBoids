@@ -160,6 +160,16 @@ public class BoidManager : MonoBehaviour
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
         [WriteOnly] public NativeArray<float3> forces;
 
+        private float3 CalculateForce(Vector3 dir, float weight)
+        {
+            return CalculateForce(dir, weight, 0, 1, 0);
+        }
+
+        private float3 CalculateForce(Vector3 dir, float weight, float dist, float maxDist, float exponent)
+        {
+            return math.normalize(dir) * weight * math.pow((dist / maxDist), exponent);
+        }
+
         public void Execute(int index)
         {
             /*** BOID BEHAVIOR VARIABLES ***/
@@ -202,7 +212,7 @@ public class BoidManager : MonoBehaviour
                         viewCount++;
 
                         // Add to average position for cohesion
-                        avgPosCohesion += boids[i].vel;
+                        avgPosCohesion += boids[i].pos;
                     }
                     
                     // If friendly boid is within separationRadius...
@@ -240,11 +250,10 @@ public class BoidManager : MonoBehaviour
             Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
             float3 enemyFlockPos = enemyFlock.avgPos;
             Vector3 aggressionForce;
-            //if (targetDist == Mathf.Infinity) aggressionForce = new float3(0, 0, 0);
+            
             if (enemyFlock.boidCount == 0) aggressionForce = new float3(0, 0, 0);
             else
                 aggressionForce =
-                    //math.normalize(targetPos - boid.pos) * boid.classInfo.aggressionStrength * targetDist;
                     math.normalize(enemyFlockPos - boid.pos) * boid.classInfo.aggressionStrength;
             
             // Calculate fear force

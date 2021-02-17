@@ -40,7 +40,7 @@ public class Boid : MonoBehaviour
         separationRadius = 0.3f,
         viewRadius = 5f,
         alignmentStrength = 0.5f,
-        cohesionStrength = 0.3f,
+        cohesionStrength = 0.8f,
         separationStrength = 1f,
         emotionalState = 0f,
         morale = 0f,
