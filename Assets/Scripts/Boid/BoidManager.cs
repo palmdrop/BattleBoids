@@ -85,19 +85,45 @@ public class BoidManager : MonoBehaviour
     }
 
     // Finds all boids within the given radius from the given boid (excludes the given boid itself)
-    public Boid[] FindBoidsWithinRadius(Boid boid, float radius)
+    public static NativeArray<Boid.BoidInfo> FindBoidsWithinRadius(Boid.BoidInfo boid, float radius)
     {
-        // For now, just loop over all boids and check distance
-        // In the future, make use of an efficient data structure
-        List<Boid> result = new List<Boid>();
-        foreach (Boid b in _boids)
+        int xIndex = (int)(math.floor(boid.pos.x) / cellWidth);
+        int zIndex = (int)(math.floor(boid.pos.z) / cellDepth);
+        NativeList<Boid.BoidInfo> boidsInRadius = new NativeList<Boid.BoidInfo>();
+
+
+        int minI = xIndex - (int)math.ceil(radius / cellWidth);
+        int maxI = xIndex + (int)math.ceil(radius / cellWidth);
+        int minJ = zIndex - (int)math.ceil(radius / cellDepth);
+        int maxJ = zIndex + (int)math.ceil(radius / cellDepth);
+
+        for (int i = minI; i <= maxI; i++)
         {
-            if ((b.GetPos() - boid.GetPos()).sqrMagnitude < (radius * radius) && b != boid)
+            for (int j = minJ; j <= maxJ; j++)
             {
-                result.Add(b);
+                GridPoint gp = new GridPoint(i, j, cellXAmount);
+                if (_grid.ContainsKey(gp))
+                {
+                    NativeList<Boid.BoidInfo> gridList = _grid[gp];
+                    for (int k = 0; k < gridList.Length; k++)
+                    {
+                        Boid.BoidInfo b = gridList[k];
+                        float3 horizontalDistance = b.pos - boid.pos;
+                        if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z + horizontalDistance.z < radius * radius/* && !b.Equals(boid)*/)
+                        {
+                            boidsInRadius.Add(b);
+                        }
+                    }
+                }
             }
         }
-        return result.ToArray();
+
+        NativeArray<Boid.BoidInfo> result = new NativeArray<Boid.BoidInfo>(boidsInRadius.Length, Allocator.TempJob);
+        for (int i = 0; i < boidsInRadius.Length; i++)
+        {
+            result[i] = boidsInRadius[i];
+        }
+        return result;
     }
 
     [BurstCompile]
