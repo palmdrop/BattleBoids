@@ -57,7 +57,7 @@ public class Boid : MonoBehaviour
         aggressionStrength = 1.5f,
         
         fearStrength = 0.8f,
-        fearExponent = -0.5f,
+        fearExponent = -0.6f,
         
         randomMovements = 2.0f,
     };

@@ -198,25 +198,27 @@ public class BoidManager : MonoBehaviour
         {
             /*** BOID BEHAVIOR VARIABLES ***/
             // Average velocity is used to calculate alignment force
-            float3 avgVel = new Vector3(0, 0, 0);
+            float3 avgVel = float3.zero;
 
             // Average neighbour position used to calculate cohesion
-            float3 avgPosCohesion = new Vector3(0, 0, 0);
+            float3 avgPosCohesion = float3.zero;
 
             // Average neighbour position used to calculate cohesion
-            float3 avgPosSeparation = new Vector3(0, 0, 0);
+            float3 avgPosSeparation = float3.zero;
+            
+            // Average position of visible enemy boids
+            float3 avgEnemyPos = float3.zero;
 
             // Position of closest enemy
-            float3 targetPos = new Vector3(0, 0, 0);
+            float3 targetPos = float3.zero;
             float targetDist = Mathf.Infinity;
 
             Boid.BoidInfo boid = boids[index];
 
             // Iterate over all the neighbours
             float viewDivider = 0;
-            
             int separationViewCount = 0;
-            
+            int enemyCounter = 0;
             for (int i = 0; i < boids.Length; i++)
             {
                 if (i == index) continue;
@@ -251,10 +253,21 @@ public class BoidManager : MonoBehaviour
                     }
                 } else {
                     // Enemy boid
-                    if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius && sqrDist < targetDist) {
-                        targetPos = boids[i].pos;
-                        targetDist = sqrDist;
+                    if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius)
+                    {
+                        avgEnemyPos += boids[i].pos;
+                        enemyCounter++;
+                        
+                        // If the enemy boid is closer than the previous enemy boid, update the target and target dist
+                        // Resulting target will be the boid closest
+                        // TODO: use other factors to determine target as well? for example target weak enemy boid?
+                        // TODO: we could use weight calculated using distance, health, and other factors
+                        if (sqrDist < targetDist) {
+                            targetPos = boids[i].pos;
+                            targetDist = sqrDist;
+                        }
                     }
+                    
                 }
             }
 
@@ -289,7 +302,7 @@ public class BoidManager : MonoBehaviour
             Vector3 fearForce;
             if (targetDist == math.INFINITY) fearForce = new float3(0, 0, 0);
             else
-                fearForce = math.normalize(boid.pos - enemyFlockPos) * boid.classInfo.fearStrength *
+                fearForce = math.normalize(boid.pos - (avgEnemyPos / enemyCounter)) * boid.classInfo.fearStrength *
                             math.pow(targetDist, boid.classInfo.fearExponent);
             
             
