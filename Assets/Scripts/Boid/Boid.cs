@@ -26,6 +26,7 @@ public class Boid : MonoBehaviour
         
         public float emotionalState;
         public float morale;
+        
         public float aggressionRadius;
         public float aggressionStrength;
 
@@ -52,7 +53,7 @@ public class Boid : MonoBehaviour
         cohesionStrength = 0.8f,
         separationStrength = 1f,
         emotionalState = 0f,
-        morale = 0f,
+        morale = 1f,
         aggressionStrength = 1.5f,
         
         fearStrength = 0.8f,

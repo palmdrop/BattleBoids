@@ -213,8 +213,10 @@ public class BoidManager : MonoBehaviour
             Boid.BoidInfo boid = boids[index];
 
             // Iterate over all the neighbours
-            int viewCount = 0;
+            float viewDivider = 0;
+            
             int separationViewCount = 0;
+            
             for (int i = 0; i < boids.Length; i++)
             {
                 if (i == index) continue;
@@ -231,12 +233,13 @@ public class BoidManager : MonoBehaviour
                     // If friendly boid is within viewRadius...
                     if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius)
                     {
-                        // Add to average velocity
-                        avgVel += boids[i].vel;
-                        viewCount++;
-
-                        // Add to average position for cohesion
-                        avgPosCohesion += boids[i].pos;
+                        // Add to average velocity, weighted using morale
+                        avgVel += boids[i].vel * boid.classInfo.morale;
+                        
+                        // Add to average position for cohesion, weighted using morale
+                        avgPosCohesion += boids[i].pos * boid.classInfo.morale;
+                        
+                        viewDivider += boid.classInfo.morale;
                     }
                     
                     // If friendly boid is within separationRadius...
@@ -257,13 +260,13 @@ public class BoidManager : MonoBehaviour
 
             // Calculate alignment force
             Vector3 alignmentForce;
-            if (viewCount == 0 || avgVel.Equals(new float3(0, 0, 0))) alignmentForce = new float3(0, 0, 0);
+            if (viewDivider == 0 || avgVel.Equals(new float3(0, 0, 0))) alignmentForce = new float3(0, 0, 0);
             else alignmentForce = math.normalize(avgVel) * boid.classInfo.alignmentStrength;
 
             // Calculate cohesion force
             Vector3 cohesionForce;
-            if (viewCount == 0) cohesionForce = new float3(0, 0, 0);
-            else cohesionForce = math.normalize((avgPosCohesion / viewCount) - boid.pos) * boid.classInfo.cohesionStrength;
+            if (viewDivider == 0) cohesionForce = new float3(0, 0, 0);
+            else cohesionForce = math.normalize((avgPosCohesion / viewDivider) - boid.pos) * boid.classInfo.cohesionStrength;
 
             // Calculate separation force
             Vector3 separationForce;
