@@ -8,7 +8,7 @@ public class Boid : MonoBehaviour
     [SerializeField] private int cost = 10;
     [SerializeField] private int health = 100;
     [SerializeField] private int damage = 10;
-    [SerializeField] private float maxSpeed = 5f;
+    [SerializeField] private float maxSpeed = 2f;
     [SerializeField] private float targetHeight = 1f;
     [SerializeField] private float collisionAvoidanceDistance;
     [SerializeField] private float avoidCollisionWeight = 5f;
@@ -16,17 +16,21 @@ public class Boid : MonoBehaviour
     [SerializeField] private float hover_Kp = 0.5f;
     [SerializeField] private float hover_gravity = 10f;
 
-
     public struct ClassInfo {
         public float separationRadius;
         public float viewRadius;
+        
         public float alignmentStrength;
         public float cohesionStrength;
         public float separationStrength;
+        
         public float emotionalState;
         public float morale;
         public float aggressionRadius;
         public float aggressionStrength;
+
+        public float fearStrength, fearExponent;
+        public float randomMovements;
     }
 
     public struct BoidInfo {
@@ -42,14 +46,19 @@ public class Boid : MonoBehaviour
 
     private ClassInfo classInfo = new ClassInfo
     {
-        separationRadius = 0.2f,
+        separationRadius = 0.3f,
         viewRadius = 5f,
-        alignmentStrength = 1.1f,
-        cohesionStrength = 1.2f,
-        separationStrength = 3f,
+        alignmentStrength = 0.5f,
+        cohesionStrength = 0.8f,
+        separationStrength = 1f,
         emotionalState = 0f,
         morale = 0f,
-        aggressionStrength = 1f
+        aggressionStrength = 1.5f,
+        
+        fearStrength = 0.8f,
+        fearExponent = -0.5f,
+        
+        randomMovements = 2.0f,
     };
 
     private Rigidbody _rigidbody;
@@ -160,7 +169,7 @@ public class Boid : MonoBehaviour
     }
 
     private void OnCollisionEnter(Collision collision) {
-        TakeDamage((int) collision.impulse.magnitude * 10);
+        //TakeDamage((int) collision.impulse.magnitude * 10);
     }
 
     public void SetOwner(Player owner) {
@@ -252,4 +261,9 @@ public class Boid : MonoBehaviour
         return new Vector3(0, v.y, 0);
     }
 
+    public void SetColor(Color color)
+    {
+        //NOTE: ugly solution, assumes prefab structure... TODO improve somehow
+        transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+    }
 }
