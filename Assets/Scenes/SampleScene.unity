@@ -1729,7 +1729,6 @@ MonoBehaviour:
   camera: {fileID: 103867933}
   owner: {fileID: 1608449559}
   map: {fileID: 850325149}
-  canvas: {fileID: 1466581752}
 --- !u!64 &276888056
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -2986,7 +2985,6 @@ MonoBehaviour:
   camera: {fileID: 103867933}
   owner: {fileID: 495055329}
   map: {fileID: 850325149}
-  canvas: {fileID: 1466581752}
 --- !u!64 &559709281
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -6925,17 +6923,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1443186522622653047, guid: d81e9157231fb733fb5a88d4f2d41cf3, type: 3}
   m_PrefabInstance: {fileID: 1442305910}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1466581752 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7854776976437878689, guid: 3c9de0462a3284133befb28a2fff4b3b, type: 3}
-  m_PrefabInstance: {fileID: 1780300367}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 28cb7f6f09fe6f6d6ab78250f9adb855, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1497901470
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7946,7 +7933,6 @@ MonoBehaviour:
   players:
   - {fileID: 495055329}
   - {fileID: 1608449559}
-  canvas: {fileID: 1466581752}
 --- !u!4 &1689501168
 Transform:
   m_ObjectHideFlags: 0
@@ -8592,6 +8578,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 7854776976437878689, guid: 3c9de0462a3284133befb28a2fff4b3b, type: 3}
+      propertyPath: boidManager
+      value: 
+      objectReference: {fileID: 1689501167}
+    - target: {fileID: 7854776976437878689, guid: 3c9de0462a3284133befb28a2fff4b3b, type: 3}
+      propertyPath: unitButtonCols
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7854776976437878689, guid: 3c9de0462a3284133befb28a2fff4b3b, type: 3}
+      propertyPath: unitButtonRows
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7854776976437878689, guid: 3c9de0462a3284133befb28a2fff4b3b, type: 3}
       propertyPath: players.Array.data[0]
       value: 
