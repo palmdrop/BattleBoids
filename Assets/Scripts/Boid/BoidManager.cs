@@ -10,9 +10,12 @@ using UnityEngine;
 public class BoidManager : MonoBehaviour
 {
     [SerializeField] private List<Player> players = new List<Player>();
+    [SerializeField] private static readonly float cellWidth = 1f, cellDepth = 1f;
+    private static readonly int cellXAmount = 20, cellZAmount = 20;
 
     // To be replaced by some other data structure
     private List<Boid> _boids = new List<Boid>();
+    private static readonly NativeHashMap<GridPoint, NativeList<Boid.BoidInfo>> _grid = new NativeHashMap<GridPoint, NativeList<Boid.BoidInfo>>();
 
     // Start is called before the first frame update
     void Start()
@@ -40,6 +43,24 @@ public class BoidManager : MonoBehaviour
         {
             boidInfos[i] = _boids[i].GetInfo();
         }
+        
+        for (int i = 0; i < boidInfos.Length; i++)
+        {
+            Boid.BoidInfo info = boidInfos[i];
+            int xIndex = (int)(math.floor(info.pos.x) / cellWidth);
+            int zIndex = (int)(math.floor(info.pos.z) / cellDepth);
+            GridPoint gp = new GridPoint(xIndex, zIndex, cellXAmount);
+            if (_grid.ContainsKey(gp))
+            {
+                _grid[gp].Add(info);
+            }
+            else
+            {
+                NativeList<Boid.BoidInfo> toAdd = new NativeList<Boid.BoidInfo>();
+                toAdd.Add(info);
+                _grid.Add(gp, toAdd);
+            }
+        }
 
         BoidStructJob boidJob = new BoidStructJob
             {
@@ -57,6 +78,10 @@ public class BoidManager : MonoBehaviour
 
         boidInfos.Dispose();
         forces.Dispose();
+        foreach (NativeList<Boid.BoidInfo> list in _grid.GetValueArray(Allocator.TempJob))
+        {
+            list.Dispose();
+        }
     }
 
     // Finds all boids within the given radius from the given boid (excludes the given boid itself)
