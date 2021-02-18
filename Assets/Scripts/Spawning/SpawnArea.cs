@@ -8,7 +8,6 @@ public class SpawnArea : MonoBehaviour
     public Camera camera;
     public Player owner;
     public Map.Map map;
-    [SerializeField] GameUI canvas;
 
     int instanceNumber = 1;
 
@@ -81,15 +80,6 @@ public class SpawnArea : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /*
-        if (Input.GetKey("1")) {
-            active = owner.id == 1;
-        } else if (Input.GetKey("2")) {
-            active = owner.id == 2;
-        }
-        */
-        active = owner == canvas.GetActivePlayer();
-
         if (!active) {
             gridWidth = 0;
             UpdateGrid(new Vector3(0, 0, 0));
@@ -173,5 +163,13 @@ public class SpawnArea : MonoBehaviour
     public void SetEntityToSpawn(GameObject entity)
     {
         entityToSpawn = entity;
+    }
+
+    public void Activate() {
+        active = true;
+    }
+
+    public void Deactivate() {
+        active = false;
     }
 }

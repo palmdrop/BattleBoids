@@ -11,7 +11,7 @@ using Random = System.Random;
 public class BoidManager : MonoBehaviour
 {
     [SerializeField] private List<Player> players = new List<Player>();
-    [SerializeField] private GameUI canvas;
+    private bool isBattlePhase;
 
     // To be replaced by some other data structure
     private List<Boid> _boids = new List<Boid>();
@@ -27,12 +27,9 @@ public class BoidManager : MonoBehaviour
     // Fetches the boids from the respective players and places them in the boids list
     private void AddPlayerBoids()
     {
-        canvas.GetReadyButton().gameObject.SetActive(false);
         _boids.Clear();
-        foreach (Player p in players)
-        {
-            foreach (GameObject b in p.GetFlock())
-            {
+        foreach (Player p in players) {
+            foreach (GameObject b in p.GetFlock()) {
                 _boids.Add(b.GetComponent<Boid>());
             }
         }
@@ -49,7 +46,7 @@ public class BoidManager : MonoBehaviour
     {
         // When game is started, clear boids and fetch all the new boids from the 
         // corresponding players
-        if (canvas.AllPlayersReady())
+        if (isBattlePhase)
         {
             AddPlayerBoids();
         }
@@ -119,6 +116,14 @@ public class BoidManager : MonoBehaviour
         boidInfos.Dispose();
         forces.Dispose();
         flockInfos.Dispose();
+    }
+
+    public void BeginBattle() {
+        isBattlePhase = true;
+    }
+
+    public void StopBattle() {
+        isBattlePhase = false;
     }
 
     // This job calculates information specific for the entire flock, such as 
