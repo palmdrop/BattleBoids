@@ -28,6 +28,7 @@ public class GameUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        ManageKeyInput();
         UpdateBoins();
         UpdateReady();
         UpdateGameState();
@@ -80,6 +81,22 @@ public class GameUI : MonoBehaviour
         }
         UpdateReady();
         ready.onClick.AddListener(ToggleReady);
+    }
+
+    void ManageKeyInput() {
+        if (Input.GetKey("1")) {
+            // Select player 1
+            SetPlayerSelectValue(0);
+        } else if (Input.GetKey("2")) {
+            // Select player 2
+            SetPlayerSelectValue(1);
+        } else if (Input.GetKeyDown("n")) {
+            // Create new entity
+            activePlayer.GetSpawnArea().ChangeGridWidth(1);
+        } else if (Input.GetKeyDown("x")) {
+            // Remove entity
+            activePlayer.GetSpawnArea().ChangeGridWidth(-1);
+        }
     }
 
     void ManageActivePlayer() {
@@ -139,6 +156,12 @@ public class GameUI : MonoBehaviour
             }
         }
         return null;
+    }
+
+    void SetPlayerSelectValue(int i) {
+        if (i >= 0 && i - 1 <= playerSelect.options.Count) {
+            playerSelect.value = i;
+        }
     }
 
     Player SetActivePlayer()

@@ -116,14 +116,6 @@ public class SpawnArea : MonoBehaviour
             }
 
         }
-
-        if (Input.GetKeyDown("n")) {
-            // Create new entity
-            ChangeGridWidth(1);
-        } else if (Input.GetKeyDown("x")) {
-            // Remove entity
-            ChangeGridWidth(-1);
-        }
     }
 
     bool PurchaseSuccess()
