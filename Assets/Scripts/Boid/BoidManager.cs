@@ -149,47 +149,49 @@ public class BoidManager : MonoBehaviour
 
             Boid.BoidInfo boid = boids[index];
 
+            NativeArray<Boid.BoidInfo> neighbours = FindBoidsWithinRadius(boid, boid.classInfo.viewRadius);
+
             // Iterate over all the neighbours
             int viewCount = 0;
             int separationViewCount = 0;
-            for (int i = 0; i < boids.Length; i++)
+            for (int i = 0; i < neighbours.Length; i++)
             {
                 if (i == index) continue;
 
                 // Compare the distance between this boid and the neighbour using the
                 // square of the distance and radius. This avoids costly square root operations
                 // And if close enough, add to average position for separation
-                float3 vector = (boid.pos - boids[i].pos);
+                float3 vector = (boid.pos - neighbours[i].pos);
                 float sqrDist = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
 
-                if (boids[i].flockId == boid.flockId) {
+                if (neighbours[i].flockId == boid.flockId) {
                     // Friendly boid
                     if (sqrDist < boid.classInfo.separationRadius * boid.classInfo.separationRadius)
                     {
                         // Add to average velocity
-                        avgVel += boids[i].vel;
+                        avgVel += neighbours[i].vel;
                         viewCount++;
 
                         // Add to average position for cohesion
-                        avgPosCohesion += boids[i].pos;
+                        avgPosCohesion += neighbours[i].pos;
 
-                        avgPosSeparation += boids[i].pos;
+                        avgPosSeparation += neighbours[i].pos;
                         separationViewCount++;
                     }
                     else if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius)
                     {
                         // Add to average velocity
-                        avgVel += boids[i].vel;
+                        avgVel += neighbours[i].vel;
                         viewCount++;
 
                         // Add to average position for cohesion
-                        avgPosCohesion += boids[i].vel;
+                        avgPosCohesion += neighbours[i].vel;
 
                     }
                 } else {
                     // Enemy boid
                     if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius && sqrDist < targetDist) {
-                        targetPos = boids[i].pos;
+                        targetPos = neighbours[i].pos;
                         targetDist = sqrDist;
                     }
                 }
