@@ -134,7 +134,7 @@ public class BoidManager : MonoBehaviour
                         viewCount++;
 
                         // Add to average position for cohesion
-                        avgPosCohesion += boids[i].vel;
+                        avgPosCohesion += boids[i].pos;
 
                     }
                 } else {
