@@ -6,6 +6,7 @@ using Unity.Jobs;
 using Unity.Collections;
 using Unity.Burst;
 using UnityEngine;
+using Random = System.Random;
 
 public class BoidManager : MonoBehaviour
 {
@@ -13,6 +14,9 @@ public class BoidManager : MonoBehaviour
 
     // To be replaced by some other data structure
     private List<Boid> _boids = new List<Boid>();
+    
+    // Random number generator
+    private Random random = new Random();
 
     // Start is called before the first frame update
     void Start()
@@ -74,8 +78,16 @@ public class BoidManager : MonoBehaviour
         jobHandle.Complete();
 
         // Allocate a struct job for calculating boid forces
+        NativeArray<float> randomFloats = new NativeArray<float>(_boids.Count * 2, Allocator.TempJob);
+
+        for (int i = 0; i < randomFloats.Length; i++)
+        {
+            randomFloats[i] = (float)random.NextDouble();
+        }
+        
         BoidStructJob boidJob = new BoidStructJob
         {
+            random = randomFloats,
             flocks = flockInfos,
             boids = boidInfos,
             forces = forces,
@@ -98,6 +110,7 @@ public class BoidManager : MonoBehaviour
         }
 
         // Dispose of all data
+        randomFloats.Dispose();
         boidInfos.Dispose();
         forces.Dispose();
         flockInfos.Dispose();
@@ -156,6 +169,7 @@ public class BoidManager : MonoBehaviour
     [BurstCompile]
     public struct BoidStructJob : IJobParallelFor
     {
+        [ReadOnly] public NativeArray<float> random;
         [ReadOnly] public NativeArray<Player.FlockInfo> flocks;
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
         [WriteOnly] public NativeArray<float3> forces;
@@ -264,6 +278,13 @@ public class BoidManager : MonoBehaviour
             else
                 fearForce = math.normalize(boid.pos - enemyFlockPos) * boid.classInfo.fearStrength *
                             math.pow(targetDist, boid.classInfo.fearExponent);
+            
+            
+            // Calculate random force
+            float angle = math.PI * 2 * random[index * 2];
+            float size = random[index * 2 + 1];
+            Vector3 randomForce = new float3(math.cos(angle), 0.0f, math.sin(angle)) * size *
+                                  boid.classInfo.randomMovements;
 
             // Sum all the forces
             forces[index] = 
@@ -272,6 +293,7 @@ public class BoidManager : MonoBehaviour
                             + separationForce
                             + aggressionForce
                             + fearForce
+                            + randomForce
             ;
         }
     }

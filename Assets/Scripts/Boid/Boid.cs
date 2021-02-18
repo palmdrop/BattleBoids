@@ -24,6 +24,7 @@ public class Boid : MonoBehaviour
         public float aggressionStrength;
 
         public float fearStrength, fearExponent;
+        public float randomMovements;
     }
 
     public struct BoidInfo {
@@ -44,10 +45,12 @@ public class Boid : MonoBehaviour
         separationStrength = 1f,
         emotionalState = 0f,
         morale = 0f,
-        aggressionStrength = 0.8f,
+        aggressionStrength = 1.5f,
         
-        fearStrength = 0.5f,
-        fearExponent = -0.4f
+        fearStrength = 0.8f,
+        fearExponent = -0.5f,
+        
+        randomMovements = 2.0f,
     };
 
     private Rigidbody _rigidbody;
