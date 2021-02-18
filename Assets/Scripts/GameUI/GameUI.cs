@@ -13,23 +13,24 @@ public class GameUI : MonoBehaviour
     [SerializeField] private GameObject buttonPrefab;
     [SerializeField] private List<GameObject> unitPrefabs;
     [SerializeField] private Button ready;
+    [SerializeField] private int unitButtonRows;
+    [SerializeField] private int unitButtonCols;
+    [SerializeField] private BoidManager boidManager;
 
     // Start is called before the first frame update
     void Start()
     {
         InitPlayerDropdown();
-        activePlayer = SetActivePlayer();
         InitUnitButtons();
         InitReadyButton();
-        UpdateBoins();
     }
 
     // Update is called once per frame
     void Update()
     {
-        activePlayer = SetActivePlayer();
         UpdateBoins();
         UpdateReady();
+        UpdateGameState();
     }
 
     void InitPlayerDropdown()
@@ -41,6 +42,12 @@ public class GameUI : MonoBehaviour
             newPlayer.text = player.GetNickname();
             playerSelect.options.Add(newPlayer);
         }
+        activePlayer = SetActivePlayer();
+        activePlayer.GetSpawnArea().Activate();
+        playerSelect.captionText.text = activePlayer.GetNickname();
+        playerSelect.onValueChanged.AddListener(delegate {
+            ManageActivePlayer();
+        });
     }
 
     void InitUnitButtons()
@@ -54,8 +61,8 @@ public class GameUI : MonoBehaviour
             float width = buttonRectTransform.sizeDelta.x * buttonRectTransform.localScale.x;
             float height = buttonRectTransform.sizeDelta.y * buttonRectTransform.localScale.y;
             button.transform.localPosition = new Vector3(
-                -(i % 3) * width,
-                (i % 2) * height,
+                -(i % unitButtonCols) * width,
+                (i % unitButtonRows) * height,
                 0
             );
 
@@ -75,6 +82,16 @@ public class GameUI : MonoBehaviour
         ready.onClick.AddListener(ToggleReady);
     }
 
+    void ManageActivePlayer() {
+        string selectedPlayerName = playerSelect.options[playerSelect.value].text;
+        string activePlayerName = activePlayer.GetNickname();
+        if (!selectedPlayerName.Equals(activePlayerName)) {
+            activePlayer.GetSpawnArea().Deactivate();
+            activePlayer = SetActivePlayer();
+            activePlayer.GetSpawnArea().Activate();
+        }
+    }
+
     void UpdateReady()
     {
         if (activePlayer.IsReady())
@@ -84,6 +101,13 @@ public class GameUI : MonoBehaviour
         else
         {
             ready.GetComponentInChildren<Text>().text = "Ready";
+        }
+    }
+
+    void UpdateGameState() {
+        if (AllPlayersReady()) {
+            boidManager.BeginBattle();
+            ready.gameObject.SetActive(false);
         }
     }
 
