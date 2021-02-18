@@ -168,4 +168,27 @@ public class BoidManager : MonoBehaviour
             forces[index] = alignmentForce + cohesionForce + separationForce + aggressionForce;
         }
     }
+
+    private struct GridPoint : IEquatable<GridPoint>
+    {
+        public int x, y, w;
+
+        public GridPoint(int x, int y, int w)
+        {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+        }
+
+        public override int GetHashCode()
+        {
+            return x + y * w;
+        }
+
+        public bool Equals(GridPoint gp)
+        {
+            return x == gp.x && y == gp.y && w == gp.w;
+        }
+    }
+
 }
