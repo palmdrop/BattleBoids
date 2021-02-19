@@ -11,12 +11,14 @@ public class BoidManager : MonoBehaviour
 {
     [SerializeField] private List<Player> players = new List<Player>();
     [SerializeField] private static readonly float cellWidth = 1f, cellDepth = 1f;
-    private static readonly int cellXAmount = 20, cellZAmount = 20;
-    private bool playing = false;
 
-    // To be replaced by some other data structure
+    // The "width" of the grid, used for hashing the cell coordinate points (GridPoints)
+    private static readonly int cellXAmount = 20;
+
     private List<Boid> _boids = new List<Boid>();
-    private NativeMultiHashMap<GridPoint, Boid.BoidInfo> _grid;// = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.Persistent);
+
+    // Data structure for efficiently looking up neighbouring boids
+    private NativeMultiHashMap<GridPoint, Boid.BoidInfo> _grid;
 
     // Start is called before the first frame update
     void Start()
@@ -29,7 +31,6 @@ public class BoidManager : MonoBehaviour
     {
         if (Input.GetKey("p"))
         {
-            playing = true;
             _boids.Clear();
             foreach (Player p in players)
             {
@@ -59,10 +60,11 @@ public class BoidManager : MonoBehaviour
             _grid.Add(gp, info);
         }
 
-        // Use the grid
         for (int i = 0; i < _boids.Count; i++)
         {
             boidInfos[i] = _boids[i].GetInfo();
+
+            // Use the grid
             Boid.BoidInfo[] neighbourArray = FindBoidsWithinRadius(_boids[i].GetInfo(), _boids[i].GetInfo().classInfo.viewRadius);
             foreach (Boid.BoidInfo info in neighbourArray)
             {
@@ -94,16 +96,18 @@ public class BoidManager : MonoBehaviour
     // Finds all boids within the given radius from the given boid (excludes the given boid itself)
     public Boid.BoidInfo[] FindBoidsWithinRadius(Boid.BoidInfo boid, float radius)
     {
+        // The cell that the current boid is in
         int xIndex = (int)(math.floor(boid.pos.x) / cellWidth);
         int zIndex = (int)(math.floor(boid.pos.z) / cellDepth);
         List<Boid.BoidInfo> boidsInRadius = new List<Boid.BoidInfo>();
 
-
+        // The cells that cover the view radius of the boid
         int minI = xIndex - (int)math.ceil(radius / cellWidth);
         int maxI = xIndex + (int)math.ceil(radius / cellWidth);
         int minJ = zIndex - (int)math.ceil(radius / cellDepth);
         int maxJ = zIndex + (int)math.ceil(radius / cellDepth);
 
+        // Iterate over surrounding cells
         for (int i = minI; i <= maxI; i++)
         {
             for (int j = minJ; j <= maxJ; j++)
@@ -111,11 +115,9 @@ public class BoidManager : MonoBehaviour
                 GridPoint gp = new GridPoint(i, j, cellXAmount);
                 if (_grid.ContainsKey(gp))
                 {
-                    //NativeList<Boid.BoidInfo> gridList = _grid[gp];
-                    //for (int k = 0; k < gridList.Length; k++)
+                    // Iterate over the boids in surrounding cells
                     foreach (Boid.BoidInfo b in _grid.GetValuesForKey(gp))
                     {
-                        //Boid.BoidInfo b = gridList[k];
                         float3 horizontalDistance = b.pos - boid.pos;
                         if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z + horizontalDistance.z < radius * radius && !b.Equals(boid))
                         {
@@ -159,15 +161,11 @@ public class BoidManager : MonoBehaviour
 
             Boid.BoidInfo boid = boids[index];
 
-            //neighbours = FindBoidsWithinRadius(boid, boid.classInfo.viewRadius);
-
             // Iterate over all the neighbours
             int viewCount = 0;
             int separationViewCount = 0;
             foreach (Boid.BoidInfo other in neighbourArray.GetValuesForKey(index))
             {
-
-                //Boid.BoidInfo other = neighbours[i];
 
                 // Compare the distance between this boid and the neighbour using the
                 // square of the distance and radius. This avoids costly square root operations
@@ -235,9 +233,15 @@ public class BoidManager : MonoBehaviour
         }
     }
 
+    // Struct for storing coordinates of a grid cell
+    // Used in the _grid hashmap
     private struct GridPoint : IEquatable<GridPoint>
     {
-        public int x, y, w;
+        // Cell coordinates
+        public int x, y;
+
+        // "Width" of the grid, used for hashing
+        public int w;
 
         public GridPoint(int x, int y, int w)
         {
