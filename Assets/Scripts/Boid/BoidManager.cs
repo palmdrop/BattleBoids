@@ -117,7 +117,7 @@ public class BoidManager : MonoBehaviour
                     {
                         //Boid.BoidInfo b = gridList[k];
                         float3 horizontalDistance = b.pos - boid.pos;
-                        if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z + horizontalDistance.z < radius * radius/* && !b.Equals(boid)*/)
+                        if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z + horizontalDistance.z < radius * radius && !b.Equals(boid))
                         {
                             boidsInRadius.Add(b);
                         }
@@ -164,10 +164,8 @@ public class BoidManager : MonoBehaviour
             // Iterate over all the neighbours
             int viewCount = 0;
             int separationViewCount = 0;
-            int i = 0;
             foreach (Boid.BoidInfo other in neighbourArray.GetValuesForKey(index))
             {
-                if (i == index) continue;
 
                 //Boid.BoidInfo other = neighbours[i];
 
@@ -208,8 +206,6 @@ public class BoidManager : MonoBehaviour
                         targetDist = sqrDist;
                     }
                 }
-
-                i++;
             }
 
             
