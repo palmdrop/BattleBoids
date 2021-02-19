@@ -32,6 +32,9 @@ namespace Map
         {
             // Get ground child, used to calculate bounds and heightmap
             _ground = transform.Find("Ground").gameObject;
+            
+            // Find all GroundTiles and reparent them to the ground container
+            MoveGroundTilesToGround();
 
             // Calculate the bounds of the map
             CalculateBounds();
@@ -203,5 +206,22 @@ namespace Map
         {
             return _bounds;
         }
+        
+        private void MoveGroundTilesToGround()
+        {
+            GameObject[] groundTiles = GameObject.FindGameObjectsWithTag("GroundTile");
+            
+            /*for (int i = ground.Count() - 1; i >= 0; --i) {
+                ground[i].transform.SetParent(_ground.transform, true);
+            }
+            */
+
+            foreach (GameObject groundTile in groundTiles)
+            {
+                groundTile.transform.SetParent(_ground.transform); 
+            }
+        }
+
+        
     }
 }
