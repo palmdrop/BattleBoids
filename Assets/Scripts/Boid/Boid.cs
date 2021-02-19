@@ -17,12 +17,12 @@ public class Boid : MonoBehaviour
     [SerializeField] private float hover_gravity = 10f;
 
     public struct ClassInfo {
-        public float separationRadius;
+        //public float separationRadius;
         public float viewRadius;
         
         public float alignmentStrength;
         public float cohesionStrength;
-        public float separationStrength;
+        public float separationStrength, separationExponent;
         
         public float emotionalState;
         public float morale;
@@ -47,11 +47,11 @@ public class Boid : MonoBehaviour
 
     private ClassInfo classInfo = new ClassInfo
     {
-        separationRadius = 0.3f,
+        //separationRadius = 0.3f,
         viewRadius = 5f,
         alignmentStrength = 0.5f,
-        cohesionStrength = 0.8f,
-        separationStrength = 1f,
+        cohesionStrength = 0.9f,
+        separationStrength = 0.5f, separationExponent = 10.0f,
         emotionalState = 0f,
         morale = 1f,
         aggressionStrength = 1.5f,
