@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Boid
   - BoidManager
+  - Map
   layers:
   - Default
   - TransparentFX
