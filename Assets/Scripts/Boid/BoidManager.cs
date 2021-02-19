@@ -12,23 +12,29 @@ public class BoidManager : MonoBehaviour
     [SerializeField] private List<Player> players = new List<Player>();
     [SerializeField] private static readonly float cellWidth = 1f, cellDepth = 1f;
     private static readonly int cellXAmount = 20, cellZAmount = 20;
+    private bool playing = false;
 
     // To be replaced by some other data structure
     private List<Boid> _boids = new List<Boid>();
-    private static readonly NativeHashMap<GridPoint, NativeList<Boid.BoidInfo>> _grid = new NativeHashMap<GridPoint, NativeList<Boid.BoidInfo>>();
+    private NativeMultiHashMap<GridPoint, Boid.BoidInfo> _grid;// = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.Persistent);
 
     // Start is called before the first frame update
     void Start()
     {
+        _grid = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.Persistent);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey("p")) {
+        if (Input.GetKey("p"))
+        {
+            playing = true;
             _boids.Clear();
-            foreach (Player p in players) {
-                foreach (GameObject b in p.GetFlock()) {
+            foreach (Player p in players)
+            {
+                foreach (GameObject b in p.GetFlock())
+                {
                     _boids.Add(b.GetComponent<Boid>());
                 }
             }
@@ -38,35 +44,47 @@ public class BoidManager : MonoBehaviour
 
         NativeArray<Boid.BoidInfo> boidInfos = new NativeArray<Boid.BoidInfo>(_boids.Count, Allocator.TempJob);
         NativeArray<float3> forces = new NativeArray<float3>(_boids.Count, Allocator.TempJob);
+        NativeMultiHashMap<int, Boid.BoidInfo> neighbours = new NativeMultiHashMap<int, Boid.BoidInfo>(_boids.Count, Allocator.TempJob);
 
         for (int i = 0; i < _boids.Count; i++)
         {
             boidInfos[i] = _boids[i].GetInfo();
-        }
-        
-        for (int i = 0; i < boidInfos.Length; i++)
-        {
-            Boid.BoidInfo info = boidInfos[i];
-            int xIndex = (int)(math.floor(info.pos.x) / cellWidth);
-            int zIndex = (int)(math.floor(info.pos.z) / cellDepth);
-            GridPoint gp = new GridPoint(xIndex, zIndex, cellXAmount);
-            if (_grid.ContainsKey(gp))
+            Boid.BoidInfo[] neighbourArray = FindBoidsWithinRadius(_boids[i].GetInfo(), _boids[i].GetInfo().classInfo.viewRadius); 
+            foreach (Boid.BoidInfo info in neighbourArray)
             {
-                _grid[gp].Add(info);
+                neighbours.Add(i, info);
             }
-            else
+        }
+
+        if (playing)
+        {
+            _grid.Clear();
+            for (int i = 0; i < boidInfos.Length; i++)
             {
-                NativeList<Boid.BoidInfo> toAdd = new NativeList<Boid.BoidInfo>();
-                toAdd.Add(info);
-                _grid.Add(gp, toAdd);
+                Boid.BoidInfo info = _boids[i].GetInfo();
+                int xIndex = (int)(math.floor(info.pos.x) / cellWidth);
+                int zIndex = (int)(math.floor(info.pos.z) / cellDepth);
+                GridPoint gp = new GridPoint(xIndex, zIndex, cellXAmount);
+                _grid.Add(gp, info);
+                //if (_grid.ContainsKey(gp))
+                //{
+                //    _grid[gp].Add(info);
+                //}
+                //else
+                //{
+                //    NativeList<Boid.BoidInfo> toAdd = new NativeList<Boid.BoidInfo>();
+                //    toAdd.Add(info);
+                //    _grid.Add(gp, toAdd);
+                //}
             }
         }
 
         BoidStructJob boidJob = new BoidStructJob
-            {
-                boids = boidInfos,
-                forces = forces
-            };
+        {
+            boids = boidInfos,
+            forces = forces,
+            neighbourArray = neighbours
+        };
 
         JobHandle jobHandle = boidJob.Schedule(_boids.Count, _boids.Count / 10);
         jobHandle.Complete();
@@ -78,18 +96,15 @@ public class BoidManager : MonoBehaviour
 
         boidInfos.Dispose();
         forces.Dispose();
-        foreach (NativeList<Boid.BoidInfo> list in _grid.GetValueArray(Allocator.TempJob))
-        {
-            list.Dispose();
-        }
+        neighbours.Dispose();
     }
 
     // Finds all boids within the given radius from the given boid (excludes the given boid itself)
-    public static NativeArray<Boid.BoidInfo> FindBoidsWithinRadius(Boid.BoidInfo boid, float radius)
+    public Boid.BoidInfo[] FindBoidsWithinRadius(Boid.BoidInfo boid, float radius)
     {
         int xIndex = (int)(math.floor(boid.pos.x) / cellWidth);
         int zIndex = (int)(math.floor(boid.pos.z) / cellDepth);
-        NativeList<Boid.BoidInfo> boidsInRadius = new NativeList<Boid.BoidInfo>();
+        List<Boid.BoidInfo> boidsInRadius = new List<Boid.BoidInfo>();
 
 
         int minI = xIndex - (int)math.ceil(radius / cellWidth);
@@ -104,10 +119,11 @@ public class BoidManager : MonoBehaviour
                 GridPoint gp = new GridPoint(i, j, cellXAmount);
                 if (_grid.ContainsKey(gp))
                 {
-                    NativeList<Boid.BoidInfo> gridList = _grid[gp];
-                    for (int k = 0; k < gridList.Length; k++)
+                    //NativeList<Boid.BoidInfo> gridList = _grid[gp];
+                    //for (int k = 0; k < gridList.Length; k++)
+                    foreach (Boid.BoidInfo b in _grid.GetValuesForKey(gp))
                     {
-                        Boid.BoidInfo b = gridList[k];
+                        //Boid.BoidInfo b = gridList[k];
                         float3 horizontalDistance = b.pos - boid.pos;
                         if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z + horizontalDistance.z < radius * radius/* && !b.Equals(boid)*/)
                         {
@@ -118,11 +134,12 @@ public class BoidManager : MonoBehaviour
             }
         }
 
-        NativeArray<Boid.BoidInfo> result = new NativeArray<Boid.BoidInfo>(boidsInRadius.Length, Allocator.TempJob);
-        for (int i = 0; i < boidsInRadius.Length; i++)
+        Boid.BoidInfo[] result = new Boid.BoidInfo[boidsInRadius.Count];
+        for (int i = 0; i < boidsInRadius.Count; i++)
         {
             result[i] = boidsInRadius[i];
         }
+
         return result;
     }
 
@@ -131,6 +148,7 @@ public class BoidManager : MonoBehaviour
     {
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
         [WriteOnly] public NativeArray<float3> forces;
+        [ReadOnly] public NativeMultiHashMap<int, Boid.BoidInfo> neighbourArray;
 
         public void Execute(int index)
         {
@@ -149,53 +167,60 @@ public class BoidManager : MonoBehaviour
 
             Boid.BoidInfo boid = boids[index];
 
-            NativeArray<Boid.BoidInfo> neighbours = FindBoidsWithinRadius(boid, boid.classInfo.viewRadius);
+            //neighbours = FindBoidsWithinRadius(boid, boid.classInfo.viewRadius);
 
             // Iterate over all the neighbours
             int viewCount = 0;
             int separationViewCount = 0;
-            for (int i = 0; i < neighbours.Length; i++)
+            int i = 0;
+            foreach (Boid.BoidInfo other in neighbourArray.GetValuesForKey(index))
             {
                 if (i == index) continue;
+
+                //Boid.BoidInfo other = neighbours[i];
 
                 // Compare the distance between this boid and the neighbour using the
                 // square of the distance and radius. This avoids costly square root operations
                 // And if close enough, add to average position for separation
-                float3 vector = (boid.pos - neighbours[i].pos);
+                float3 vector = (boid.pos - other.pos);
                 float sqrDist = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
 
-                if (neighbours[i].flockId == boid.flockId) {
+                if (other.flockId == boid.flockId) {
                     // Friendly boid
                     if (sqrDist < boid.classInfo.separationRadius * boid.classInfo.separationRadius)
                     {
                         // Add to average velocity
-                        avgVel += neighbours[i].vel;
+                        avgVel += other.vel;
                         viewCount++;
 
                         // Add to average position for cohesion
-                        avgPosCohesion += neighbours[i].pos;
+                        avgPosCohesion += other.pos;
 
-                        avgPosSeparation += neighbours[i].pos;
+                        avgPosSeparation += other.pos;
                         separationViewCount++;
                     }
                     else if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius)
                     {
                         // Add to average velocity
-                        avgVel += neighbours[i].vel;
+                        avgVel += other.vel;
                         viewCount++;
 
                         // Add to average position for cohesion
-                        avgPosCohesion += neighbours[i].vel;
+                        avgPosCohesion += other.vel;
 
                     }
                 } else {
                     // Enemy boid
                     if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius && sqrDist < targetDist) {
-                        targetPos = neighbours[i].pos;
+                        targetPos = other.pos;
                         targetDist = sqrDist;
                     }
                 }
+
+                i++;
             }
+
+            
 
             // Calculate alignment force
             Vector3 alignmentForce;
