@@ -21,7 +21,7 @@ public class BoidManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _grid = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.Persistent);
+        
     }
 
     // Update is called once per frame
@@ -46,36 +46,27 @@ public class BoidManager : MonoBehaviour
         NativeArray<float3> forces = new NativeArray<float3>(_boids.Count, Allocator.TempJob);
         NativeMultiHashMap<int, Boid.BoidInfo> neighbours = new NativeMultiHashMap<int, Boid.BoidInfo>(_boids.Count, Allocator.TempJob);
 
+        // Create the grid
+        _grid = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.TempJob);
+        
+        // Populate the grid
+        for (int i = 0; i < boidInfos.Length; i++)
+        {
+            Boid.BoidInfo info = _boids[i].GetInfo();
+            int xIndex = (int)(math.floor(info.pos.x) / cellWidth);
+            int zIndex = (int)(math.floor(info.pos.z) / cellDepth);
+            GridPoint gp = new GridPoint(xIndex, zIndex, cellXAmount);
+            _grid.Add(gp, info);
+        }
+
+        // Use the grid
         for (int i = 0; i < _boids.Count; i++)
         {
             boidInfos[i] = _boids[i].GetInfo();
-            Boid.BoidInfo[] neighbourArray = FindBoidsWithinRadius(_boids[i].GetInfo(), _boids[i].GetInfo().classInfo.viewRadius); 
+            Boid.BoidInfo[] neighbourArray = FindBoidsWithinRadius(_boids[i].GetInfo(), _boids[i].GetInfo().classInfo.viewRadius);
             foreach (Boid.BoidInfo info in neighbourArray)
             {
                 neighbours.Add(i, info);
-            }
-        }
-
-        if (playing)
-        {
-            _grid.Clear();
-            for (int i = 0; i < boidInfos.Length; i++)
-            {
-                Boid.BoidInfo info = _boids[i].GetInfo();
-                int xIndex = (int)(math.floor(info.pos.x) / cellWidth);
-                int zIndex = (int)(math.floor(info.pos.z) / cellDepth);
-                GridPoint gp = new GridPoint(xIndex, zIndex, cellXAmount);
-                _grid.Add(gp, info);
-                //if (_grid.ContainsKey(gp))
-                //{
-                //    _grid[gp].Add(info);
-                //}
-                //else
-                //{
-                //    NativeList<Boid.BoidInfo> toAdd = new NativeList<Boid.BoidInfo>();
-                //    toAdd.Add(info);
-                //    _grid.Add(gp, toAdd);
-                //}
             }
         }
 
@@ -97,6 +88,7 @@ public class BoidManager : MonoBehaviour
         boidInfos.Dispose();
         forces.Dispose();
         neighbours.Dispose();
+        _grid.Dispose();
     }
 
     // Finds all boids within the given radius from the given boid (excludes the given boid itself)
