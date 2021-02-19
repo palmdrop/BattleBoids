@@ -20,8 +20,8 @@ public class Boid : MonoBehaviour
         //public float separationRadius;
         public float viewRadius;
         
-        public float alignmentStrength;
-        public float cohesionStrength;
+        public float alignmentStrength, alignmentExponent;
+        public float cohesionStrength, cohesionExponent;
         public float separationStrength, separationExponent;
         
         public float emotionalState;
@@ -49,15 +49,16 @@ public class Boid : MonoBehaviour
     {
         //separationRadius = 0.3f,
         viewRadius = 5f,
-        alignmentStrength = 0.5f,
-        cohesionStrength = 0.9f,
+        
+        alignmentStrength = 0.5f, alignmentExponent = 1.0f,
+        cohesionStrength = 0.9f, cohesionExponent = 1.0f,
         separationStrength = 0.5f, separationExponent = 10.0f,
+        
         emotionalState = 0f,
         morale = 1f,
         aggressionStrength = 1.5f,
         
-        fearStrength = 0.8f,
-        fearExponent = -0.6f,
+        fearStrength = 0.8f, fearExponent = -0.6f,
         
         randomMovements = 2.0f,
     };
