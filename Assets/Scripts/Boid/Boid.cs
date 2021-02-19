@@ -48,18 +48,26 @@ public class Boid : MonoBehaviour
     private ClassInfo classInfo = new ClassInfo
     {
         //separationRadius = 0.3f,
+        
+        // The field of view of the boid. 
         viewRadius = 5f,
         
-        alignmentStrength = 0.5f, alignmentExponent = 1.0f,
-        cohesionStrength = 0.9f, cohesionExponent = 1.0f,
+        // Weights for the three basic flocking behaviors 
+        // NOTE: an exponent of 0.0 would make the behavior ignore the distance to the neighbouring boid
+        alignmentStrength = 0.5f, alignmentExponent = 1.0f, 
+        cohesionStrength = 1.1f, cohesionExponent = 1.0f,
         separationStrength = 0.5f, separationExponent = 10.0f,
         
+        // Additional behaviors
+        //fearStrength = 1.8f, fearExponent = 40.0f, // Fear controls 
+        fearStrength = 0.5f, fearExponent = -0.6f, // Fear controls 
+        
+        // Internal state of boid
         emotionalState = 0f,
         morale = 1f,
         aggressionStrength = 1.5f,
-        
-        fearStrength = 0.8f, fearExponent = -0.6f,
-        
+
+        // Misc behaviors
         randomMovements = 2.0f,
     };
 
@@ -95,6 +103,7 @@ public class Boid : MonoBehaviour
         }
         transform.forward = _rigidbody.velocity;
 
+        //_rigidbody.AddForce(HoverForce(), ForceMode.Acceleration);
     }
 
     private Vector3 HoverForce()
@@ -114,7 +123,7 @@ public class Boid : MonoBehaviour
         Vector3 yForce = new Vector3(0, (deltaY > 0 ? (hover_Ki * (deltaY - lastdY) / Time.fixedDeltaTime + hover_Kp * deltaY) : hover_gravity) * deltaY, 0);
 
         lastdY = deltaY;
-
+        
         return yForce;
     }
 

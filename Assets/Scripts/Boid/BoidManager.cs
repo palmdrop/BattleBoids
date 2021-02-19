@@ -198,6 +198,16 @@ public class BoidManager : MonoBehaviour
             return weight * math.pow(1.0f - normalizedDist, exponent);
         }
 
+        // Calculates a random force based on an array of random values
+        private float3 CalculateRandomForce(int index, float strength)
+        {
+            float angle = math.PI * 2 * random[index * 2];
+            float amount = random[index * 2 + 1];
+            
+            // Ignore they y component, since the boids only move in 2 dimensions
+            return new float3(math.cos(angle), 0.0f, math.sin(angle)) * amount * strength;
+        }
+
         public void Execute(int index)
         {
             /*** BOID BEHAVIOR VARIABLES ***/
@@ -282,9 +292,12 @@ public class BoidManager : MonoBehaviour
                     // Enemy boid
                     //if (sqrDist < boid.classInfo.viewRadius * boid.classInfo.viewRadius)
                     //{
-                        avgEnemyPos += boids[i].pos;
+                        float amount = 
+                            1.0f;
+                            //CalculatePower(1.0f, normalizedDistance, boid.classInfo.fearExponent);
+                        avgEnemyPos += boids[i].pos * amount;
                         //enemyCounter++;
-                        avgEnemyPosDivider += 1.0f;
+                        avgEnemyPosDivider += amount;
                         
                         // If the enemy boid is closer than the previous enemy boid, update the target and target dist
                         // Resulting target will be the boid closest
@@ -320,24 +333,20 @@ public class BoidManager : MonoBehaviour
             
             if (enemyFlock.boidCount == 0) aggressionForce = new float3(0, 0, 0);
             else
-                aggressionForce =
-                    math.normalize(enemyFlockPos - boid.pos) * boid.classInfo.aggressionStrength;
+                aggressionForce = math.normalize(enemyFlockPos - boid.pos) * boid.classInfo.aggressionStrength;
             
             // Calculate fear force
             // The strength of the force is calculated using the closest enemy
             // TODO use closeness of entire enemy flock instead?
             Vector3 fearForce;
-            if (targetDist == math.INFINITY) fearForce = new float3(0, 0, 0);
+            if (avgEnemyPosDivider == 0.0f) fearForce = new float3(0, 0, 0);
             else
-                fearForce = math.normalize(boid.pos - (avgEnemyPos / avgEnemyPosDivider)) * boid.classInfo.fearStrength *
-                            math.pow(targetDist, boid.classInfo.fearExponent);
+                fearForce = math.normalize(boid.pos - (avgEnemyPos / avgEnemyPosDivider)) * boid.classInfo.fearStrength
+                            * math.pow(targetDist, boid.classInfo.fearExponent);
             
             
             // Calculate random force
-            float angle = math.PI * 2 * random[index * 2];
-            float size = random[index * 2 + 1];
-            Vector3 randomForce = new float3(math.cos(angle), 0.0f, math.sin(angle)) * size *
-                                  boid.classInfo.randomMovements;
+            Vector3 randomForce = CalculateRandomForce(index, boid.classInfo.randomMovements);
 
             // Sum all the forces
             forces[index] = 
