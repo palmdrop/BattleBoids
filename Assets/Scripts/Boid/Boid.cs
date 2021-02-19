@@ -17,20 +17,19 @@ public class Boid : MonoBehaviour
     [SerializeField] private float hover_gravity = 10f;
 
     public struct ClassInfo {
-        //public float separationRadius;
         public float viewRadius;
         
         public float alignmentStrength, alignmentExponent;
         public float cohesionStrength, cohesionExponent;
         public float separationStrength, separationExponent;
+
+        public float fearStrength, fearExponent;
+        public float attackMovementStrength, attackMovementExponent;
         
         public float emotionalState;
         public float morale;
-        
-        public float aggressionRadius;
         public float aggressionStrength;
 
-        public float fearStrength, fearExponent;
         public float randomMovements;
     }
 
@@ -59,16 +58,16 @@ public class Boid : MonoBehaviour
         separationStrength = 0.5f, separationExponent = 10.0f,
         
         // Additional behaviors
-        //fearStrength = 1.8f, fearExponent = 40.0f, // Fear controls 
-        fearStrength = 0.5f, fearExponent = -0.6f, // Fear controls 
+        fearStrength = 0.65f, fearExponent = -0.6f, // Fear controls 
+        attackMovementStrength = 1.1f, attackMovementExponent = 5.0f, // Controls attack impulse
         
         // Internal state of boid
         emotionalState = 0f,
         morale = 1f,
-        aggressionStrength = 1.5f,
+        aggressionStrength = 1.5f, // Controls how much the boid is attracted to the enemy flock
 
         // Misc behaviors
-        randomMovements = 2.0f,
+        randomMovements = 6.0f,
     };
 
     private Rigidbody _rigidbody;
@@ -102,8 +101,6 @@ public class Boid : MonoBehaviour
             _rigidbody.velocity = _rigidbody.velocity.normalized * maxSpeed;
         }
         transform.forward = _rigidbody.velocity;
-
-        //_rigidbody.AddForce(HoverForce(), ForceMode.Acceleration);
     }
 
     private Vector3 HoverForce()
@@ -185,9 +182,6 @@ public class Boid : MonoBehaviour
 
     public void SetOwner(Player owner) {
         this.owner = owner;
-
-
-
     }
 
     // Returns the position of this boid
