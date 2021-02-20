@@ -53,8 +53,8 @@ public class Boid : MonoBehaviour
         
         // Weights for the three basic flocking behaviors 
         // NOTE: an exponent of 0.0 would make the behavior ignore the distance to the neighbouring boid
-        alignmentStrength = 0.5f, alignmentExponent = 1.0f, 
-        cohesionStrength = 1.1f, cohesionExponent = 1.0f,
+        alignmentStrength = 0.7f, alignmentExponent = 1.0f, 
+        cohesionStrength = 1.5f, cohesionExponent = 0.8f,
         separationStrength = 0.5f, separationExponent = 10.0f,
         
         // Additional behaviors
@@ -64,7 +64,7 @@ public class Boid : MonoBehaviour
         // Internal state of boid
         emotionalState = 0f,
         morale = 1f,
-        aggressionStrength = 1.5f, // Controls how much the boid is attracted to the enemy flock
+        aggressionStrength = 1.7f, // Controls how much the boid is attracted to the enemy flock
 
         // Misc behaviors
         randomMovements = 6.0f,
