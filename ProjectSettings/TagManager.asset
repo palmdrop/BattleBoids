@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Boid
   - BoidManager
+  - GroundTile
   - Map
   layers:
   - Default
