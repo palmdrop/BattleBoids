@@ -46,8 +46,6 @@ public class Boid : MonoBehaviour
 
     private ClassInfo classInfo = new ClassInfo
     {
-        //separationRadius = 0.3f,
-        
         // The field of view of the boid. 
         viewRadius = 5f,
         
@@ -72,10 +70,10 @@ public class Boid : MonoBehaviour
 
     private Rigidbody _rigidbody;
     private Vector3 _localScale;
-    private Player owner;
-    private float lastdY = 0;
+    private Player _owner;
+    private float _lastdY = 0;
     private float _rayCastTheta = 10;
-    private Map.Map map;
+    private Map.Map _map;
 
     // Start is called before the first frame update
     void Start()
@@ -85,7 +83,7 @@ public class Boid : MonoBehaviour
         GameObject map = GameObject.FindGameObjectWithTag("Map");
         if (map != null)
         {
-            this.map = (Map.Map)map.GetComponent(typeof(Map.Map));
+            this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
     }
 
@@ -93,7 +91,6 @@ public class Boid : MonoBehaviour
     // Updates the boid according to the standard flocking behaviour
     public void UpdateBoid(Vector3 force)
     {
-
         _rigidbody.AddForce(force, ForceMode.Acceleration);
 
         if (_rigidbody.velocity.sqrMagnitude > maxSpeed * maxSpeed)
@@ -105,21 +102,21 @@ public class Boid : MonoBehaviour
 
     private Vector3 HoverForce()
     {
-        if (map == null)
+        if (_map == null)
         {
             return Vector3.zero;
         }
         //Calculate difference in height
-        float targetYPos = targetHeight + map.HeightmapLookup(GetPos());
+        float targetYPos = targetHeight + _map.HeightmapLookup(GetPos());
         float currentYPos = GetPos().y;
 
         //If boid exits map
         float deltaY = targetYPos > -1000 ? targetYPos - currentYPos : -100;
 
         //Formula to determine whether to hover or fall, uses a PI-regulator with values Ki and Kp
-        Vector3 yForce = new Vector3(0, (deltaY > 0 ? (hover_Ki * (deltaY - lastdY) / Time.fixedDeltaTime + hover_Kp * deltaY) : hover_gravity) * deltaY, 0);
+        Vector3 yForce = new Vector3(0, (deltaY > 0 ? (hover_Ki * (deltaY - _lastdY) / Time.fixedDeltaTime + hover_Kp * deltaY) : hover_gravity) * deltaY, 0);
 
-        lastdY = deltaY;
+        _lastdY = deltaY;
         
         return yForce;
     }
@@ -181,7 +178,7 @@ public class Boid : MonoBehaviour
     }
 
     public void SetOwner(Player owner) {
-        this.owner = owner;
+        this._owner = owner;
     }
 
     // Returns the position of this boid
@@ -201,7 +198,7 @@ public class Boid : MonoBehaviour
         info.pos = GetPos();
         info.vel = GetVel();
         info.classInfo = classInfo;
-        info.flockId = owner.id;
+        info.flockId = _owner.id;
         return info;
     }
 

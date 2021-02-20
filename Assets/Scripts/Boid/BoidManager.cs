@@ -11,7 +11,7 @@ using Random = System.Random;
 public class BoidManager : MonoBehaviour
 {
     [SerializeField] private List<Player> players = new List<Player>();
-    private bool isBattlePhase;
+    private bool _isBattlePhase;
 
     // To be replaced by some other data structure
     private List<Boid> _boids = new List<Boid>();
@@ -46,7 +46,7 @@ public class BoidManager : MonoBehaviour
     {
         // When game is started, clear boids and fetch all the new boids from the 
         // corresponding players
-        if (isBattlePhase)
+        if (_isBattlePhase)
         {
             AddPlayerBoids();
         }
@@ -119,11 +119,11 @@ public class BoidManager : MonoBehaviour
     }
 
     public void BeginBattle() {
-        isBattlePhase = true;
+        _isBattlePhase = true;
     }
 
     public void StopBattle() {
-        isBattlePhase = false;
+        _isBattlePhase = false;
     }
 
     // This job calculates information specific for the entire flock, such as 
