@@ -123,6 +123,7 @@ namespace Map
         {
             _walls = new GameObject("Walls");
             _walls.transform.parent = this.gameObject.transform;
+            _walls.layer = LayerMask.NameToLayer("Ground");
             
             // Hashset for holding those positions that are already occupied by an invisible tile
             HashSet<Vector3> occupied = new HashSet<Vector3>();
@@ -158,6 +159,7 @@ namespace Map
                         
                         // If not, create a new wall in this position
                         GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity, this.transform);
+                        wall.layer = LayerMask.NameToLayer("Ground");
                         wall.name = wallPrefab.name + (counter == 0 ? "" : " (" + counter + ")");
 
                         //_wallTiles.Add(wall);

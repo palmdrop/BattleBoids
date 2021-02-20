@@ -10,7 +10,7 @@ public class Boid : MonoBehaviour
     [SerializeField] private int damage = 10;
     [SerializeField] private float maxSpeed = 2f;
     [SerializeField] private float targetHeight = 1f;
-    [SerializeField] private float collisionAvoidanceDistance;
+    [SerializeField] private float collisionAvoidanceDistance = 3f;
     [SerializeField] private float avoidCollisionWeight = 5f;
     [SerializeField] private float hover_Ki = 5f;
     [SerializeField] private float hover_Kp = 1f;
@@ -88,6 +88,10 @@ public class Boid : MonoBehaviour
     public void FixedUpdate()
     {
         _rigidbody.AddForce(HoverForce(), ForceMode.Acceleration);
+
+        if (!dead && HeadedForCollisionWithMapBoundary()) {
+            _rigidbody.AddForce(AvoidCollisionDir() * avoidCollisionWeight, ForceMode.Acceleration);
+        }
     }
 
     // Called by the boid manager
@@ -125,12 +129,6 @@ public class Boid : MonoBehaviour
 
     private bool HeadedForCollisionWithMapBoundary()
     {
-
-        if (collisionMask == null)
-        {
-            return false;
-        }
-
         for (int i = 0; i < 3; i++) //Send 3 rays. This is to avoid tangentially going too close to an obstacle.
         {
             float angle = ((i + 1) / 2) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
@@ -139,7 +137,6 @@ public class Boid : MonoBehaviour
             Vector3 dir = RotationMatrix_y(angle * sign, GetVel()).normalized;
 
             Ray ray = new Ray(GetPos() + GetCenterForwardPoint(), dir);
-
 
             if (Physics.Raycast(ray, collisionAvoidanceDistance, collisionMask))   //Cast rays to nearby boundaries
             {
@@ -152,11 +149,6 @@ public class Boid : MonoBehaviour
 
     private Vector3 AvoidCollisionDir()
     {
-        if (collisionMask == null)
-        {
-            return transform.forward;
-        }
-
         for (int i = 3; i < 300 / _rayCastTheta; i++)
         {
             float angle = ((i + 1) / 2) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
@@ -172,7 +164,7 @@ public class Boid : MonoBehaviour
                 return sign < 0 ? transform.right : -transform.right;
             }
         }
-        return transform.forward;
+        return new Vector3(0, 0, 0);
     }
 
     private void OnCollisionEnter(Collision collision) {

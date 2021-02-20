@@ -81,7 +81,7 @@ MonoBehaviour:
   damage: 10
   maxSpeed: 3
   targetHeight: 2
-  collisionAvoidanceDistance: 0
+  collisionAvoidanceDistance: 3
   avoidCollisionWeight: 5
   hover_Ki: 2
   hover_Kp: 10
@@ -89,7 +89,7 @@ MonoBehaviour:
   mesh: {fileID: 0}
   collisionMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
 --- !u!23 &8824354153650340697
 MeshRenderer:
   m_ObjectHideFlags: 0
