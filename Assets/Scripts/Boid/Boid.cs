@@ -14,9 +14,13 @@ public class Boid : MonoBehaviour
     [SerializeField] private float avoidCollisionWeight = 5f;
     [SerializeField] private float hover_Ki = 5f;
     [SerializeField] private float hover_Kp = 1f;
+    [SerializeField] private float timeBetweenAttacks = 0.1f;
 
     public struct ClassInfo {
         public float viewRadius;
+
+        public float attackDstRange;
+        public float attackAngleRange;
         
         public float alignmentStrength, alignmentExponent;
         public float cohesionStrength, cohesionExponent;
@@ -47,6 +51,10 @@ public class Boid : MonoBehaviour
     {
         // The field of view of the boid. 
         viewRadius = 5f,
+
+        // Attack range
+        attackDstRange = 0.5f,
+        attackAngleRange = 45, // Angle relative local z-axis
         
         // Weights for the three basic flocking behaviors 
         // NOTE: an exponent of 0.0 would make the behavior ignore the distance to the neighbouring boid
@@ -67,6 +75,8 @@ public class Boid : MonoBehaviour
         randomMovements = 6.0f,
     };
 
+    private Boid _target;
+    private float _nextAttackTime;
     private Rigidbody _rigidbody;
     private Vector3 _localScale;
     private Player _owner;
@@ -83,6 +93,10 @@ public class Boid : MonoBehaviour
             this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
         _localScale = transform.GetChild(0).transform.localScale;
+    }
+
+    void Update() {
+        Attack();
     }
 
     public void FixedUpdate()
@@ -179,8 +193,31 @@ public class Boid : MonoBehaviour
         //TakeDamage((int) collision.impulse.magnitude * 10);
     }
 
+    private void Attack() {
+        if (_target != null && Time.time > _nextAttackTime) {
+            _nextAttackTime = Time.time + timeBetweenAttacks;
+            _target.TakeDamage(damage);
+            AnimateAttack(this.GetPos(), _target.GetPos());
+        }
+    }
+
+    private void AnimateAttack(Vector3 fromPos, Vector3 toPos) {
+        LineRenderer lineRenderer = new GameObject("Line").AddComponent<LineRenderer>();
+        lineRenderer.startWidth = 0.01f;
+        lineRenderer.endWidth = 0.01f;
+        lineRenderer.positionCount = 2;
+        lineRenderer.useWorldSpace = true;
+        lineRenderer.SetPosition(0, fromPos);
+        lineRenderer.SetPosition(1, toPos);
+        Destroy(lineRenderer, 0.2f);
+    }
+
     public void SetOwner(Player owner) {
         this._owner = owner;
+    }
+
+    public void SetTarget(Boid target) {
+        _target = target;
     }
 
     // Returns the position of this boid
@@ -231,6 +268,7 @@ public class Boid : MonoBehaviour
     public void Die()
     {
         this.dead = true;
+        _target = null;
     }
 
     private Vector3 GetCenterForwardPoint()

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 26594132553738016}
   - component: {fileID: 65946813234146026}
   - component: {fileID: 8824354153650340697}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Melee
   m_TagString: Boid
   m_Icon: {fileID: 0}
@@ -85,6 +85,7 @@ MonoBehaviour:
   avoidCollisionWeight: 5
   hover_Ki: 2
   hover_Kp: 10
+  timeBetweenAttacks: 1
   dead: 0
   mesh: {fileID: 0}
   collisionMask:
