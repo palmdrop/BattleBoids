@@ -16,19 +16,19 @@ public class Boid : MonoBehaviour
     [SerializeField] private float hover_Kp = 1f;
 
     public struct ClassInfo {
-        public float separationRadius;
         public float viewRadius;
         
-        public float alignmentStrength;
-        public float cohesionStrength;
-        public float separationStrength;
+        public float alignmentStrength, alignmentExponent;
+        public float cohesionStrength, cohesionExponent;
+        public float separationStrength, separationExponent;
+
+        public float fearStrength, fearExponent;
+        public float attackMovementStrength, attackMovementExponent;
         
         public float emotionalState;
         public float morale;
-        public float aggressionRadius;
         public float aggressionStrength;
 
-        public float fearStrength, fearExponent;
         public float randomMovements;
     }
 
@@ -45,26 +45,33 @@ public class Boid : MonoBehaviour
 
     private ClassInfo classInfo = new ClassInfo
     {
-        separationRadius = 0.3f,
+        // The field of view of the boid. 
         viewRadius = 5f,
-        alignmentStrength = 0.5f,
-        cohesionStrength = 0.8f,
-        separationStrength = 1f,
+        
+        // Weights for the three basic flocking behaviors 
+        // NOTE: an exponent of 0.0 would make the behavior ignore the distance to the neighbouring boid
+        alignmentStrength = 0.7f, alignmentExponent = 1.0f, 
+        cohesionStrength = 1.5f, cohesionExponent = 0.8f,
+        separationStrength = 0.5f, separationExponent = 10.0f,
+        
+        // Additional behaviors
+        fearStrength = 0.65f, fearExponent = -0.6f, // Fear controls 
+        attackMovementStrength = 1.1f, attackMovementExponent = 5.0f, // Controls attack impulse
+        
+        // Internal state of boid
         emotionalState = 0f,
-        morale = 0f,
-        aggressionStrength = 1.5f,
-        
-        fearStrength = 0.8f,
-        fearExponent = -0.5f,
-        
-        randomMovements = 2.0f,
+        morale = 1f,
+        aggressionStrength = 1.7f, // Controls how much the boid is attracted to the enemy flock
+
+        // Misc behaviors
+        randomMovements = 6.0f,
     };
 
     private Rigidbody _rigidbody;
     private Vector3 _localScale;
-    private Player owner;
+    private Player _owner;
     private float _rayCastTheta = 10;
-    private Map.Map map;
+    private Map.Map _map;
 
     // Start is called before the first frame update
     void Start()
@@ -73,7 +80,7 @@ public class Boid : MonoBehaviour
         GameObject map = GameObject.FindGameObjectWithTag("Map");
         if (map != null)
         {
-            this.map = (Map.Map)map.GetComponent(typeof(Map.Map));
+            this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
         _localScale = transform.GetChild(0).transform.localScale;
     }
@@ -87,7 +94,6 @@ public class Boid : MonoBehaviour
     // Updates the boid according to the standard flocking behaviour
     public void UpdateBoid(Vector3 force)
     {
-
         _rigidbody.AddForce(force, ForceMode.Acceleration);
 
         if (_rigidbody.velocity.sqrMagnitude > maxSpeed * maxSpeed)
@@ -95,17 +101,16 @@ public class Boid : MonoBehaviour
             _rigidbody.velocity = _rigidbody.velocity.normalized * maxSpeed;
         }
         transform.forward = new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z);
-
     }
 
     private Vector3 HoverForce()
     {
-        if (map == null)
+        if (_map == null)
         {
             return Vector3.zero;
         }
         //Calculate difference in height
-        float targetYPos = targetHeight + map.HeightmapLookup(GetPos());
+        float targetYPos = targetHeight + _map.HeightmapLookup(GetPos());
         float currentYPos = GetPos().y;
 
         //If boid exits map
@@ -114,7 +119,7 @@ public class Boid : MonoBehaviour
 
         //Formula to determine whether to hover or fall, uses a PI-regulator with values Ki and Kp
         Vector3 yForce = new Vector3(0, (deltaY > 0 && !dead ? (hover_Kp * deltaY - hover_Ki * velY) : 0), 0);
-
+        
         return yForce;
     }
 
@@ -175,10 +180,7 @@ public class Boid : MonoBehaviour
     }
 
     public void SetOwner(Player owner) {
-        this.owner = owner;
-
-
-
+        this._owner = owner;
     }
 
     // Returns the position of this boid
@@ -198,7 +200,7 @@ public class Boid : MonoBehaviour
         info.pos = GetPos();
         info.vel = GetVel();
         info.classInfo = classInfo;
-        info.flockId = owner.id;
+        info.flockId = _owner.id;
         return info;
     }
 
