@@ -317,10 +317,11 @@ public class BoidManager : MonoBehaviour
             
             // Calculate fear force
             Vector3 fearForce;
-            if (avgEnemyPosDivider == 0.0f) fearForce = new float3(0, 0, 0);
+            if (avgEnemyPosDivider == 0.0 || targetDist == math.INFINITY) fearForce = new float3(0, 0, 0);
             else
                 fearForce = math.normalize(boid.pos - (avgEnemyPos / avgEnemyPosDivider)) * boid.classInfo.fearStrength
-                            * math.pow(targetDist, boid.classInfo.fearExponent);
+                    * math.pow(1.0f - targetDist / boid.classInfo.viewRadius, boid.classInfo.fearExponent)
+                    ;
             
             // Calculate attack force
             Vector3 attackForce;
