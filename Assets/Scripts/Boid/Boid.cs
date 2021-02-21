@@ -13,8 +13,7 @@ public class Boid : MonoBehaviour
     [SerializeField] private float collisionAvoidanceDistance;
     [SerializeField] private float avoidCollisionWeight = 5f;
     [SerializeField] private float hover_Ki = 5f;
-    [SerializeField] private float hover_Kp = 0.5f;
-    [SerializeField] private float hover_gravity = 10f;
+    [SerializeField] private float hover_Kp = 1f;
 
     public struct ClassInfo {
         public float viewRadius;
@@ -71,7 +70,6 @@ public class Boid : MonoBehaviour
     private Rigidbody _rigidbody;
     private Vector3 _localScale;
     private Player _owner;
-    private float _lastdY = 0;
     private float _rayCastTheta = 10;
     private Map.Map _map;
 
@@ -79,12 +77,17 @@ public class Boid : MonoBehaviour
     void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
-        _localScale = transform.GetChild(0).transform.localScale;
         GameObject map = GameObject.FindGameObjectWithTag("Map");
         if (map != null)
         {
             this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
+        _localScale = transform.GetChild(0).transform.localScale;
+    }
+
+    public void FixedUpdate()
+    {
+        _rigidbody.AddForce(HoverForce(), ForceMode.Acceleration);
     }
 
     // Called by the boid manager
@@ -97,7 +100,7 @@ public class Boid : MonoBehaviour
         {
             _rigidbody.velocity = _rigidbody.velocity.normalized * maxSpeed;
         }
-        transform.forward = _rigidbody.velocity;
+        transform.forward = new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z);
     }
 
     private Vector3 HoverForce()
@@ -112,11 +115,10 @@ public class Boid : MonoBehaviour
 
         //If boid exits map
         float deltaY = targetYPos > -1000 ? targetYPos - currentYPos : -100;
+        float velY = GetVel().y;
 
         //Formula to determine whether to hover or fall, uses a PI-regulator with values Ki and Kp
-        Vector3 yForce = new Vector3(0, (deltaY > 0 ? (hover_Ki * (deltaY - _lastdY) / Time.fixedDeltaTime + hover_Kp * deltaY) : hover_gravity) * deltaY, 0);
-
-        _lastdY = deltaY;
+        Vector3 yForce = new Vector3(0, (deltaY > 0 && !dead ? (hover_Kp * deltaY - hover_Ki * velY) : 0), 0);
         
         return yForce;
     }

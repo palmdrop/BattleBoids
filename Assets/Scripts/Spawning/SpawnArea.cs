@@ -55,7 +55,7 @@ public class SpawnArea : MonoBehaviour
                 
                 if (map.PointInsideBounds(position))
                 {
-                    position.y = map.HeightmapLookup(position) + map.transform.position.y;
+                    position.y = map.HeightmapLookup(position) + map.transform.position.y + 1f;
                 }
                 else
                 {
