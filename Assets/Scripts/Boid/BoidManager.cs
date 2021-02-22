@@ -79,13 +79,14 @@ public class BoidManager : MonoBehaviour
         JobHandle jobHandle = flockJob.Schedule();
         jobHandle.Complete();
 
-        // Allocate a struct job for calculating boid forces
+        // Allocate a struct job for calculating boid forces and attack target
         NativeArray<float> randomFloats = new NativeArray<float>(_boids.Count * 2, Allocator.TempJob);
-
         for (int i = 0; i < randomFloats.Length; i++)
         {
             randomFloats[i] = (float)random.NextDouble();
         }
+        NativeArray<bool> enemyInRanges = new NativeArray<bool>(_boids.Count, Allocator.TempJob);
+        NativeArray<int> boidIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
         
         BoidStructJob boidJob = new BoidStructJob
         {
@@ -93,24 +94,12 @@ public class BoidManager : MonoBehaviour
             flocks = flockInfos,
             boids = boidInfos,
             forces = forces,
-        };
-
-        // Schedule job 
-        jobHandle = boidJob.Schedule(_boids.Count, _boids.Count / 10);
-        jobHandle.Complete();
-
-        // Allocate a struct job for calculating attack info
-        NativeArray<bool> enemyInRanges = new NativeArray<bool>(_boids.Count, Allocator.TempJob);
-        NativeArray<int> boidIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
-        AttackStructJob attackJob = new AttackStructJob
-        {
-            boidInfos = boidInfos,
             enemyInRanges = enemyInRanges,
             boidIndices = boidIndices,
         };
 
         // Schedule job
-        jobHandle = attackJob.Schedule(_boids.Count, _boids.Count / 10);
+        jobHandle = boidJob.Schedule(_boids.Count, _boids.Count / 10);
         jobHandle.Complete();
 
         // Update player data with new flock info
@@ -196,7 +185,7 @@ public class BoidManager : MonoBehaviour
         }
     }
 
-    // This job calculates all the forces acting on the boids
+    // This job calculates all the forces acting on the boids and the attack target
     [BurstCompile]
     public struct BoidStructJob : IJobParallelFor
     {
@@ -204,6 +193,8 @@ public class BoidManager : MonoBehaviour
         [ReadOnly] public NativeArray<Player.FlockInfo> flocks;
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
         [WriteOnly] public NativeArray<float3> forces;
+        [WriteOnly] public NativeArray<bool> enemyInRanges;
+        [WriteOnly] public NativeArray<int> boidIndices;
 
         // Translates a squared distance into a normalized distance representation,
         // i.e to a value from 0 to 1
@@ -229,6 +220,36 @@ public class BoidManager : MonoBehaviour
             return new float3(math.cos(angle), 0.0f, math.sin(angle)) * amount * strength;
         }
 
+        private bool BoidIndexInAttackRange(
+                float3 vectorFromSelfToEnemy,
+                float attackDstRange,
+                float attackAngleRange,
+                int boidIndex) {
+
+            float sqrAttackDstRange = attackDstRange * attackDstRange;
+            float cosAttackAngleRange = Mathf.Cos(attackAngleRange);
+            float sqrCosAttackAngleRange = cosAttackAngleRange * cosAttackAngleRange;
+
+            float sqrZ = vectorFromSelfToEnemy.z * vectorFromSelfToEnemy.z;
+            float sqrDst = vectorFromSelfToEnemy.x * vectorFromSelfToEnemy.x
+                         + vectorFromSelfToEnemy.y * vectorFromSelfToEnemy.y
+                         + sqrZ;
+            float sqrCosAngle = sqrZ / sqrDst;
+
+            // Ignores
+            if (sqrDst > sqrAttackDstRange) { // If distance too big
+                return false;
+            }
+            if (vectorFromSelfToEnemy.z < 0f) { // if enemy behind
+                return false;
+            }
+            if (sqrCosAngle < sqrCosAttackAngleRange) { // If angle to big
+                return false;
+            }
+
+            return true;
+        }
+
         public void Execute(int index)
         {
             /*** BOID BEHAVIOR VARIABLES ***/
@@ -251,6 +272,11 @@ public class BoidManager : MonoBehaviour
             float3 targetPos = float3.zero;
             float targetDist = Mathf.Infinity;
 
+            // Init attack info
+            bool enemyInRange = false;
+            int boidIndex = -1; // index of target boid in _boids
+            float sqrDstToClosestEnemyInRange = Mathf.Infinity;
+
             Boid.BoidInfo boid = boids[index];
 
             // Iterate over all the neighbours
@@ -261,7 +287,7 @@ public class BoidManager : MonoBehaviour
                 // Compare the distance between this boid and the neighbour using the
                 // square of the distance and radius. This avoids costly square root operations
                 // And if close enough, add to average position for separation
-                float3 vector = (boid.pos - boids[i].pos);
+                float3 vector = (boids[i].pos - boid.pos);
                 float sqrDist = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
 
                 // If boid is beyond view radius, ignore
@@ -308,6 +334,18 @@ public class BoidManager : MonoBehaviour
                     if (sqrDist < targetDist) {
                         targetPos = boids[i].pos;
                         targetDist = sqrDist;
+                    }
+
+                    // If closer than current attack target
+                    if (sqrDist < sqrDstToClosestEnemyInRange) {
+                        enemyInRange = BoidIndexInAttackRange(vector,
+                                boid.classInfo.attackDstRange,
+                                boid.classInfo.attackAngleRange,
+                                i);
+                        if (enemyInRange) { // and in range, update target
+                            boidIndex = i;
+                            sqrDstToClosestEnemyInRange = sqrDist;
+                        }
                     }
                 }
             }
@@ -364,70 +402,6 @@ public class BoidManager : MonoBehaviour
                             + attackForce
                             + randomForce
             ;
-        }
-    }
-
-    // This job calculates the target to attack
-    [BurstCompile]
-    public struct AttackStructJob : IJobParallelFor
-    {
-        [ReadOnly]
-        public NativeArray<Boid.BoidInfo> boidInfos;
-
-        [WriteOnly]
-        public NativeArray<bool> enemyInRanges;
-        public NativeArray<int> boidIndices;
-
-        public void Execute(int index) {
-            // Init attack info
-            bool enemyInRange = false;
-            int boidIndex = -1;
-
-            // Init dst^2 to target
-            float sqrTargetDst = Mathf.Infinity;
-
-            // Boid to operate on
-            Boid.BoidInfo boidInfo = boidInfos[index];
-
-            // Boid attack properties
-            float sqrAttackDstRange = boidInfo.classInfo.attackDstRange * boidInfo.classInfo.attackDstRange;
-            float cosAttackAngleRange = Mathf.Cos(boidInfo.classInfo.attackAngleRange);
-            float sqrCosAttackAngleRange = cosAttackAngleRange * cosAttackAngleRange;
-
-            // Iterate over all the neighbours
-            for (int i = 0; i < boidInfos.Length; i++) {
-                // Ignores
-                if (i == index) { // If self
-                    continue;
-                }
-                if (boidInfos[i].flockId == boidInfo.flockId) { // if friendly
-                    continue;
-                }
-
-                // Calc distance and angle (from boids own z-axis) to enemy
-                float3 vector = (boidInfos[i].pos - boidInfo.pos);
-                float sqrZ = vector.z * vector.z;
-                float sqrDst = vector.x * vector.x + vector.y * vector.y + sqrZ;
-                float sqrCosAngle = sqrZ / sqrDst;
-
-                // Ignores
-                if (sqrDst > sqrAttackDstRange) { // If distance too big
-                    continue;
-                }
-                if (vector.z < 0f) { // if enemy behind
-                    continue;
-                }
-                if (sqrCosAngle < sqrCosAttackAngleRange) { // If angle to big
-                    continue;
-                }
-
-                // Check if current target is better than stored target
-                if (sqrDst < sqrTargetDst) {
-                    enemyInRange = true;
-                    boidIndex = i;
-                    sqrTargetDst = sqrDst;
-                }
-            }
 
             // Update attack info
             enemyInRanges[index] = enemyInRange;
