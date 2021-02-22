@@ -61,7 +61,7 @@ public class Boid : MonoBehaviour
         // Internal state of boid
         emotionalState = 0f,
         morale = 1f,
-        aggressionStrength = 1.7f, // Controls how much the boid is attracted to the enemy flock
+        aggressionStrength = 2.0f, // Controls how much the boid is attracted to the enemy flock
 
         // Misc behaviors
         randomMovements = 6.0f,
