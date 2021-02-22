@@ -55,13 +55,13 @@ public class Boid : MonoBehaviour
         separationStrength = 0.5f, separationExponent = 10.0f,
         
         // Additional behaviors
-        fearStrength = 0.65f, fearExponent = -0.6f, // Fear controls 
+        fearStrength = 4.65f, fearExponent = 8.0f, // Fear controls 
         attackMovementStrength = 1.1f, attackMovementExponent = 5.0f, // Controls attack impulse
         
         // Internal state of boid
         emotionalState = 0f,
         morale = 1f,
-        aggressionStrength = 1.7f, // Controls how much the boid is attracted to the enemy flock
+        aggressionStrength = 2.0f, // Controls how much the boid is attracted to the enemy flock
 
         // Misc behaviors
         randomMovements = 6.0f,

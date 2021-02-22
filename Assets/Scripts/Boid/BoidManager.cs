@@ -228,7 +228,7 @@ public class BoidManager : MonoBehaviour
 
             // Position of closest enemy
             float3 targetPos = float3.zero;
-            float targetDist = Mathf.Infinity;
+            float targetDist = math.INFINITY;
 
             Boid.BoidInfo boid = boids[index];
 
@@ -244,7 +244,7 @@ public class BoidManager : MonoBehaviour
                 float sqrDist = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
 
                 // If boid is beyond view radius, ignore
-                if (sqrDist > boid.classInfo.viewRadius * boid.classInfo.viewRadius) continue;
+                if (sqrDist > (boid.classInfo.viewRadius * boid.classInfo.viewRadius)) continue;
 
                 // Calculate a normalized distance (a value from 0.0 to 1.0)
                 float normalizedDistance = NormalizedDist(sqrDist, boid.classInfo.viewRadius);
@@ -315,20 +315,22 @@ public class BoidManager : MonoBehaviour
             else
                 aggressionForce = math.normalize(enemyFlockPos - boid.pos) * boid.classInfo.aggressionStrength;
             
+            // Normalize distance to enemy target boid
+            float normalizedTargetDist = NormalizedDist(targetDist, boid.classInfo.viewRadius);
+            
             // Calculate fear force
+            // This force is facing away from the weighted center of the nearby enemy boids, but is 
+            // scaled using the proximity of the closest (target) enemy boid
             Vector3 fearForce;
-            if (avgEnemyPosDivider == 0.0f) fearForce = new float3(0, 0, 0);
-            else
-                fearForce = math.normalize(boid.pos - (avgEnemyPos / avgEnemyPosDivider)) * boid.classInfo.fearStrength
-                            * math.pow(targetDist, boid.classInfo.fearExponent);
+            if (avgEnemyPosDivider <= 0.00 || float.IsPositiveInfinity(targetDist)) fearForce = new float3(0, 0, 0);
+            else fearForce = math.normalize(boid.pos - (avgEnemyPos / avgEnemyPosDivider)) *
+                             CalculatePower(boid.classInfo.fearStrength, normalizedTargetDist, boid.classInfo.fearExponent);
             
             // Calculate attack force
             Vector3 attackForce;
-            if (targetDist == math.INFINITY) attackForce = new float3(0, 0, 0);
-            else
-                attackForce = math.normalize(targetPos - boid.pos) * boid.classInfo.attackMovementStrength *
-                              math.pow(1.0f - NormalizedDist(targetDist, boid.classInfo.viewRadius),
-                                  boid.classInfo.attackMovementExponent);
+            if (float.IsPositiveInfinity(targetDist)) attackForce = new float3(0, 0, 0);
+            else attackForce = math.normalize(targetPos - boid.pos) *
+                               CalculatePower(boid.classInfo.attackMovementStrength, normalizedTargetDist, boid.classInfo.attackMovementExponent);
 
             // Calculate random force
             Vector3 randomForce = CalculateRandomForce(index, boid.classInfo.randomMovements);
