@@ -64,7 +64,6 @@ public class BoidGrid
         {
             for (int j = minJ; j <= maxJ; j++)
             {
-                if (i == j) continue;
 
                 GridPoint gp = new GridPoint(i, j, cellXAmount);
                 if (_grid.ContainsKey(gp))
@@ -73,7 +72,7 @@ public class BoidGrid
                     foreach (Boid.BoidInfo b in _grid.GetValuesForKey(gp))
                     {
                         float3 horizontalDistance = b.pos - boid.pos;
-                        if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z + horizontalDistance.z < radius * radius)
+                        if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z * horizontalDistance.z < radius * radius && !boid.Equals(b))
                         {
                             boidsInRadius.Add(b);
                         }
