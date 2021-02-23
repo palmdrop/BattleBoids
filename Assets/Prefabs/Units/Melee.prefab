@@ -90,7 +90,7 @@ MonoBehaviour:
   mesh: {fileID: 0}
   collisionMask:
     serializedVersion: 2
-    m_Bits: 512
+    m_Bits: 1536
 --- !u!23 &8824354153650340697
 MeshRenderer:
   m_ObjectHideFlags: 0
