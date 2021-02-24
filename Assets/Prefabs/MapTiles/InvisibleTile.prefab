@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6941871449208881802}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: InvisibleTile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 9209797111772536294}
   - component: {fileID: 1024367016966838669}
   - component: {fileID: 7245177105674115754}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
