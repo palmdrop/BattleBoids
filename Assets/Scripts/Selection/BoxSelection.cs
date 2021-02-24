@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BoxSelection : MonoBehaviour
 {
@@ -94,6 +95,7 @@ public class BoxSelection : MonoBehaviour
             DrawUISelectionArea();
     }
 
+    // The selection area that will be drawn on the canvas
     private void DrawUISelectionArea()
     {
         Vector2 center = (_startSelectionPosition + _endSelectionPosition) / 2;
@@ -107,6 +109,7 @@ public class BoxSelection : MonoBehaviour
         selectionAreaUI.sizeDelta = new Vector2(selectionAreaUIWidth, selectionAreaUIHeight);
     }
 
+    // Select the active player's boids inside the selection area
     private void SelectPlayerFlockEntities()
     {
         // The current players flock
@@ -114,12 +117,13 @@ public class BoxSelection : MonoBehaviour
         
         foreach (GameObject entity in activePlayerFlock)
         {
-            Boid selected = entity.GetComponent<Boid>();
+            Selectable selected = entity.GetComponent<Selectable>();
+            
             entityScreenPosition = selectionCamera.WorldToScreenPoint(selected.transform.position);
             
             if (_selectionArea.Contains(entityScreenPosition))
             {
-                SelectionManager.AddToSelected(entity);
+                SelectionManager.AddToSelected(selected);
                 selected.SetSelectionIndicator(true);
             }
         }
@@ -128,9 +132,8 @@ public class BoxSelection : MonoBehaviour
     
     private void DeselectEntities()
     {
-        foreach (GameObject entity in SelectionManager.GETSelectedEntities())
+        foreach (Selectable selected in SelectionManager.GETSelectedEntities())
         {
-            ISelectable selected = entity.GetComponent<ISelectable>();
             selected.SetSelectionIndicator(false);
         }
         

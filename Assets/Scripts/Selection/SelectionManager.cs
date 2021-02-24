@@ -4,20 +4,19 @@ using UnityEngine;
 
 public class SelectionManager : MonoBehaviour
 {
-    private static List<GameObject> _selected = new List<GameObject>();
+    private static List<Selectable> _selected = new List<Selectable>();
 
-    public static void AddToSelected(GameObject entity)
+    public static void AddToSelected(Selectable selected)
     {
-        _selected.Add(entity);
+        _selected.Add(selected);
     }
 
     public static void RemoveSelected()
     {
-
         _selected.Clear();
     }
 
-    public static List<GameObject> GETSelectedEntities()
+    public static List<Selectable> GETSelectedEntities()
     {
         return _selected;
     }

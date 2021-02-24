@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
 
-public class Boid : SelectableMonoBehaviour
+public class Boid : Selectable
 {
     [SerializeField] private int cost = 10;
     [SerializeField] private int health = 100;
