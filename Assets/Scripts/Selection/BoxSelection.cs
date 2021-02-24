@@ -82,7 +82,7 @@ public class BoxSelection : MonoBehaviour
         // When the left mouse button is released
         if (Input.GetMouseButtonUp(0))
         {
-            SelectEntities();
+            SelectPlayerFlockEntities();
             ResetDrawUISelectionArea();
         }
 }
@@ -107,19 +107,20 @@ public class BoxSelection : MonoBehaviour
         selectionAreaUI.sizeDelta = new Vector2(selectionAreaUIWidth, selectionAreaUIHeight);
     }
 
-    private void SelectEntities()
+    private void SelectPlayerFlockEntities()
     {
         // The current players flock
         List<GameObject> activePlayerFlock = gameUI.GetActivePlayer().GetFlock();
         
-        
         foreach (GameObject entity in activePlayerFlock)
         {
-            entityScreenPosition = selectionCamera.WorldToScreenPoint(entity.transform.position);
+            Boid selected = entity.GetComponent<Boid>();
+            entityScreenPosition = selectionCamera.WorldToScreenPoint(selected.transform.position);
             
             if (_selectionArea.Contains(entityScreenPosition))
             {
                 SelectionManager.AddToSelected(entity);
+                selected.SetSelectionIndicator(true);
             }
         }
 
@@ -127,6 +128,12 @@ public class BoxSelection : MonoBehaviour
     
     private void DeselectEntities()
     {
+        foreach (GameObject entity in SelectionManager.GETSelectedEntities())
+        {
+            ISelectable selected = entity.GetComponent<ISelectable>();
+            selected.SetSelectionIndicator(false);
+        }
+        
         SelectionManager.RemoveSelected();
     }
     

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
 
-public class Boid : MonoBehaviour
+public class Boid : SelectableMonoBehaviour
 {
     [SerializeField] private int cost = 10;
     [SerializeField] private int health = 100;
@@ -88,7 +88,7 @@ public class Boid : MonoBehaviour
     void Start()
     {
         // To start off, we don't want to show that the boid is selected 
-        SetSelectedGraphic(false);
+        SetSelectionIndicator(false);
         
         _rigidbody = GetComponent<Rigidbody>();
         GameObject map = GameObject.FindGameObjectWithTag("Map");
@@ -306,9 +306,5 @@ public class Boid : MonoBehaviour
     }
 
 
-    public void SetSelectedGraphic(bool isSelected)
-    {
-        // TODO: now highlight indicator needs to be the second child of the Boid container, should be solved differently
-        transform.GetChild(1).gameObject.SetActive(isSelected);
-    }
+   
 }

@@ -8,16 +8,11 @@ public class SelectionManager : MonoBehaviour
 
     public static void AddToSelected(GameObject entity)
     {
-        entity.transform.GetChild(1).gameObject.SetActive(true);
         _selected.Add(entity);
     }
 
     public static void RemoveSelected()
     {
-        foreach (GameObject entity in _selected)
-        {
-            entity.transform.GetChild(1).gameObject.SetActive(false);
-        }
 
         _selected.Clear();
     }
