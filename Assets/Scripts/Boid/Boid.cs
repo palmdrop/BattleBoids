@@ -15,6 +15,7 @@ public class Boid : MonoBehaviour
     [SerializeField] private float hover_Ki = 5f;
     [SerializeField] private float hover_Kp = 1f;
     [SerializeField] private float timeBetweenAttacks = 0.1f;
+    
 
     public struct ClassInfo {
         public float viewRadius;
@@ -86,6 +87,9 @@ public class Boid : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // To start off, we don't want to show that the boid is selected 
+        SetSelectedGraphic(false);
+        
         _rigidbody = GetComponent<Rigidbody>();
         GameObject map = GameObject.FindGameObjectWithTag("Map");
         if (map != null)
@@ -299,5 +303,12 @@ public class Boid : MonoBehaviour
     {
         //NOTE: ugly solution, assumes prefab structure... TODO improve somehow
         transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+    }
+
+
+    public void SetSelectedGraphic(bool isSelected)
+    {
+        // TODO: now highlight indicator needs to be the second child of the Boid container, should be solved differently
+        transform.GetChild(1).gameObject.SetActive(isSelected);
     }
 }

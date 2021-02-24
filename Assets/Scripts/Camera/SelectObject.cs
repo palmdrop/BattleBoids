@@ -18,7 +18,6 @@ public class SelectObject : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             currentlySelected = RetrieveGameObject();
-            print(currentlySelected);
         }
     }
 
