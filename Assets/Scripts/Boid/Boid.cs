@@ -3,37 +3,49 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
 
-public class Boid : Selectable
+
+public abstract class Boid : Selectable
 {
-    [SerializeField] private int cost = 10;
-    [SerializeField] private int health = 100;
-    [SerializeField] private int damage = 10;
-    [SerializeField] private float maxSpeed = 2f;
-    [SerializeField] private float targetHeight = 1f;
-    [SerializeField] private float collisionAvoidanceDistance = 3f;
-    [SerializeField] private float avoidCollisionWeight = 5f;
-    [SerializeField] private float hover_Ki = 5f;
-    [SerializeField] private float hover_Kp = 1f;
-    [SerializeField] private float timeBetweenAttacks = 0.1f;
-    
+    protected int cost;
+    protected int health;
+    protected int damage;
+    protected float maxSpeed;
+    protected float targetHeight;
+    protected float collisionAvoidanceDistance;
+    protected float avoidCollisionWeight;
+    protected float hover_Ki;
+    protected float hover_Kp;
+    protected float timeBetweenAttacks;
+    protected bool dead;
+    protected Mesh mesh;
+    protected LayerMask collisionMask;
+    protected ClassInfo classInfo;
+    protected Boid _target;
 
     public struct ClassInfo {
+        // The field of view of the boid
         public float viewRadius;
 
+        // Attack range
         public float attackDstRange;
-        public float attackAngleRange;
-        
+        public float attackAngleRange; // Angle relative local z-axis
+
+        // Weights for the three basic flocking behaviors
+        // NOTE: an exponent of 0.0 would make the behavior ignore the distance to the neighbouring boid
         public float alignmentStrength, alignmentExponent;
         public float cohesionStrength, cohesionExponent;
         public float separationStrength, separationExponent;
 
-        public float fearStrength, fearExponent;
-        public float attackMovementStrength, attackMovementExponent;
-        
+        // Additional behaviors
+        public float fearStrength, fearExponent; // Fear controls
+        public float attackMovementStrength, attackMovementExponent; // Controls attack impulse
+
+        // Internal state of boid
         public float emotionalState;
         public float morale;
-        public float aggressionStrength;
+        public float aggressionStrength; // Controls how much the boid is attracted to the enemy flock
 
+        // Misc behaviors
         public float randomMovements;
     }
 
@@ -44,40 +56,6 @@ public class Boid : Selectable
         public int flockId;
     }
 
-    public bool dead = false;
-    public Mesh mesh;
-    public LayerMask collisionMask;
-
-    private ClassInfo classInfo = new ClassInfo
-    {
-        // The field of view of the boid. 
-        viewRadius = 5f,
-
-        // Attack range
-        attackDstRange = 0.5f,
-        attackAngleRange = 45, // Angle relative local z-axis
-        
-        // Weights for the three basic flocking behaviors 
-        // NOTE: an exponent of 0.0 would make the behavior ignore the distance to the neighbouring boid
-        alignmentStrength = 0.7f, alignmentExponent = 1.0f, 
-        cohesionStrength = 1.5f, cohesionExponent = 0.8f,
-        separationStrength = 0.5f, separationExponent = 10.0f,
-        
-        // Additional behaviors
-        fearStrength = 4.65f, fearExponent = 8.0f, // Fear controls 
-        attackMovementStrength = 1.1f, attackMovementExponent = 5.0f, // Controls attack impulse
-        
-        // Internal state of boid
-        emotionalState = 0f,
-        morale = 1f,
-        aggressionStrength = 2.0f, // Controls how much the boid is attracted to the enemy flock
-
-        // Misc behaviors
-        randomMovements = 6.0f,
-    };
-
-    private Boid _target;
-    private float _nextAttackTime;
     private Rigidbody _rigidbody;
     private Vector3 _localScale;
     private Player _owner;
@@ -85,7 +63,7 @@ public class Boid : Selectable
     private Map.Map _map;
 
     // Start is called before the first frame update
-    void Start()
+    protected void Start()
     {
         // To start off, we don't want to show that the boid is selected 
         SetSelectionIndicator(false);
@@ -189,25 +167,6 @@ public class Boid : Selectable
         //TakeDamage((int) collision.impulse.magnitude * 10);
     }
 
-    private void Attack() {
-        if (_target != null && Time.time > _nextAttackTime) {
-            _nextAttackTime = Time.time + timeBetweenAttacks;
-            _target.TakeDamage(damage);
-            AnimateAttack(this.GetPos(), _target.GetPos());
-        }
-    }
-
-    private void AnimateAttack(Vector3 fromPos, Vector3 toPos) {
-        LineRenderer lineRenderer = new GameObject("Line").AddComponent<LineRenderer>();
-        lineRenderer.startWidth = 0.01f;
-        lineRenderer.endWidth = 0.01f;
-        lineRenderer.positionCount = 2;
-        lineRenderer.useWorldSpace = true;
-        lineRenderer.SetPosition(0, fromPos);
-        lineRenderer.SetPosition(1, toPos);
-        Destroy(lineRenderer, 0.2f);
-    }
-
     public void SetOwner(Player owner) {
         this._owner = owner;
     }
@@ -267,6 +226,10 @@ public class Boid : Selectable
         _target = null;
     }
 
+    public bool IsDead() {
+        return dead;
+    }
+
     private Vector3 GetCenterForwardPoint()
     {
         if (mesh == null || _localScale == null)
@@ -305,6 +268,5 @@ public class Boid : Selectable
         transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material.SetColor("_Color", color);
     }
 
-
-   
+    public abstract void Attack();
 }
