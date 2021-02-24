@@ -13,7 +13,7 @@ public class GridTest
     public IEnumerator TestGrid()
     {
         int testAmount = 100;
-        var asset = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/BoidPrefab.prefab");
+        var asset = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Units/Melee.prefab");
 
         List<Boid> boids = new List<Boid>();
         for (int i = 0; i < testAmount; i++)
@@ -36,7 +36,7 @@ public class GridTest
         BoidGrid grid = new BoidGrid();
         grid.Populate(boids);
 
-        NativeMultiHashMap<int, Boid.BoidInfo> gridNeighbours = grid.GetNeighbours();
+        NativeMultiHashMap<int, BoidGrid.IndexBoidPair> gridNeighbours = grid.GetNeighbours();
 
         for (int i = 0; i < testAmount; i++)
         {
@@ -55,14 +55,16 @@ public class GridTest
             Assert.AreEqual(realNeighbours.Count, gridNeighbours.CountValuesForKey(i));
 
             int k = 0;
-            foreach (Boid.BoidInfo neighbourInfo in gridNeighbours.GetValuesForKey(i))
+            foreach (BoidGrid.IndexBoidPair neighbourPair in gridNeighbours.GetValuesForKey(i))
             {
+                Boid.BoidInfo neighbourInfo = neighbourPair.boid;
                 //Assert.AreEqual(neighbourInfo, realNeighbours[k]);
                 Assert.IsTrue(realNeighbours.Contains(neighbourInfo));
                 k++;
             }
         }
 
+        gridNeighbours.Dispose();
         grid.Dispose();
     }
 }

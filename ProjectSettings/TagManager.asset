@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Boid
   - BoidManager
+  - GroundTile
+  - Map
+  - Wall
   layers:
   - Default
   - TransparentFX
@@ -16,8 +19,8 @@ TagManager:
   - Ground
   - Spawn Area
   - Units
-  - 
-  - 
+  - Wall
+  - Obstacle
   - 
   - 
   - 

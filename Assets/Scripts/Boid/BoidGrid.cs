@@ -7,8 +7,8 @@ using Unity.Mathematics;
 
 public class BoidGrid
 {
-    [SerializeField] private static readonly float cellWidth = 1f, cellDepth = 1f;
-    private static readonly int cellXAmount = 20;
+    [SerializeField] private static readonly float cellWidth = 0.5f, cellDepth = 0.5f;
+    private static readonly int cellXAmount = 100;
     private NativeMultiHashMap<GridPoint, Boid.BoidInfo> _grid;// = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.TempJob);
     private List<Boid> _boids;
 
@@ -30,15 +30,15 @@ public class BoidGrid
 
 
     // TODO: Documentation
-    public NativeMultiHashMap<int, Boid.BoidInfo> GetNeighbours()
+    public NativeMultiHashMap<int, IndexBoidPair> GetNeighbours()
     {
-        NativeMultiHashMap<int, Boid.BoidInfo> neighbours = new NativeMultiHashMap<int, Boid.BoidInfo>(10, Allocator.TempJob);
+        NativeMultiHashMap<int, IndexBoidPair> neighbours = new NativeMultiHashMap<int, IndexBoidPair>(10, Allocator.TempJob);
         for (int i = 0; i < _boids.Count; i++)
         {
             Boid.BoidInfo[] neighbourArray = FindBoidsWithinRadius(_boids[i].GetInfo(), _boids[i].GetInfo().classInfo.viewRadius);
             foreach (Boid.BoidInfo info in neighbourArray)
             {
-                neighbours.Add(i, info);
+                neighbours.Add(i, new IndexBoidPair(i, info));
             }
         }
         return neighbours;
@@ -123,5 +123,18 @@ public class BoidGrid
         {
             return x == gp.x && y == gp.y && w == gp.w;
         }
+    }
+
+
+    public struct IndexBoidPair
+    {
+        public IndexBoidPair(int index, Boid.BoidInfo boid)
+        {
+            this.index = index;
+            this.boid = boid;
+        }
+
+        public readonly int index;
+        public readonly Boid.BoidInfo boid;
     }
 }
