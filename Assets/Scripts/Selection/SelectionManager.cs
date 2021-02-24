@@ -13,6 +13,11 @@ public class SelectionManager : MonoBehaviour
 
     public static void RemoveSelected()
     {
+        foreach (Selectable selected in GETSelectedEntities())
+        {
+            selected.SetSelectionIndicator(false);
+        }
+        
         _selected.Clear();
     }
 

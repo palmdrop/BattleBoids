@@ -132,10 +132,6 @@ public class BoxSelection : MonoBehaviour
     
     private void DeselectEntities()
     {
-        foreach (Selectable selected in SelectionManager.GETSelectedEntities())
-        {
-            selected.SetSelectionIndicator(false);
-        }
         
         SelectionManager.RemoveSelected();
     }
