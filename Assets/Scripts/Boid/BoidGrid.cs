@@ -5,22 +5,23 @@ using Unity.Collections;
 using System;
 using Unity.Mathematics;
 
-public class BoidGrid
+public struct BoidGrid
 {
-    [SerializeField] private static readonly float cellWidth = 0.5f, cellDepth = 0.5f;
+    [SerializeField] private static readonly float cellWidth = 1f, cellDepth = 1f;
     private static readonly int cellXAmount = 100;
     private NativeMultiHashMap<GridPoint, Boid.BoidInfo> _grid;// = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.TempJob);
-    private List<Boid> _boids;
+    private NativeList<Boid.BoidInfo> _boids;
 
 
     // TODO: Documentation
     public void Populate(List<Boid> boids)
     {
-        _boids = boids;
+        _boids = new NativeList<Boid.BoidInfo>(10, Allocator.TempJob);
         _grid = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.TempJob);
         foreach (Boid b in boids)
         {
             Boid.BoidInfo info = b.GetInfo();
+            _boids.Add(info);
             int xIndex = (int)(math.floor(info.pos.x) / cellWidth);
             int zIndex = (int)(math.floor(info.pos.z) / cellDepth);
             GridPoint gp = new GridPoint(xIndex, zIndex, cellXAmount);
@@ -33,25 +34,26 @@ public class BoidGrid
     public NativeMultiHashMap<int, IndexBoidPair> GetNeighbours()
     {
         NativeMultiHashMap<int, IndexBoidPair> neighbours = new NativeMultiHashMap<int, IndexBoidPair>(10, Allocator.TempJob);
-        for (int i = 0; i < _boids.Count; i++)
+        for (int i = 0; i < _boids.Length; i++)
         {
-            Boid.BoidInfo[] neighbourArray = FindBoidsWithinRadius(_boids[i].GetInfo(), _boids[i].GetInfo().classInfo.viewRadius);
+            NativeArray<Boid.BoidInfo> neighbourArray = FindBoidsWithinRadius(_boids[i], _boids[i].classInfo.viewRadius);
             foreach (Boid.BoidInfo info in neighbourArray)
             {
                 neighbours.Add(i, new IndexBoidPair(i, info));
             }
+            neighbourArray.Dispose();
         }
         return neighbours;
     }
 
 
     // Finds all boids within the given radius from the given boid (excludes the given boid itself)
-    public Boid.BoidInfo[] FindBoidsWithinRadius(Boid.BoidInfo boid, float radius)
+    public NativeArray<Boid.BoidInfo> FindBoidsWithinRadius(Boid.BoidInfo boid, float radius)
     {
         // The cell that the current boid is in
         int xIndex = (int)(math.floor(boid.pos.x) / cellWidth);
         int zIndex = (int)(math.floor(boid.pos.z) / cellDepth);
-        List<Boid.BoidInfo> boidsInRadius = new List<Boid.BoidInfo>();
+        NativeList<Boid.BoidInfo> boidsInRadius = new NativeList<Boid.BoidInfo>(10, Allocator.Temp);
 
         // The cells that cover the view radius of the boid
         int minI = xIndex - (int)math.ceil(radius / cellWidth);
@@ -81,8 +83,8 @@ public class BoidGrid
             }
         }
 
-        Boid.BoidInfo[] result = new Boid.BoidInfo[boidsInRadius.Count];
-        for (int i = 0; i < boidsInRadius.Count; i++)
+        NativeArray<Boid.BoidInfo> result = new NativeArray<Boid.BoidInfo>(boidsInRadius.Length, Allocator.Temp);
+        for (int i = 0; i < boidsInRadius.Length; i++)
         {
             result[i] = boidsInRadius[i];
         }
@@ -95,6 +97,7 @@ public class BoidGrid
     public void Dispose()
     {
         _grid.Dispose();
+        _boids.Dispose();
     }
 
 

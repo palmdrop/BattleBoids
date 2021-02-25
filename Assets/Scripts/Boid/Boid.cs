@@ -53,6 +53,11 @@ public abstract class Boid : MonoBehaviour
         public float3 pos;
         public ClassInfo classInfo;
         public int flockId;
+
+        public bool Equals(BoidInfo other)
+        {
+            return vel.Equals(other.vel) && pos.Equals(other.pos) && flockId == other.flockId;
+        }
     }
 
     private Rigidbody _rigidbody;
