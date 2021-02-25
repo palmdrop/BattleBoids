@@ -13,7 +13,7 @@ public class MapTest
     public void Setup()
     {
         // Load scene
-        SceneManager.LoadScene("SampleScene", LoadSceneMode.Single);
+        SceneManager.LoadScene("LevelOne", LoadSceneMode.Single);
         new WaitForSeconds(2);
     }
     
