@@ -24,6 +24,7 @@ public abstract class Boid : Selectable
     public struct ClassInfo {
         // The field of view of the boid
         public float viewRadius;
+        public float maxForce;
 
         // Attack range
         public float attackDstRange;
@@ -268,5 +269,12 @@ public abstract class Boid : Selectable
         transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material.SetColor("_Color", color);
     }
 
+    public Rigidbody GetRigidbody()
+    {
+        return _rigidbody;
+    }
+
     public abstract void Attack();
+    
+    
 }
