@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
+using Random = UnityEngine.Random;
 
 public class Melee : Boid {
 
@@ -14,7 +16,7 @@ public class Melee : Boid {
         cost = 10;
         health = 100;
         damage = 10;
-        maxSpeed = 2f;
+        maxSpeed = 4f;
         targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
@@ -25,30 +27,37 @@ public class Melee : Boid {
         //mesh = ;
         collisionMask = LayerMask.GetMask("Wall", "Obstacle");
 
+
         classInfo = new ClassInfo {
             viewRadius = 5f,
+            maxForce = 1f,
+            
+            alignmentStrength = 
+                5.6f,
+            //alignmentExponent = 1.0f, 
+            alignmentExponent = 0.0f, 
+            
+            //cohesionStrength = 1.8f,
+            cohesionStrength = 4.0f,
+            //cohesionExponent = 0.8f,
+            cohesionExponent = 0.0f,
+            
+            //separationStrength = 2.0f,
+            separationStrength = 0.0f,
+            separationExponent = 40.0f,
+            
+            fearStrength = 5.65f,
+            fearExponent = 9.0f,
             
             attackDstRange = 1f,
             attackAngleRange = Mathf.PI / 4,
-            
-            alignmentStrength = 0.6f,
-            alignmentExponent = 1.0f, 
-            
-            cohesionStrength = 1.8f,
-            cohesionExponent = 0.8f,
-            
-            separationStrength = 2.0f,
-            separationExponent = 40.0f,
-            
-            fearStrength = 4.65f,
-            fearExponent = 8.0f,
             
             attackMovementStrength = 1.1f,
             attackMovementExponent = 5.0f,
             
             emotionalState = 0f,
             morale = 1f,
-            aggressionStrength = 2.0f,
+            aggressionStrength = 1.4f,
             
             randomMovements = 6.0f,
         };

@@ -49,6 +49,7 @@ public class BoidManager : MonoBehaviour
         if (_isBattlePhase)
         {
             AddPlayerBoids();
+            
         }
 
         // Remove all dead boids
@@ -351,20 +352,25 @@ public class BoidManager : MonoBehaviour
                     }
                 }
             }
+            
+            //TODO desired velocity for all behaviors should be max velocity?
+            //TODO limit all the forces to maxForce separately, before adding together?
 
             // Calculate alignment force
+            //TODO possible variation: use heading of neighbouring boids instead of velocity! this way, faster
+            //TODO boids do not have more influence (although this might be desirable)
             Vector3 alignmentForce;
-            if (avgVel.Equals(new float3(0, 0, 0))) alignmentForce = new float3(0, 0, 0);
+            if (avgVel.Equals(new float3(0, 0, 0))) alignmentForce = float3.zero;
             else alignmentForce = math.normalize(avgVel) * boid.classInfo.alignmentStrength;
 
             // Calculate cohesion force
             Vector3 cohesionForce;
-            if (avgPosCohesionDivider == 0) cohesionForce = new float3(0, 0, 0);
+            if (avgPosCohesionDivider == 0) cohesionForce = float3.zero;
             else cohesionForce = math.normalize((avgPosCohesion / avgPosCohesionDivider) - boid.pos) * boid.classInfo.cohesionStrength;
 
             // Calculate separation force
             Vector3 separationForce;
-            if (avgPosSeparationDivider == 0) separationForce = new float3(0, 0, 0);
+            if (avgPosSeparationDivider == 0) separationForce = float3.zero;
             else separationForce = math.normalize(boid.pos - (avgPosSeparation / avgPosSeparationDivider)) * boid.classInfo.separationStrength;
 
             // Calculate aggression force
@@ -397,7 +403,8 @@ public class BoidManager : MonoBehaviour
             Vector3 randomForce = CalculateRandomForce(index, boid.classInfo.randomMovements);
 
             // Sum all the forces
-            forces[index] = 
+            //TODO: calculate steering for every behavior, not just summed up desire?
+            float3 desire = 
                         alignmentForce 
                             + cohesionForce 
                             + separationForce
@@ -406,6 +413,16 @@ public class BoidManager : MonoBehaviour
                             + attackForce
                             + randomForce
             ;
+
+            float3 force = 
+                desire - boid.vel;
+
+            if (math.lengthsq(force) > boid.classInfo.maxForce)
+            {
+                force = math.normalize(force) * boid.classInfo.maxForce;
+            }
+
+            forces[index] = force;
 
             // Update attack info
             enemyInRanges[index] = enemyInRange;
