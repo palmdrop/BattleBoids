@@ -96,6 +96,10 @@ public class GameUI : MonoBehaviour
         } else if (Input.GetKeyDown("x")) {
             // Remove entity
             activePlayer.GetSpawnArea().ChangeGridWidth(-1);
+        } else if (Input.GetKeyDown("r"))
+        {
+            // Run game
+            players.ForEach(p => p.Ready());
         }
     }
 
