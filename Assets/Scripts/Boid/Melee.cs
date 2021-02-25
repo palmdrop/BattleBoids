@@ -27,21 +27,29 @@ public class Melee : Boid {
 
         classInfo = new ClassInfo {
             viewRadius = 5f,
+            
             attackDstRange = 1f,
             attackAngleRange = Mathf.PI / 4,
-            alignmentStrength = 0.7f,
+            
+            alignmentStrength = 0.6f,
             alignmentExponent = 1.0f, 
-            cohesionStrength = 1.5f,
+            
+            cohesionStrength = 1.8f,
             cohesionExponent = 0.8f,
-            separationStrength = 0.5f,
-            separationExponent = 10.0f,
+            
+            separationStrength = 2.0f,
+            separationExponent = 40.0f,
+            
             fearStrength = 4.65f,
             fearExponent = 8.0f,
+            
             attackMovementStrength = 1.1f,
             attackMovementExponent = 5.0f,
+            
             emotionalState = 0f,
             morale = 1f,
             aggressionStrength = 2.0f,
+            
             randomMovements = 6.0f,
         };
     }
