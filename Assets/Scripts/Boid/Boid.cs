@@ -19,7 +19,8 @@ public abstract class Boid : MonoBehaviour
     protected Mesh mesh;
     protected LayerMask collisionMask;
     protected ClassInfo classInfo;
-    protected Boid _target;
+    protected Boid target;
+    protected Player owner;
 
     public struct ClassInfo {
         // The field of view of the boid
@@ -27,7 +28,7 @@ public abstract class Boid : MonoBehaviour
 
         // Attack range
         public float attackDstRange;
-        public float attackAngleRange; // Angle relative local z-axis
+        public float attackAngleRange; // Angle relative local z-axis in rad
 
         // Weights for the three basic flocking behaviors
         // NOTE: an exponent of 0.0 would make the behavior ignore the distance to the neighbouring boid
@@ -51,13 +52,13 @@ public abstract class Boid : MonoBehaviour
     public struct BoidInfo {
         public float3 vel;
         public float3 pos;
+        public float3 forward;
         public ClassInfo classInfo;
         public int flockId;
     }
 
     private Rigidbody _rigidbody;
     private Vector3 _localScale;
-    private Player _owner;
     private float _rayCastTheta = 10;
     private Map.Map _map;
 
@@ -164,11 +165,11 @@ public abstract class Boid : MonoBehaviour
     }
 
     public void SetOwner(Player owner) {
-        this._owner = owner;
+        this.owner = owner;
     }
 
     public void SetTarget(Boid target) {
-        _target = target;
+        this.target = target;
     }
 
     // Returns the position of this boid
@@ -186,9 +187,10 @@ public abstract class Boid : MonoBehaviour
     public BoidInfo GetInfo() {
         BoidInfo info;
         info.pos = GetPos();
+        info.forward = transform.forward;
         info.vel = GetVel();
         info.classInfo = classInfo;
-        info.flockId = _owner.id;
+        info.flockId = owner.id;
         return info;
     }
 
@@ -219,7 +221,7 @@ public abstract class Boid : MonoBehaviour
     public void Die()
     {
         this.dead = true;
-        _target = null;
+        target = null;
     }
 
     public bool IsDead() {
