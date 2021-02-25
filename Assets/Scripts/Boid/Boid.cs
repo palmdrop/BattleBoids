@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
 
-public abstract class Boid : MonoBehaviour
+
+public abstract class Boid : Selectable
 {
     protected int cost;
     protected int health;
@@ -65,6 +64,9 @@ public abstract class Boid : MonoBehaviour
     // Start is called before the first frame update
     protected void Start()
     {
+        // To start off, we don't want to show that the boid is selected 
+        SetSelectionIndicator(false);
+        
         _rigidbody = GetComponent<Rigidbody>();
         GameObject map = GameObject.FindGameObjectWithTag("Map");
         if (map != null)
