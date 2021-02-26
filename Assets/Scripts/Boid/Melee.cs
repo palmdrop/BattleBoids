@@ -15,7 +15,7 @@ public class Melee : Boid {
 
         cost = 10;
         health = 100;
-        damage = 10;
+        damage = 1;
         maxSpeed = 4f;
         targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
@@ -30,34 +30,30 @@ public class Melee : Boid {
 
         classInfo = new ClassInfo {
             viewRadius = 5f,
-            maxForce = 1f,
+            separationRadius = 0.3f,
+            maxForce = 2f,
             
-            alignmentStrength = 
-                5.6f,
-            //alignmentExponent = 1.0f, 
+            alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
             
-            //cohesionStrength = 1.8f,
             cohesionStrength = 4.0f,
-            //cohesionExponent = 0.8f,
             cohesionExponent = 0.0f,
             
-            //separationStrength = 2.0f,
-            separationStrength = 0.0f,
-            separationExponent = 40.0f,
+            separationStrength = 120.0f,
+            separationExponent = 1.0f,
             
-            fearStrength = 5.65f,
-            fearExponent = 9.0f,
+            fearStrength = 100.65f,
+            fearExponent = 8.0f,
             
             attackDstRange = 1f,
-            attackAngleRange = Mathf.PI / 4,
+            attackAngleRange = Mathf.PI / 4.0f,
             
             attackMovementStrength = 1.1f,
             attackMovementExponent = 5.0f,
             
             emotionalState = 0f,
             morale = 1f,
-            aggressionStrength = 1.4f,
+            aggressionStrength = 10.4f,
             
             randomMovements = 6.0f,
         };
