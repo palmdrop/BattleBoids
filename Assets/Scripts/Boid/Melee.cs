@@ -10,7 +10,7 @@ public class Melee : Boid {
     // Start is called before the first frame update
     void Start() {
         base.Start();
-        
+
         cost = 10;
         health = 100;
         damage = 10;
@@ -28,7 +28,7 @@ public class Melee : Boid {
         classInfo = new ClassInfo {
             viewRadius = 1f,
             attackDstRange = 0.5f,
-            attackAngleRange = 45,
+            attackAngleRange = Mathf.PI / 4,
             alignmentStrength = 0.7f,
             alignmentExponent = 1.0f, 
             cohesionStrength = 1.5f,
@@ -47,21 +47,23 @@ public class Melee : Boid {
     }
 
     public override void Attack() {
-        if (_target != null && Time.time > _nextAttackTime) {
+        if (target != null && Time.time > _nextAttackTime) {
             _nextAttackTime = Time.time + timeBetweenAttacks;
-            _target.TakeDamage(damage);
-            AnimateAttack(this.GetPos(), _target.GetPos());
+            target.TakeDamage(damage);
+            AnimateAttack(this.GetPos(), target.GetPos());
         }
     }
 
     private void AnimateAttack(Vector3 fromPos, Vector3 toPos) {
         LineRenderer lineRenderer = new GameObject("Line").AddComponent<LineRenderer>();
-        lineRenderer.startWidth = 0.01f;
+        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        lineRenderer.startWidth = 0.1f;
         lineRenderer.endWidth = 0.01f;
+        lineRenderer.startColor = owner.color;
         lineRenderer.positionCount = 2;
         lineRenderer.useWorldSpace = true;
         lineRenderer.SetPosition(0, fromPos);
         lineRenderer.SetPosition(1, toPos);
-        Destroy(lineRenderer, 0.2f);
+        Destroy(lineRenderer, 0.1f);
     }
 }

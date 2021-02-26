@@ -166,6 +166,7 @@ public class GameUI : MonoBehaviour
 
     Player SetActivePlayer()
     {
+        SelectionManager.RemoveSelected();
         string nickname = playerSelect.options[playerSelect.value].text;
         foreach (Player player in players)
         {

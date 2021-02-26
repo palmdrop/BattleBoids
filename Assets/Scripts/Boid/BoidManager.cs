@@ -248,28 +248,29 @@ public class BoidManager : MonoBehaviour
 
         private bool BoidIndexInAttackRange(
                 float3 vectorFromSelfToEnemy,
+                float3 forward,
                 float attackDstRange,
                 float attackAngleRange,
                 int boidIndex) {
 
-            float sqrAttackDstRange = attackDstRange * attackDstRange;
-            float cosAttackAngleRange = Mathf.Cos(attackAngleRange);
-            float sqrCosAttackAngleRange = cosAttackAngleRange * cosAttackAngleRange;
+            // Calc distance to target
+            float dst = Mathf.Sqrt(
+                        vectorFromSelfToEnemy.x * vectorFromSelfToEnemy.x
+                      + vectorFromSelfToEnemy.y * vectorFromSelfToEnemy.y
+                      + vectorFromSelfToEnemy.z * vectorFromSelfToEnemy.z);
 
-            float sqrZ = vectorFromSelfToEnemy.z * vectorFromSelfToEnemy.z;
-            float sqrDst = vectorFromSelfToEnemy.x * vectorFromSelfToEnemy.x
-                         + vectorFromSelfToEnemy.y * vectorFromSelfToEnemy.y
-                         + sqrZ;
-            float sqrCosAngle = sqrZ / sqrDst;
+            // Calc angle to target
+            float dp = vectorFromSelfToEnemy.x * forward.x
+                     + vectorFromSelfToEnemy.y * forward.y
+                     + vectorFromSelfToEnemy.z * forward.z;
+
+            float angle = Mathf.Acos(dp / dst);
 
             // Ignores
-            if (sqrDst > sqrAttackDstRange) { // If distance too big
+            if (dst > attackDstRange) { // If distance too big
                 return false;
             }
-            if (vectorFromSelfToEnemy.z < 0f) { // if enemy behind
-                return false;
-            }
-            if (sqrCosAngle < sqrCosAttackAngleRange) { // If angle to big
+            if (angle > attackAngleRange) { // If angle to big
                 return false;
             }
 
@@ -365,6 +366,7 @@ public class BoidManager : MonoBehaviour
                     // If closer than current attack target
                     if (sqrDist < sqrDstToClosestEnemyInRange) {
                         enemyInRange = BoidIndexInAttackRange(vector,
+                                boid.forward,
                                 boid.classInfo.attackDstRange,
                                 boid.classInfo.attackAngleRange,
                                 i);
