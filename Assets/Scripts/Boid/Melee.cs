@@ -26,14 +26,14 @@ public class Melee : Boid {
         collisionMask = LayerMask.GetMask("Wall", "Obstacle");
 
         classInfo = new ClassInfo {
-            viewRadius = 0.5f,
+            viewRadius = 1f,
             attackDstRange = 0.5f,
             attackAngleRange = 45,
             alignmentStrength = 0.7f,
             alignmentExponent = 1.0f, 
             cohesionStrength = 1.5f,
             cohesionExponent = 0.8f,
-            separationStrength = 0.5f,
+            separationStrength = 1.0f,
             separationExponent = 10.0f,
             fearStrength = 4.65f,
             fearExponent = 8.0f,

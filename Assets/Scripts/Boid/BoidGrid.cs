@@ -9,7 +9,7 @@ public struct BoidGrid
 {
     [SerializeField] private static readonly float cellWidth = 1f, cellDepth = 1f;
     private static readonly int cellXAmount = 100;
-    private NativeMultiHashMap<GridPoint, Boid.BoidInfo> _grid;// = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.TempJob);
+    private NativeMultiHashMap<GridPoint, int> _grid;// = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.TempJob);
     private NativeList<Boid.BoidInfo> _boids;
 
 
@@ -17,29 +17,30 @@ public struct BoidGrid
     public void Populate(List<Boid> boids)
     {
         _boids = new NativeList<Boid.BoidInfo>(10, Allocator.TempJob);
-        _grid = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.TempJob);
-        foreach (Boid b in boids)
+        _grid = new NativeMultiHashMap<GridPoint, int>(10, Allocator.TempJob);
+        for (int i = 0; i < boids.Count; i++) 
         {
-            Boid.BoidInfo info = b.GetInfo();
+            Boid.BoidInfo info = boids[i].GetInfo();
             _boids.Add(info);
             int xIndex = (int)(math.floor(info.pos.x) / cellWidth);
             int zIndex = (int)(math.floor(info.pos.z) / cellDepth);
             GridPoint gp = new GridPoint(xIndex, zIndex, cellXAmount);
-            _grid.Add(gp, info);
+            //_grid.Add(gp, info);
+            _grid.Add(gp, i);
         }
     }
 
 
     // TODO: Documentation
-    public NativeMultiHashMap<int, IndexBoidPair> GetNeighbours()
+    public NativeMultiHashMap<int, int> GetNeighbours()
     {
-        NativeMultiHashMap<int, IndexBoidPair> neighbours = new NativeMultiHashMap<int, IndexBoidPair>(10, Allocator.TempJob);
+        NativeMultiHashMap<int, int> neighbours = new NativeMultiHashMap<int, int>(10, Allocator.TempJob);
         for (int i = 0; i < _boids.Length; i++)
         {
-            NativeArray<Boid.BoidInfo> neighbourArray = FindBoidsWithinRadius(_boids[i], _boids[i].classInfo.viewRadius);
-            foreach (Boid.BoidInfo info in neighbourArray)
+            NativeArray<int> neighbourArray = FindBoidsWithinRadius(_boids[i], _boids[i].classInfo.viewRadius);
+            foreach (int j in neighbourArray)
             {
-                neighbours.Add(i, new IndexBoidPair(i, info));
+                neighbours.Add(i, j);
             }
             neighbourArray.Dispose();
         }
@@ -48,12 +49,12 @@ public struct BoidGrid
 
 
     // Finds all boids within the given radius from the given boid (excludes the given boid itself)
-    public NativeArray<Boid.BoidInfo> FindBoidsWithinRadius(Boid.BoidInfo boid, float radius)
+    public NativeArray<int> FindBoidsWithinRadius(Boid.BoidInfo boid, float radius)
     {
         // The cell that the current boid is in
         int xIndex = (int)(math.floor(boid.pos.x) / cellWidth);
         int zIndex = (int)(math.floor(boid.pos.z) / cellDepth);
-        NativeList<Boid.BoidInfo> boidsInRadius = new NativeList<Boid.BoidInfo>(10, Allocator.Temp);
+        NativeList<int> boidsInRadius = new NativeList<int>(10, Allocator.Temp);
 
         // The cells that cover the view radius of the boid
         int minI = xIndex - (int)math.ceil(radius / cellWidth);
@@ -71,10 +72,10 @@ public struct BoidGrid
                 if (_grid.ContainsKey(gp))
                 {
                     // Iterate over the boids in surrounding cells
-                    foreach (Boid.BoidInfo b in _grid.GetValuesForKey(gp))
+                    foreach (int b in _grid.GetValuesForKey(gp))
                     {
-                        float3 horizontalDistance = b.pos - boid.pos;
-                        if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z * horizontalDistance.z < radius * radius && !boid.Equals(b))
+                        float3 horizontalDistance = _boids[b].pos - boid.pos;
+                        if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z * horizontalDistance.z < radius * radius && !boid.Equals(_boids[b]))
                         {
                             boidsInRadius.Add(b);
                         }
@@ -83,7 +84,7 @@ public struct BoidGrid
             }
         }
 
-        NativeArray<Boid.BoidInfo> result = new NativeArray<Boid.BoidInfo>(boidsInRadius.Length, Allocator.Temp);
+        NativeArray<int> result = new NativeArray<int>(boidsInRadius.Length, Allocator.Temp);
         for (int i = 0; i < boidsInRadius.Length; i++)
         {
             result[i] = boidsInRadius[i];
@@ -126,18 +127,5 @@ public struct BoidGrid
         {
             return x == gp.x && y == gp.y && w == gp.w;
         }
-    }
-
-
-    public struct IndexBoidPair
-    {
-        public IndexBoidPair(int index, Boid.BoidInfo boid)
-        {
-            this.index = index;
-            this.boid = boid;
-        }
-
-        public readonly int index;
-        public readonly Boid.BoidInfo boid;
     }
 }

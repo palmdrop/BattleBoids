@@ -36,7 +36,7 @@ public class GridTest
         BoidGrid grid = new BoidGrid();
         grid.Populate(boids);
 
-        NativeMultiHashMap<int, BoidGrid.IndexBoidPair> gridNeighbours = grid.GetNeighbours();
+        NativeMultiHashMap<int, int> gridNeighbours = grid.GetNeighbours();
 
         for (int i = 0; i < testAmount; i++)
         {
@@ -55,9 +55,9 @@ public class GridTest
             Assert.AreEqual(realNeighbours.Count, gridNeighbours.CountValuesForKey(i));
 
             int k = 0;
-            foreach (BoidGrid.IndexBoidPair neighbourPair in gridNeighbours.GetValuesForKey(i))
+            foreach (int neighbourIndex in gridNeighbours.GetValuesForKey(i))
             {
-                Boid.BoidInfo neighbourInfo = neighbourPair.boid;
+                Boid.BoidInfo neighbourInfo = boids[neighbourIndex].GetInfo();
                 //Assert.AreEqual(neighbourInfo, realNeighbours[k]);
                 Assert.IsTrue(realNeighbours.Contains(neighbourInfo));
                 k++;

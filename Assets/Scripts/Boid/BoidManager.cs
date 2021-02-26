@@ -70,12 +70,18 @@ public class BoidManager : MonoBehaviour
         NativeArray<float3> forces = new NativeArray<float3>(_boids.Count, Allocator.TempJob); // Out data
         // Information about the entire flocks is gathered
         NativeArray<Player.FlockInfo> flockInfos = new NativeArray<Player.FlockInfo>(players.Count, Allocator.TempJob); // Out and in data
-        
+
+        _grid = new BoidGrid();
+        _grid.Populate(_boids);
+        NativeMultiHashMap<int, int> neighbours = new NativeMultiHashMap<int, int>(10, Allocator.TempJob);
+
         // Allocate a struct job for calculating flock info
         FlockStructJob flockJob = new FlockStructJob()
         {
             boids = boidInfos,
-            flockInfos = flockInfos
+            grid = _grid,
+            flockInfos = flockInfos,
+            allNeighbours = neighbours
         };
         
         // Schedule job 
@@ -90,10 +96,6 @@ public class BoidManager : MonoBehaviour
         }
         NativeArray<bool> enemyInRanges = new NativeArray<bool>(_boids.Count, Allocator.TempJob);
         NativeArray<int> boidIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
-
-        _grid = new BoidGrid();
-        _grid.Populate(_boids);
-        NativeMultiHashMap<int, BoidGrid.IndexBoidPair> neighbours = _grid.GetNeighbours();
 
         BoidStructJob boidJob = new BoidStructJob
         {
@@ -152,7 +154,9 @@ public class BoidManager : MonoBehaviour
     public struct FlockStructJob : IJob
     {
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
+        [ReadOnly] public BoidGrid grid;
         [WriteOnly] public NativeArray<Player.FlockInfo> flockInfos;
+        [WriteOnly] public NativeMultiHashMap<int, int> allNeighbours;
 
         public void Execute()
         {
@@ -174,6 +178,13 @@ public class BoidManager : MonoBehaviour
 
                 // Save new data in array (necessary since "flockInfo" is a temporary value)
                 tempFlockInfos[boid.flockId - 1] = flockInfo;
+
+                NativeArray<int> neighbours = grid.FindBoidsWithinRadius(boid, boid.classInfo.viewRadius);
+                foreach (int j in neighbours)
+                {
+                    allNeighbours.Add(i, j);
+                }
+                neighbours.Dispose();
             }
 
             // Iterate over all the temporary flock info structs and average the results
@@ -205,7 +216,7 @@ public class BoidManager : MonoBehaviour
         [WriteOnly] public NativeArray<float3> forces;
         [WriteOnly] public NativeArray<bool> enemyInRanges;
         [WriteOnly] public NativeArray<int> boidIndices;
-        [ReadOnly] public NativeMultiHashMap<int, BoidGrid.IndexBoidPair> neighbourArray;
+        [ReadOnly] public NativeMultiHashMap<int, int> neighbourArray;
 
         // Translates a squared distance into a normalized distance representation,
         // i.e to a value from 0 to 1
@@ -291,9 +302,9 @@ public class BoidManager : MonoBehaviour
             Boid.BoidInfo boid = boids[index];
 
             // Iterate over all the neighbours
-            foreach (BoidGrid.IndexBoidPair pair in neighbourArray.GetValuesForKey(index))
+            foreach (int i in neighbourArray.GetValuesForKey(index))
             {
-                Boid.BoidInfo neighbour = pair.boid;
+                Boid.BoidInfo neighbour = boids[i];
 
                 // Compare the distance between this boid and the neighbour using the
                 // square of the distance and radius. This avoids costly square root operations
@@ -347,14 +358,20 @@ public class BoidManager : MonoBehaviour
                         targetDist = sqrDist;
                     }
 
+                    //if (neighbour.arrayId == 0)
+                    //{
+                    //    Debug.Log("Array id is 0");
+                    //}
+                    //Debug.Log(String.Format("{0}", neighbour.arrayId));
+
                     // If closer than current attack target
                     if (sqrDist < sqrDstToClosestEnemyInRange) {
                         enemyInRange = BoidIndexInAttackRange(vector,
                                 boid.classInfo.attackDstRange,
                                 boid.classInfo.attackAngleRange,
-                                pair.index);
+                                i);
                         if (enemyInRange) { // and in range, update target
-                            boidIndex = pair.index;
+                            boidIndex = i;
                             sqrDstToClosestEnemyInRange = sqrDist;
                         }
                     }
