@@ -75,16 +75,12 @@ public class BoidManager : MonoBehaviour
         _grid = new BoidGrid();
         _grid.Populate(_boids);
 
-        // Hashmap mapping from one index in the boid array to a list of indices of neighbouring boids
-        NativeMultiHashMap<int, int> neighbours = new NativeMultiHashMap<int, int>(10, Allocator.TempJob);
-
         // Allocate a struct job for calculating flock info
         FlockStructJob flockJob = new FlockStructJob()
         {
             boids = boidInfos,
             grid = _grid,
-            flockInfos = flockInfos,
-            allNeighbours = neighbours
+            flockInfos = flockInfos
         };
         
         // Schedule job 
@@ -108,7 +104,7 @@ public class BoidManager : MonoBehaviour
             forces = forces,
             enemyInRanges = enemyInRanges,
             boidIndices = boidIndices,
-            neighbourArray = neighbours
+            grid = _grid
         };
 
         // Schedule job
@@ -139,7 +135,6 @@ public class BoidManager : MonoBehaviour
         flockInfos.Dispose();
         enemyInRanges.Dispose();
         boidIndices.Dispose();
-        neighbours.Dispose();
         _grid.Dispose();
     }
 
@@ -159,7 +154,6 @@ public class BoidManager : MonoBehaviour
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
         [ReadOnly] public BoidGrid grid;
         [WriteOnly] public NativeArray<Player.FlockInfo> flockInfos;
-        [WriteOnly] public NativeMultiHashMap<int, int> allNeighbours;
 
         public void Execute()
         {
@@ -181,14 +175,6 @@ public class BoidManager : MonoBehaviour
 
                 // Save new data in array (necessary since "flockInfo" is a temporary value)
                 tempFlockInfos[boid.flockId - 1] = flockInfo;
-
-                // Calculate neighbouring boids using the grid
-                NativeArray<int> neighbours = grid.FindBoidsWithinRadius(boid, boid.classInfo.viewRadius);
-                foreach (int j in neighbours)
-                {
-                    allNeighbours.Add(i, j);
-                }
-                neighbours.Dispose();
             }
 
             // Iterate over all the temporary flock info structs and average the results
@@ -220,7 +206,7 @@ public class BoidManager : MonoBehaviour
         [WriteOnly] public NativeArray<float3> forces;
         [WriteOnly] public NativeArray<bool> enemyInRanges;
         [WriteOnly] public NativeArray<int> boidIndices;
-        [ReadOnly] public NativeMultiHashMap<int, int> neighbourArray;
+        [ReadOnly] public BoidGrid grid;
 
         // Translates a squared distance into a normalized distance representation,
         // i.e to a value from 0 to 1
@@ -306,8 +292,10 @@ public class BoidManager : MonoBehaviour
 
             Boid.BoidInfo boid = boids[index];
 
+            NativeArray<int> neighbours = grid.FindBoidsWithinRadius(boid, boid.classInfo.viewRadius);
+
             // Iterate over all the neighbours
-            foreach (int i in neighbourArray.GetValuesForKey(index))
+            foreach (int i in neighbours)
             {
                 Boid.BoidInfo neighbour = boids[i];
 
@@ -378,7 +366,7 @@ public class BoidManager : MonoBehaviour
                 }
             }
 
-            
+            neighbours.Dispose();
 
             // Calculate alignment force
             Vector3 alignmentForce;
