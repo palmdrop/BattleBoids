@@ -13,7 +13,7 @@ public struct BoidGrid
     private NativeList<Boid.BoidInfo> _boids;
 
 
-    // TODO: Documentation
+    // Populates the grid by placing the indices of the boids in cells
     public void Populate(List<Boid> boids)
     {
         _boids = new NativeList<Boid.BoidInfo>(10, Allocator.TempJob);
@@ -31,7 +31,7 @@ public struct BoidGrid
     }
 
 
-    // TODO: Documentation
+    // Returns a complete map from boid index to list of neighbouring boid indices, for all boids
     public NativeMultiHashMap<int, int> GetNeighbours()
     {
         NativeMultiHashMap<int, int> neighbours = new NativeMultiHashMap<int, int>(10, Allocator.TempJob);
@@ -48,7 +48,7 @@ public struct BoidGrid
     }
 
 
-    // Finds all boids within the given radius from the given boid (excludes the given boid itself)
+    // Finds indices of boids within the given radius from the given boid (excludes the given boid itself)
     public NativeArray<int> FindBoidsWithinRadius(Boid.BoidInfo boid, float radius)
     {
         // The cell that the current boid is in
@@ -84,6 +84,7 @@ public struct BoidGrid
             }
         }
 
+        // Construct resulting array
         NativeArray<int> result = new NativeArray<int>(boidsInRadius.Length, Allocator.Temp);
         for (int i = 0; i < boidsInRadius.Length; i++)
         {
@@ -94,7 +95,7 @@ public struct BoidGrid
     }
 
 
-    // TODO: Documentation
+    // Disposes of temporary data
     public void Dispose()
     {
         _grid.Dispose();

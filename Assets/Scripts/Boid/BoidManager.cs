@@ -71,8 +71,11 @@ public class BoidManager : MonoBehaviour
         // Information about the entire flocks is gathered
         NativeArray<Player.FlockInfo> flockInfos = new NativeArray<Player.FlockInfo>(players.Count, Allocator.TempJob); // Out and in data
 
+        // Construct and populate the grid to do efficient neighbour queries
         _grid = new BoidGrid();
         _grid.Populate(_boids);
+
+        // Hashmap mapping from one index in the boid array to a list of indices of neighbouring boids
         NativeMultiHashMap<int, int> neighbours = new NativeMultiHashMap<int, int>(10, Allocator.TempJob);
 
         // Allocate a struct job for calculating flock info
@@ -179,6 +182,7 @@ public class BoidManager : MonoBehaviour
                 // Save new data in array (necessary since "flockInfo" is a temporary value)
                 tempFlockInfos[boid.flockId - 1] = flockInfo;
 
+                // Calculate neighbouring boids using the grid
                 NativeArray<int> neighbours = grid.FindBoidsWithinRadius(boid, boid.classInfo.viewRadius);
                 foreach (int j in neighbours)
                 {
@@ -357,12 +361,6 @@ public class BoidManager : MonoBehaviour
                         targetPos = neighbour.pos;
                         targetDist = sqrDist;
                     }
-
-                    //if (neighbour.arrayId == 0)
-                    //{
-                    //    Debug.Log("Array id is 0");
-                    //}
-                    //Debug.Log(String.Format("{0}", neighbour.arrayId));
 
                     // If closer than current attack target
                     if (sqrDist < sqrDstToClosestEnemyInRange) {
