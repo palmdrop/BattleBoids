@@ -24,6 +24,7 @@ public abstract class Boid : Selectable
     public struct ClassInfo {
         // The field of view of the boid
         public float viewRadius;
+        public float separationRadius;
         public float maxForce;
 
         // Attack range

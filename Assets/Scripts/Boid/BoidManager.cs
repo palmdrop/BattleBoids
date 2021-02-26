@@ -229,7 +229,7 @@ public class BoidManager : MonoBehaviour
                 int boidIndex) {
 
             // Calc distance to target
-            float dst = Mathf.Sqrt(
+            float dst = math.sqrt(
                         vectorFromSelfToEnemy.x * vectorFromSelfToEnemy.x
                       + vectorFromSelfToEnemy.y * vectorFromSelfToEnemy.y
                       + vectorFromSelfToEnemy.z * vectorFromSelfToEnemy.z);
@@ -239,7 +239,7 @@ public class BoidManager : MonoBehaviour
                      + vectorFromSelfToEnemy.y * forward.y
                      + vectorFromSelfToEnemy.z * forward.z;
 
-            float angle = Mathf.Acos(dp / dst);
+            float angle = math.acos(dp / dst);
 
             // Ignores
             if (dst > attackDstRange) { // If distance too big
@@ -259,12 +259,12 @@ public class BoidManager : MonoBehaviour
             float3 avgVel = float3.zero;
 
             // Average neighbour position used to calculate cohesion
-            float3 avgPosCohesion = float3.zero;
-            float avgPosCohesionDivider = 0.0f;
+            float3 avgNeighborPos = float3.zero;
+            float avgNeighborPosDivider = 0.0f;
 
             // Average neighbour position used to calculate cohesion
-            float3 avgPosSeparation = float3.zero;
-            float avgPosSeparationDivider = 0.0f;
+            float3 avgSeparation = float3.zero;
+            float separationDivider = 0.0f;
             
             // Average position of visible enemy boids
             float3 avgEnemyPos = float3.zero;
@@ -277,8 +277,9 @@ public class BoidManager : MonoBehaviour
             // Init attack info
             bool enemyInRange = false;
             int boidIndex = -1; // index of target boid in _boids
-            float sqrDstToClosestEnemyInRange = Mathf.Infinity;
+            float sqrDstToClosestEnemyInRange = math.INFINITY;
 
+            // Current boid
             Boid.BoidInfo boid = boids[index];
 
             // Iterate over all the neighbours
@@ -296,35 +297,48 @@ public class BoidManager : MonoBehaviour
                 if (sqrDist > (boid.classInfo.viewRadius * boid.classInfo.viewRadius)) continue;
 
                 // Calculate a normalized distance (a value from 0.0 to 1.0)
-                float normalizedDistance = NormalizedDist(sqrDist, boid.classInfo.viewRadius);
+                float dist = math.sqrt(sqrDist);
+                float normalizedViewDistance = dist / boid.classInfo.viewRadius;
 
                 if (boids[i].flockId == boid.flockId) {
                     // Friendly boid
                     
                     // Contribute to average velocity
                     float amount = CalculatePower(boid.classInfo.morale,
-                        normalizedDistance, boid.classInfo.alignmentExponent);
+                        normalizedViewDistance, boid.classInfo.alignmentExponent);
                     
+                    //TODO possible variation: use heading of neighbouring boids instead of velocity! this way, faster
+                    //TODO boids do not have more influence (although this might be desirable)
                     avgVel += boids[i].vel * amount;
                     
                     // Add to average position for cohesion, weighted using morale
-                    amount = CalculatePower(boid.classInfo.morale, normalizedDistance,
+                    amount = CalculatePower(boid.classInfo.morale, normalizedViewDistance,
                         boid.classInfo.cohesionExponent);
                     
-                    avgPosCohesion += boids[i].pos * amount;
-                    avgPosCohesionDivider += amount;
+                    avgNeighborPos += boids[i].pos * amount;
+                    avgNeighborPosDivider += amount;
                     
-                    // Add to average position for separation
-                    amount = CalculatePower(1,
-                        normalizedDistance, boid.classInfo.separationExponent);
+                    // If within separation radius...
+                    if (dist < boid.classInfo.separationRadius)
+                    {
+                        // Calculate a normalized separation distance, i.e a value from 0 to 1
+                        float normalizedSeparationDistance = dist / boid.classInfo.separationRadius;
+                        
+                        // The power of the separation should be stronger the closer the two boids are to each other,
+                        // inversely proportional to the distance (with respect to the separation exponent)
+                        amount = CalculatePower(1,
+                            1.0f - normalizedSeparationDistance, -boid.classInfo.separationExponent);
+                        
+                        // The separation force between the two boids
+                        float3 separation = (boid.pos - boids[i].pos) / dist;
 
-                    avgPosSeparation += boids[i].pos * amount;
-                    avgPosSeparationDivider += amount;
-                    
+                        avgSeparation += separation * amount;
+                        separationDivider += amount;
+                    }
                 } else {
                     // Enemy boid
-                    float amount = 1.0f;
-                        //CalculatePower(1.0f, normalizedDistance, boid.classInfo.fearExponent);
+                    float amount = 
+                        CalculatePower(1.0f, normalizedViewDistance, boid.classInfo.fearExponent);
                         
                     avgEnemyPos += boids[i].pos * amount;
                     avgEnemyPosDivider += amount;
@@ -353,25 +367,25 @@ public class BoidManager : MonoBehaviour
                 }
             }
             
-            //TODO desired velocity for all behaviors should be max velocity?
-            //TODO limit all the forces to maxForce separately, before adding together?
+            //TODO do we want to normalize all the forces before scaling with the behavior strength?
+            //TODO this will make the behavior force equally strong at all times... Might not be what we want
 
             // Calculate alignment force
-            //TODO possible variation: use heading of neighbouring boids instead of velocity! this way, faster
-            //TODO boids do not have more influence (although this might be desirable)
             Vector3 alignmentForce;
             if (avgVel.Equals(new float3(0, 0, 0))) alignmentForce = float3.zero;
             else alignmentForce = math.normalize(avgVel) * boid.classInfo.alignmentStrength;
 
             // Calculate cohesion force
             Vector3 cohesionForce;
-            if (avgPosCohesionDivider == 0) cohesionForce = float3.zero;
-            else cohesionForce = math.normalize((avgPosCohesion / avgPosCohesionDivider) - boid.pos) * boid.classInfo.cohesionStrength;
+            if (avgNeighborPosDivider == 0) cohesionForce = float3.zero;
+            else cohesionForce = math.normalize((avgNeighborPos / avgNeighborPosDivider) - boid.pos) * boid.classInfo.cohesionStrength;
 
             // Calculate separation force
             Vector3 separationForce;
-            if (avgPosSeparationDivider == 0) separationForce = float3.zero;
-            else separationForce = math.normalize(boid.pos - (avgPosSeparation / avgPosSeparationDivider)) * boid.classInfo.separationStrength;
+            //if (avgPosSeparationDivider == 0) separationForce = float3.zero;
+            //else separationForce = math.normalize(boid.pos - (avgPosSeparation / avgPosSeparationDivider)) * boid.classInfo.separationStrength;
+            if (separationDivider == 0) separationForce = float3.zero;
+            else separationForce = (avgSeparation / separationDivider) * boid.classInfo.separationStrength;
 
             // Calculate aggression force
             Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
@@ -414,9 +428,11 @@ public class BoidManager : MonoBehaviour
                             + randomForce
             ;
 
-            float3 force = 
+            float3 force =
                 desire - boid.vel;
+                //desire;
 
+            // Limit the force to max force
             if (math.lengthsq(force) > boid.classInfo.maxForce)
             {
                 force = math.normalize(force) * boid.classInfo.maxForce;
