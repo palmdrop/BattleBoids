@@ -21,7 +21,7 @@ public class Melee : Boid {
         
 
         cost = 10;
-        health = 100;
+        health = maxHealth = 100;
         damage = 1;
         maxSpeed = 4f;
         targetHeight = 2f;
