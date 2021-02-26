@@ -4,6 +4,8 @@ using Unity.Mathematics;
 
 public abstract class Boid : Selectable
 {
+    [SerializeField] private GameObject healthBarPrefab;
+
     protected int cost;
     protected int health;
     protected int maxHealth;
@@ -70,6 +72,7 @@ public abstract class Boid : Selectable
     private Vector3 _localScale;
     private float _rayCastTheta = 10;
     private Map.Map _map;
+    private GameObject _healthBar;
 
     // Start is called before the first frame update
     protected void Start()
@@ -84,6 +87,8 @@ public abstract class Boid : Selectable
             this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
         _localScale = transform.GetChild(0).transform.localScale;
+        _healthBar = Instantiate(healthBarPrefab, transform.position, Quaternion.identity);
+        _healthBar.GetComponent<HealthBar>().SetOwner(this);
     }
 
     public void FixedUpdate()
