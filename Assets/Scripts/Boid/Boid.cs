@@ -6,6 +6,7 @@ public abstract class Boid : Selectable
 {
     protected int cost;
     protected int health;
+    protected int maxHealth;
     protected int damage;
     protected float maxSpeed;
     protected float targetHeight;
@@ -213,6 +214,11 @@ public abstract class Boid : Selectable
     public float GetHealth()
     {
         return health;
+    }
+
+    public float GetMaxHealth()
+    {
+        return maxHealth;
     }
 
     public int GetDamage()
