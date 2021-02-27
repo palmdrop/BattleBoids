@@ -31,6 +31,7 @@ public class Melee : Boid {
         classInfo = new ClassInfo {
             viewRadius = 5f,
             separationRadius = 0.3f,
+            fearRadius = 1.0f,
             maxForce = 2f,
             
             alignmentStrength = 5.6f,
@@ -42,8 +43,8 @@ public class Melee : Boid {
             separationStrength = 120.0f,
             separationExponent = 1.0f,
             
-            fearStrength = 100.65f,
-            fearExponent = 8.0f,
+            fearStrength = 140.0f,
+            fearExponent = 1.0f,
             
             attackDstRange = 1f,
             attackAngleRange = Mathf.PI / 4.0f,

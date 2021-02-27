@@ -262,13 +262,13 @@ public class BoidManager : MonoBehaviour
             float3 avgNeighborPos = float3.zero;
             float avgNeighborPosDivider = 0.0f;
 
-            // Average neighbour position used to calculate cohesion
+            // Separation force acting on the boid
             float3 avgSeparation = float3.zero;
             float separationDivider = 0.0f;
             
-            // Average position of visible enemy boids
-            float3 avgEnemyPos = float3.zero;
-            float avgEnemyPosDivider = 0.0f;
+            // Fear force acting on the boid (a boid fears enemy boids)
+            float3 avgFear = float3.zero;
+            float avgFearDivider = 0.0f;
 
             // Position of closest enemy
             float3 targetPos = float3.zero;
@@ -337,12 +337,24 @@ public class BoidManager : MonoBehaviour
                     }
                 } else {
                     // Enemy boid
-                    float amount = 
-                        CalculatePower(1.0f, normalizedViewDistance, boid.classInfo.fearExponent);
+
+                    // If the enemy boid is within the fear radius...
+                    if (dist < boid.classInfo.fearRadius)
+                    {
+                        // Normalize distance with respect to fear radius
+                        float normalizedFearDistance = dist / boid.classInfo.fearRadius;
                         
-                    avgEnemyPos += boids[i].pos * amount;
-                    avgEnemyPosDivider += amount;
-                    
+                        // Calculate the strength of the fear. This is inversely proportional to some exponent of the normalized distance
+                        float amount =
+                            CalculatePower(1.0f, 1.0f - normalizedFearDistance, -boid.classInfo.fearExponent);
+
+                        // Fear force between the two boids
+                        float3 fear = (boid.pos - boids[i].pos) / dist;
+
+                        avgFear += fear * amount;
+                        avgFearDivider += amount;
+                    }
+
                     // If the enemy boid is closer than the previous enemy boid, update the target and target dist
                     // Resulting target will be the boid closest
                     // TODO: use other factors to determine target as well? for example target weak enemy boid?
@@ -403,9 +415,9 @@ public class BoidManager : MonoBehaviour
             // This force is facing away from the weighted center of the nearby enemy boids, but is 
             // scaled using the proximity of the closest (target) enemy boid
             Vector3 fearForce;
-            if (avgEnemyPosDivider <= 0.00 || float.IsPositiveInfinity(targetDist)) fearForce = new float3(0, 0, 0);
-            else fearForce = math.normalize(boid.pos - (avgEnemyPos / avgEnemyPosDivider)) *
-                             CalculatePower(boid.classInfo.fearStrength, normalizedTargetDist, boid.classInfo.fearExponent);
+            if (avgFearDivider == 0.00) fearForce = new float3(0, 0, 0);
+            else fearForce = (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
+                             //CalculatePower(boid.classInfo.fearStrength, normalizedTargetDist, boid.classInfo.fearExponent);
             
             // Calculate attack force
             Vector3 attackForce;

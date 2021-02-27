@@ -25,11 +25,8 @@ public abstract class Boid : Selectable
         // The field of view of the boid
         public float viewRadius;
         public float separationRadius;
+        public float fearRadius;
         public float maxForce;
-
-        // Attack range
-        public float attackDstRange;
-        public float attackAngleRange; // Angle relative local z-axis in rad
 
         // Weights for the three basic flocking behaviors
         // NOTE: an exponent of 0.0 would make the behavior ignore the distance to the neighbouring boid
@@ -37,10 +34,15 @@ public abstract class Boid : Selectable
         public float cohesionStrength, cohesionExponent;
         public float separationStrength, separationExponent;
 
-        // Additional behaviors
-        public float fearStrength, fearExponent; // Fear controls
+        // Fear keeps boid from moving too close to enemies
+        public float fearStrength, fearExponent; 
+        
+        // Attack range
+        public float attackDstRange;
+        public float attackAngleRange; // Angle relative local z-axis in rad
+        
         public float attackMovementStrength, attackMovementExponent; // Controls attack impulse
-
+        
         // Internal state of boid
         public float emotionalState;
         public float morale;
