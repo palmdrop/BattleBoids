@@ -225,11 +225,11 @@ public class BoidManager : MonoBehaviour
                 float3 vectorFromSelfToEnemy,
                 float3 forward,
                 float attackDstRange,
-                float attackAngleRange,
-                int boidIndex) {
+                float attackAngleRange) 
+        {
 
             // Calc distance to target
-            float dst = math.sqrt(
+            float dist = math.sqrt(
                         vectorFromSelfToEnemy.x * vectorFromSelfToEnemy.x
                       + vectorFromSelfToEnemy.y * vectorFromSelfToEnemy.y
                       + vectorFromSelfToEnemy.z * vectorFromSelfToEnemy.z);
@@ -239,22 +239,19 @@ public class BoidManager : MonoBehaviour
                      + vectorFromSelfToEnemy.y * forward.y
                      + vectorFromSelfToEnemy.z * forward.z;
 
-            float angle = math.acos(dp / dst);
+            float angle = math.acos(dp / dist);
 
             // Ignores
-            if (dst > attackDstRange) { // If distance too big
+            if (dist > attackDstRange || angle > attackAngleRange) // If distance or angle is too big
+            { 
                 return false;
             }
-            if (angle > attackAngleRange) { // If angle to big
-                return false;
-            }
-
+            
             return true;
         }
 
         public void Execute(int index)
         {
-            /*** BOID BEHAVIOR VARIABLES ***/
             // Average velocity is used to calculate alignment force
             float3 avgVel = float3.zero;
 
@@ -270,14 +267,10 @@ public class BoidManager : MonoBehaviour
             float3 avgFear = float3.zero;
             float avgFearDivider = 0.0f;
 
-            // Position of closest enemy
-            float3 targetPos = float3.zero;
-            float targetDist = math.INFINITY;
-
             // Init attack info
             bool enemyInRange = false;
-            int boidIndex = -1; // index of target boid in _boids
-            float sqrDstToClosestEnemyInRange = math.INFINITY;
+            int targetBoidIndex = -1; // index of target boid in _boids
+            float sqrDistToClosestEnemyInRange = math.INFINITY;
 
             // Current boid
             Boid.BoidInfo boid = boids[index];
@@ -335,7 +328,9 @@ public class BoidManager : MonoBehaviour
                         avgSeparation += separation * amount;
                         separationDivider += amount;
                     }
-                } else {
+                } 
+                else 
+                {
                     // Enemy boid
 
                     // If the enemy boid is within the fear radius...
@@ -355,25 +350,20 @@ public class BoidManager : MonoBehaviour
                         avgFearDivider += amount;
                     }
 
-                    // If the enemy boid is closer than the previous enemy boid, update the target and target dist
-                    // Resulting target will be the boid closest
+                    // If closer than current attack target
                     // TODO: use other factors to determine target as well? for example target weak enemy boid?
                     // TODO: we could use weight calculated using distance, health, and other factors
-                    if (sqrDist < targetDist) {
-                        targetPos = boids[i].pos;
-                        targetDist = sqrDist;
-                    }
-
-                    // If closer than current attack target
-                    if (sqrDist < sqrDstToClosestEnemyInRange) {
+                    if (sqrDist < sqrDistToClosestEnemyInRange) 
+                    {
                         enemyInRange = BoidIndexInAttackRange(vector,
                                 boid.forward,
                                 boid.classInfo.attackDstRange,
-                                boid.classInfo.attackAngleRange,
-                                i);
-                        if (enemyInRange) { // and in range, update target
-                            boidIndex = i;
-                            sqrDstToClosestEnemyInRange = sqrDist;
+                                boid.classInfo.attackAngleRange);
+                        
+                        if (enemyInRange) // and in range, update target
+                        { 
+                            targetBoidIndex = i;
+                            sqrDistToClosestEnemyInRange = sqrDist;
                         }
                     }
                 }
@@ -394,8 +384,6 @@ public class BoidManager : MonoBehaviour
 
             // Calculate separation force
             Vector3 separationForce;
-            //if (avgPosSeparationDivider == 0) separationForce = float3.zero;
-            //else separationForce = math.normalize(boid.pos - (avgPosSeparation / avgPosSeparationDivider)) * boid.classInfo.separationStrength;
             if (separationDivider == 0) separationForce = float3.zero;
             else separationForce = (avgSeparation / separationDivider) * boid.classInfo.separationStrength;
 
@@ -405,31 +393,25 @@ public class BoidManager : MonoBehaviour
             Vector3 aggressionForce;
             
             if (enemyFlock.boidCount == 0) aggressionForce = new float3(0, 0, 0);
-            else
-                aggressionForce = math.normalize(enemyFlockPos - boid.pos) * boid.classInfo.aggressionStrength;
-            
-            // Normalize distance to enemy target boid
-            float normalizedTargetDist = NormalizedDist(targetDist, boid.classInfo.viewRadius);
+            else aggressionForce = math.normalize(enemyFlockPos - boid.pos) * boid.classInfo.aggressionStrength;
             
             // Calculate fear force
-            // This force is facing away from the weighted center of the nearby enemy boids, but is 
-            // scaled using the proximity of the closest (target) enemy boid
+            // This force is similar to the separation force, but only acts on enemy boids
             Vector3 fearForce;
             if (avgFearDivider == 0.00) fearForce = new float3(0, 0, 0);
             else fearForce = (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
-                             //CalculatePower(boid.classInfo.fearStrength, normalizedTargetDist, boid.classInfo.fearExponent);
             
             // Calculate attack force
+            // The attack force tries to move the boid towards the target boid
             Vector3 attackForce;
-            if (float.IsPositiveInfinity(targetDist)) attackForce = new float3(0, 0, 0);
-            else attackForce = math.normalize(targetPos - boid.pos) *
-                               CalculatePower(boid.classInfo.attackMovementStrength, normalizedTargetDist, boid.classInfo.attackMovementExponent);
+            if (!enemyInRange) attackForce = new float3(0, 0, 0);
+            else attackForce = math.normalize(boids[targetBoidIndex].pos - boid.pos) *
+                               CalculatePower(boid.classInfo.attackMovementStrength, NormalizedDist(sqrDistToClosestEnemyInRange, boid.classInfo.attackDstRange), boid.classInfo.attackMovementExponent);
 
             // Calculate random force
             Vector3 randomForce = CalculateRandomForce(index, boid.classInfo.randomMovements);
 
             // Sum all the forces
-            //TODO: calculate steering for every behavior, not just summed up desire?
             float3 desire = 
                         alignmentForce 
                             + cohesionForce 
@@ -440,9 +422,7 @@ public class BoidManager : MonoBehaviour
                             + randomForce
             ;
 
-            float3 force =
-                desire - boid.vel;
-                //desire;
+            float3 force = desire - boid.vel;
 
             // Limit the force to max force
             if (math.lengthsq(force) > boid.classInfo.maxForce)
@@ -454,7 +434,7 @@ public class BoidManager : MonoBehaviour
 
             // Update attack info
             enemyInRanges[index] = enemyInRange;
-            boidIndices[index] = boidIndex;
+            boidIndices[index] = targetBoidIndex;
         }
     }
 }
