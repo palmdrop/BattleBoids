@@ -29,7 +29,7 @@ public class Melee : Boid {
 
 
         classInfo = new ClassInfo {
-            viewRadius = 5f,
+            viewRadius = 3f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
