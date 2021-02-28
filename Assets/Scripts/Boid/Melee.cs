@@ -1,7 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
+using Random = UnityEngine.Random;
 
 public class Melee : Boid {
 
@@ -13,8 +15,8 @@ public class Melee : Boid {
 
         cost = 10;
         health = 100;
-        damage = 10;
-        maxSpeed = 2f;
+        damage = 1;
+        maxSpeed = 4f;
         targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
@@ -25,23 +27,35 @@ public class Melee : Boid {
         //mesh = ;
         collisionMask = LayerMask.GetMask("Wall", "Obstacle");
 
+
         classInfo = new ClassInfo {
-            viewRadius = 1f,
-            attackDstRange = 0.5f,
-            attackAngleRange = Mathf.PI / 4,
-            alignmentStrength = 0.7f,
-            alignmentExponent = 1.0f, 
-            cohesionStrength = 1.5f,
-            cohesionExponent = 0.8f,
-            separationStrength = 1.0f,
-            separationExponent = 10.0f,
-            fearStrength = 4.65f,
-            fearExponent = 8.0f,
-            attackMovementStrength = 1.1f,
-            attackMovementExponent = 5.0f,
+            viewRadius = 3f,
+            separationRadius = 0.3f,
+            fearRadius = 1.0f,
+            maxForce = 2f,
+            
+            alignmentStrength = 5.6f,
+            alignmentExponent = 0.0f, 
+            
+            cohesionStrength = 4.0f,
+            cohesionExponent = 0.0f,
+            
+            separationStrength = 120.0f,
+            separationExponent = 1.0f,
+            
+            fearStrength = 140.0f,
+            fearExponent = 1.0f,
+            
+            attackDstRange = 1f,
+            attackAngleRange = Mathf.PI / 4.0f,
+            
+            attackMovementStrength = 20.1f,
+            attackMovementExponent = 0.5f,
+            
             emotionalState = 0f,
             morale = 1f,
-            aggressionStrength = 2.0f,
+            aggressionStrength = 10.4f,
+            
             randomMovements = 6.0f,
         };
     }
