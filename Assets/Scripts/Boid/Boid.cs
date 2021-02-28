@@ -85,10 +85,6 @@ public abstract class Boid : Selectable
         _localScale = transform.GetChild(0).transform.localScale;
     }
 
-    void Update() {
-        Attack();
-    }
-
     public void FixedUpdate()
     {
         _rigidbody.AddForce(HoverForce(), ForceMode.Acceleration);
@@ -96,6 +92,8 @@ public abstract class Boid : Selectable
         if (!dead && HeadedForCollisionWithMapBoundary()) {
             _rigidbody.AddForce(AvoidCollisionDir() * avoidCollisionWeight, ForceMode.Acceleration);
         }
+
+        Attack();
     }
 
     // Called by the boid manager
@@ -177,6 +175,10 @@ public abstract class Boid : Selectable
 
     public void SetOwner(Player owner) {
         this.owner = owner;
+    }
+
+    public Player GetOwner() {
+        return owner;
     }
 
     public void SetTarget(Boid target) {
@@ -261,7 +263,7 @@ public abstract class Boid : Selectable
         return new Vector3(vector.x * cos - vector.z * sin, 0, vector.x * sin + vector.z * cos);
     }
 
-    private Vector3 RemoveYComp(Vector3 v)
+    protected Vector3 RemoveYComp(Vector3 v)
     {
         return new Vector3(v.x, 0, v.z);
     }
