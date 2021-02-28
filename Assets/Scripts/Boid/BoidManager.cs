@@ -13,15 +13,18 @@ public class BoidManager : MonoBehaviour
     [SerializeField] private List<Player> players = new List<Player>();
     private bool _isBattlePhase;
 
-    // To be replaced by some other data structure
     private List<Boid> _boids = new List<Boid>();
     
     // Random number generator
     private Random random = new Random();
 
+    // Data structure for efficiently looking up neighbouring boids
+    private BoidGrid _grid = new BoidGrid();
+
     // Start is called before the first frame update
     void Start()
     {
+        
     }
 
     // Fetches the boids from the respective players and places them in the boids list
@@ -68,11 +71,16 @@ public class BoidManager : MonoBehaviour
         NativeArray<float3> forces = new NativeArray<float3>(_boids.Count, Allocator.TempJob); // Out data
         // Information about the entire flocks is gathered
         NativeArray<Player.FlockInfo> flockInfos = new NativeArray<Player.FlockInfo>(players.Count, Allocator.TempJob); // Out and in data
-        
+
+        // Construct and populate the grid to do efficient neighbour queries
+        _grid = new BoidGrid();
+        _grid.Populate(_boids);
+
         // Allocate a struct job for calculating flock info
         FlockStructJob flockJob = new FlockStructJob()
         {
             boids = boidInfos,
+            grid = _grid,
             flockInfos = flockInfos
         };
         
@@ -88,7 +96,7 @@ public class BoidManager : MonoBehaviour
         }
         NativeArray<bool> enemyInRanges = new NativeArray<bool>(_boids.Count, Allocator.TempJob);
         NativeArray<int> boidIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
-        
+
         BoidStructJob boidJob = new BoidStructJob
         {
             random = randomFloats,
@@ -97,6 +105,7 @@ public class BoidManager : MonoBehaviour
             forces = forces,
             enemyInRanges = enemyInRanges,
             boidIndices = boidIndices,
+            grid = _grid
         };
 
         // Schedule job
@@ -127,6 +136,7 @@ public class BoidManager : MonoBehaviour
         flockInfos.Dispose();
         enemyInRanges.Dispose();
         boidIndices.Dispose();
+        _grid.Dispose();
     }
 
     public void BeginBattle() {
@@ -143,6 +153,7 @@ public class BoidManager : MonoBehaviour
     public struct FlockStructJob : IJob
     {
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
+        [ReadOnly] public BoidGrid grid;
         [WriteOnly] public NativeArray<Player.FlockInfo> flockInfos;
 
         public void Execute()
@@ -196,6 +207,7 @@ public class BoidManager : MonoBehaviour
         [WriteOnly] public NativeArray<float3> forces;
         [WriteOnly] public NativeArray<bool> enemyInRanges;
         [WriteOnly] public NativeArray<int> boidIndices;
+        [ReadOnly] public BoidGrid grid;
 
         // Translates a squared distance into a normalized distance representation,
         // i.e to a value from 0 to 1
@@ -275,15 +287,17 @@ public class BoidManager : MonoBehaviour
             // Current boid
             Boid.BoidInfo boid = boids[index];
 
+            NativeArray<int> neighbours = grid.FindBoidsWithinRadius(boid, boid.classInfo.viewRadius);
+
             // Iterate over all the neighbours
-            for (int i = 0; i < boids.Length; i++)
+            foreach (int i in neighbours)
             {
-                if (i == index) continue;
+                Boid.BoidInfo neighbour = boids[i];
 
                 // Compare the distance between this boid and the neighbour using the
                 // square of the distance and radius. This avoids costly square root operations
                 // And if close enough, add to average position for separation
-                float3 vector = (boids[i].pos - boid.pos);
+                float3 vector = (neighbour.pos - boid.pos);
                 float sqrDist = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
 
                 // If boid is beyond view radius, ignore
@@ -293,7 +307,7 @@ public class BoidManager : MonoBehaviour
                 float dist = math.sqrt(sqrDist);
                 float normalizedViewDistance = dist / boid.classInfo.viewRadius;
 
-                if (boids[i].flockId == boid.flockId) {
+                if (neighbour.flockId == boid.flockId) {
                     // Friendly boid
                     
                     // Contribute to average velocity
@@ -302,13 +316,13 @@ public class BoidManager : MonoBehaviour
                     
                     //TODO possible variation: use heading of neighbouring boids instead of velocity! this way, faster
                     //TODO boids do not have more influence (although this might be desirable)
-                    avgVel += boids[i].vel * amount;
+                    avgVel += neighbour.vel * amount;
                     
                     // Add to average position for cohesion, weighted using morale
                     amount = CalculatePower(boid.classInfo.morale, normalizedViewDistance,
                         boid.classInfo.cohesionExponent);
                     
-                    avgNeighborPos += boids[i].pos * amount;
+                    avgNeighborPos += neighbour.pos * amount;
                     avgNeighborPosDivider += amount;
                     
                     // If within separation radius...
@@ -323,7 +337,7 @@ public class BoidManager : MonoBehaviour
                             1.0f - normalizedSeparationDistance, -boid.classInfo.separationExponent);
                         
                         // The separation force between the two boids
-                        float3 separation = (boid.pos - boids[i].pos) / dist;
+                        float3 separation = (boid.pos - neighbour.pos) / dist;
 
                         avgSeparation += separation * amount;
                         separationDivider += amount;
@@ -344,7 +358,7 @@ public class BoidManager : MonoBehaviour
                             CalculatePower(1.0f, 1.0f - normalizedFearDistance, -boid.classInfo.fearExponent);
 
                         // Fear force between the two boids
-                        float3 fear = (boid.pos - boids[i].pos) / dist;
+                        float3 fear = (boid.pos - neighbour.pos) / dist;
 
                         avgFear += fear * amount;
                         avgFearDivider += amount;
@@ -371,6 +385,8 @@ public class BoidManager : MonoBehaviour
             
             //TODO do we want to normalize all the forces before scaling with the behavior strength?
             //TODO this will make the behavior force equally strong at all times... Might not be what we want
+
+            neighbours.Dispose();
 
             // Calculate alignment force
             Vector3 alignmentForce;
