@@ -16,6 +16,7 @@ public class GameUI : MonoBehaviour
     [SerializeField] private int unitButtonRows;
     [SerializeField] private int unitButtonCols;
     [SerializeField] private BoidManager boidManager;
+    [SerializeField] private bool showHealthBars;
 
     // Start is called before the first frame update
     void Start()
@@ -100,6 +101,8 @@ public class GameUI : MonoBehaviour
         {
             // Run game
             players.ForEach(p => p.Ready());
+        } else if (Input.GetKeyDown("y")) {
+            showHealthBars = !showHealthBars;
         }
     }
 
@@ -207,5 +210,10 @@ public class GameUI : MonoBehaviour
     public Button GetReadyButton()
     {
         return ready;
+    }
+
+    public bool ShowHealthBars()
+    {
+        return showHealthBars;
     }
 }
