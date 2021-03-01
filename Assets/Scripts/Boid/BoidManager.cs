@@ -224,7 +224,7 @@ public class BoidManager : MonoBehaviour
         }
 
         // Calculates a random force based on an array of random values
-        private float3 CalculateRandomForce(int index, float strength)
+        private float3 RandomForce(int index, float strength)
         {
             float angle = math.PI * 2 * random[index * 2];
             float amount = random[index * 2 + 1];
@@ -283,16 +283,14 @@ public class BoidManager : MonoBehaviour
             return distances;
         }
        
-        
-
-        private float3 AlignmentForce(Boid.BoidInfo boid, NativeArray<int> neighbors, NativeArray<float> distances)
+        private float3 AlignmentForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
             // Average velocity is used to calculate alignment force
             float3 avgVel = float3.zero;
 
-            for (int i = 0; i < neighbors.Length; i++)
+            for (int i = 0; i < neighbours.Length; i++)
             {
-                Boid.BoidInfo neighbour = boids[neighbors[i]];
+                Boid.BoidInfo neighbour = boids[neighbours[i]];
 
                 // No alignment behavior with enemy boids
                 if (boid.flockId != neighbour.flockId) continue;
@@ -318,15 +316,15 @@ public class BoidManager : MonoBehaviour
             return alignmentForce;
         }
 
-        private float3 CohesionForce(Boid.BoidInfo boid, NativeArray<int> neighbors, NativeArray<float> distances)
+        private float3 CohesionForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
             // Average neighbour position 
             float3 avgNeighborPos = float3.zero;
             float avgNeighborPosDivider = 0.0f;
 
-            for (int i = 0; i < neighbors.Length; i++)
+            for (int i = 0; i < neighbours.Length; i++)
             {
-                Boid.BoidInfo neighbour = boids[neighbors[i]];
+                Boid.BoidInfo neighbour = boids[neighbours[i]];
                 
                 // No cohesion behavior with enemy boids
                 if (boid.flockId != neighbour.flockId) continue;
@@ -350,23 +348,158 @@ public class BoidManager : MonoBehaviour
             return cohesionForce;
         }
         
-
-        public void Execute(int index)
+        private float3 SeparationForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
-
             // Separation force acting on the boid
             float3 avgSeparation = float3.zero;
             float separationDivider = 0.0f;
+
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                Boid.BoidInfo neighbour = boids[neighbours[i]];
+                
+                // No separation behavior with enemy boids (we have fear for that)
+                if (boid.flockId != neighbour.flockId) continue;
+                
+                float distance = distances[i];
+                
+                // If within separation radius...
+                if (distance < boid.classInfo.separationRadius)
+                {
+                    // Calculate a normalized separation distance, i.e a value from 0 to 1
+                    float normalizedSeparationDistance = distance / boid.classInfo.separationRadius;
+                    
+                    // The power of the separation should be stronger the closer the two boids are to each other,
+                    // inversely proportional to the distance (with respect to the separation exponent)
+                    float amount = CalculatePower(1,
+                        1.0f - normalizedSeparationDistance, -boid.classInfo.separationExponent);
+                    
+                    // The separation force between the two boids
+                    float3 separation = (boid.pos - neighbour.pos) / distance;
+
+                    avgSeparation += separation * amount;
+                    separationDivider += amount;
+                }
+            }
+
+            // Calculate separation force
+            float3 separationForce;
+            if (separationDivider == 0) separationForce = float3.zero;
+            else separationForce = (avgSeparation / separationDivider) * boid.classInfo.separationStrength;
+
+            return separationForce;
+        }
+
+        private float3 AggressionForce(Boid.BoidInfo boid)
+        {
+            // Calculate aggression force
+            // TODO this line assumes there's only two flocks and that the ID of the flock corresponds to the index 
+            // TODO in the flocks array. Find better solution
+            Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
             
+            float3 aggressionForce;
+            if (enemyFlock.boidCount == 0) aggressionForce = float3.zero;
+            else aggressionForce = math.normalize(enemyFlock.avgPos - boid.pos) * boid.classInfo.aggressionStrength;
+
+            return aggressionForce;
+        }
+
+        private float3 FearForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
+        {
             // Fear force acting on the boid (a boid fears enemy boids)
             float3 avgFear = float3.zero;
             float avgFearDivider = 0.0f;
 
-            // Init attack info
-            bool enemyInRange = false;
-            int targetBoidIndex = -1; // index of target boid in _boids
-            float sqrDistToClosestEnemyInRange = math.INFINITY;
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                Boid.BoidInfo neighbour = boids[neighbours[i]];
+                
+                // No fear for friendly boids
+                if (boid.flockId == neighbour.flockId) continue;
+                
+                float distance = distances[i];
+                
+                // If the enemy boid is within the fear radius...
+                if (distance < boid.classInfo.fearRadius)
+                {
+                    // Normalize distance with respect to fear radius
+                    float normalizedFearDistance = distance / boid.classInfo.fearRadius;
+                    
+                    // Calculate the strength of the fear. This is inversely proportional to some exponent of the normalized distance
+                    float amount =
+                        CalculatePower(1.0f, 1.0f - normalizedFearDistance, -boid.classInfo.fearExponent);
 
+                    // Fear force between the two boids
+                    float3 fear = (boid.pos - neighbour.pos) / distance;
+
+                    avgFear += fear * amount;
+                    avgFearDivider += amount;
+                }
+            }
+            
+            //TODO do we want to normalize all the forces before scaling with the behavior strength?
+            //TODO this will make the behavior force equally strong at all times... Might not be what we want
+            // Calculate fear force
+            // This force is similar to the separation force, but only acts on enemy boids
+            float3 fearForce;
+            if (avgFearDivider == 0.00) fearForce = float3.zero;
+            else fearForce = (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
+
+            return fearForce;
+        }
+        
+        private int FindTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
+        {
+            // Init attack info
+            int targetBoidIndex = -1; // index of target boid in _boids
+            float distToClosestEnemyInRange = boid.classInfo.attackDstRange;
+
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                Boid.BoidInfo neighbour = boids[neighbours[i]];
+                
+                // Friendly boids cannot be targets
+                if (boid.flockId == neighbour.flockId) continue;
+                
+                float distance = distances[i];
+                
+                // If the enemy boid is closer than the currently stored one
+                if (distance < distToClosestEnemyInRange)
+                {
+                    bool enemyInRange = BoidIndexInAttackRange(neighbour.pos - boid.pos,
+                            boid.forward,
+                            boid.classInfo.attackDstRange,
+                            boid.classInfo.attackAngleRange);
+                    
+                    if (enemyInRange) // and in range, update target
+                    { 
+                        targetBoidIndex = neighbours[i];
+                        distToClosestEnemyInRange = distance;
+                    }
+                }
+            }
+
+            return targetBoidIndex;
+        }
+
+        private float3 AttackForce(Boid.BoidInfo boid, bool enemyInRange, int targetBoidIndex)
+        {
+            // Calculate attack force
+            // The attack force tries to move the boid towards the target boid
+            float3 attackForce;
+            if (!enemyInRange) return float3.zero;
+
+            //TODO find better solution than to recalculate distance here
+            //TODO problem is that targetBoidIndex corresponds to index in boid array, not necessarily in distances array
+            float3 vector = boids[targetBoidIndex].pos - boid.pos;
+            float dist = math.length(vector);
+            attackForce = vector * CalculatePower(boid.classInfo.attackMovementStrength, dist / boid.classInfo.attackDstRange, boid.classInfo.attackMovementExponent);
+
+            return attackForce;
+        }
+
+        public void Execute(int index)
+        {
             // Current boid
             Boid.BoidInfo boid = boids[index];
 
@@ -388,118 +521,37 @@ public class BoidManager : MonoBehaviour
                 float3 vector = (neighbour.pos - boid.pos);
                 float sqrDist = vector.x * vector.x + vector.y * vector.y + vector.z * vector.z;
 
-                // If boid is beyond view radius, ignore
-                if (sqrDist > (boid.classInfo.viewRadius * boid.classInfo.viewRadius)) continue;
-
                 // Calculate a normalized distance (a value from 0.0 to 1.0)
-                float dist = math.sqrt(sqrDist);
-                float normalizedViewDistance = dist / boid.classInfo.viewRadius;
 
                 if (neighbour.flockId == boid.flockId) {
                     // Friendly boid
                     
-                    // If within separation radius...
-                    if (dist < boid.classInfo.separationRadius)
-                    {
-                        // Calculate a normalized separation distance, i.e a value from 0 to 1
-                        float normalizedSeparationDistance = dist / boid.classInfo.separationRadius;
-                        
-                        // The power of the separation should be stronger the closer the two boids are to each other,
-                        // inversely proportional to the distance (with respect to the separation exponent)
-                        float amount = CalculatePower(1,
-                            1.0f - normalizedSeparationDistance, -boid.classInfo.separationExponent);
-                        
-                        // The separation force between the two boids
-                        float3 separation = (boid.pos - neighbour.pos) / dist;
-
-                        avgSeparation += separation * amount;
-                        separationDivider += amount;
-                    }
                 } 
                 else 
                 {
                     // Enemy boid
 
-                    // If the enemy boid is within the fear radius...
-                    if (dist < boid.classInfo.fearRadius)
-                    {
-                        // Normalize distance with respect to fear radius
-                        float normalizedFearDistance = dist / boid.classInfo.fearRadius;
-                        
-                        // Calculate the strength of the fear. This is inversely proportional to some exponent of the normalized distance
-                        float amount =
-                            CalculatePower(1.0f, 1.0f - normalizedFearDistance, -boid.classInfo.fearExponent);
-
-                        // Fear force between the two boids
-                        float3 fear = (boid.pos - neighbour.pos) / dist;
-
-                        avgFear += fear * amount;
-                        avgFearDivider += amount;
-                    }
 
                     // If closer than current attack target
                     // TODO: use other factors to determine target as well? for example target weak enemy boid?
                     // TODO: we could use weight calculated using distance, health, and other factors
-                    if (sqrDist < sqrDistToClosestEnemyInRange) 
-                    {
-                        enemyInRange = BoidIndexInAttackRange(vector,
-                                boid.forward,
-                                boid.classInfo.attackDstRange,
-                                boid.classInfo.attackAngleRange);
-                        
-                        if (enemyInRange) // and in range, update target
-                        { 
-                            targetBoidIndex = i;
-                            sqrDistToClosestEnemyInRange = sqrDist;
-                        }
-                    }
                 }
             }
+
+            int targetBoidIndex = FindTargetIndex(boid, neighbours, distances);
+            bool enemyInRange = targetBoidIndex != -1;
             
-            //TODO do we want to normalize all the forces before scaling with the behavior strength?
-            //TODO this will make the behavior force equally strong at all times... Might not be what we want
-
-            neighbours.Dispose();
-            distances.Dispose();
-
-            // Calculate separation force
-            float3 separationForce;
-            if (separationDivider == 0) separationForce = float3.zero;
-            else separationForce = (avgSeparation / separationDivider) * boid.classInfo.separationStrength;
-
-            // Calculate aggression force
-            Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
-            float3 enemyFlockPos = enemyFlock.avgPos;
-            float3 aggressionForce;
-
-            if (enemyFlock.boidCount == 0) aggressionForce = float3.zero;
-            else aggressionForce = math.normalize(enemyFlockPos - boid.pos) * boid.classInfo.aggressionStrength;
-            
-            // Calculate fear force
-            // This force is similar to the separation force, but only acts on enemy boids
-            float3 fearForce;
-            if (avgFearDivider == 0.00) fearForce = float3.zero;
-            else fearForce = (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
-            
-            // Calculate attack force
-            // The attack force tries to move the boid towards the target boid
-            float3 attackForce;
-            if (!enemyInRange) attackForce = float3.zero;
-            else attackForce = math.normalize(boids[targetBoidIndex].pos - boid.pos) *
-                               CalculatePower(boid.classInfo.attackMovementStrength, NormalizedDist(sqrDistToClosestEnemyInRange, boid.classInfo.attackDstRange), boid.classInfo.attackMovementExponent);
-
-            // Calculate random force
-            float3 randomForce = CalculateRandomForce(index, boid.classInfo.randomMovements);
-
             // Sum all the forces
             float3 desire = 
+                            // Reynolds behaviors
                               AlignmentForce(boid, neighbours, distances) 
                             + CohesionForce(boid, neighbours, distances)
-                            + separationForce
-                            + aggressionForce
-                            + fearForce
-                            + attackForce
-                            + randomForce
+                            + SeparationForce(boid, neighbours, distances)
+                            // Additional behaviors
+                            + AggressionForce(boid)
+                            + FearForce(boid, neighbours, distances)
+                            + AttackForce(boid, enemyInRange, targetBoidIndex)
+                            + RandomForce(index, boid.classInfo.randomMovements);
             ;
 
             float3 force = desire - boid.vel;
@@ -515,6 +567,10 @@ public class BoidManager : MonoBehaviour
             // Update attack info
             enemyInRanges[index] = enemyInRange;
             boidIndices[index] = targetBoidIndex;
+            
+            neighbours.Dispose();
+            distances.Dispose();
+
         }
     }
 }
