@@ -137,11 +137,7 @@ public class BoidManager : MonoBehaviour
         for (int i = 0; i < _boids.Count; i++)
         {
             _boids[i].UpdateBoid(forces[i]);
-            if (targetIndices[i] != -1) { // If enemy in attack range
-                _boids[i].SetTarget(_boids[targetIndices[i]]);
-            } else {
-                _boids[i].SetTarget(null);
-            }
+            _boids[i].SetTarget(targetIndices[i] != -1 ? _boids[targetIndices[i]] : null);
         }
 
         // Dispose of all data
@@ -164,7 +160,7 @@ public class BoidManager : MonoBehaviour
     // This job calculates information specific for the entire flock, such as 
     // average velocity, average position and entity count
     [BurstCompile]
-    public struct FlockStructJob : IJob
+    private struct FlockStructJob : IJob
     {
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
         [WriteOnly] public NativeArray<Player.FlockInfo> flockInfos;
@@ -212,7 +208,7 @@ public class BoidManager : MonoBehaviour
 
     // This job calculates all the forces acting on the boids and the attack target
     [BurstCompile]
-    public struct BoidStructJob : IJobParallelFor
+    private struct BoidStructJob : IJobParallelFor
     {
         [ReadOnly] public NativeArray<float> random;
         [ReadOnly] public NativeArray<Player.FlockInfo> flocks;
@@ -247,7 +243,6 @@ public class BoidManager : MonoBehaviour
                             + FearForce(boid, neighbours, distances)
                             + AttackForce(boid, enemyInRange, targetBoidIndex)
                             + RandomForce(index, boid.classInfo.randomMovements);
-            ;
 
             float3 force = desire - boid.vel;
 
@@ -291,10 +286,7 @@ public class BoidManager : MonoBehaviour
                 float attackAngleRange) 
         {
             // Calc angle to target
-            float dp = vectorFromSelfToEnemy.x * forward.x
-                     + vectorFromSelfToEnemy.y * forward.y
-                     + vectorFromSelfToEnemy.z * forward.z;
-
+            float dp = math.dot(vectorFromSelfToEnemy, forward);
             float angle = math.acos(dp / dist);
 
             // Ignores
@@ -401,23 +393,22 @@ public class BoidManager : MonoBehaviour
                 
                 float distance = distances[i];
                 
-                // If within separation radius...
-                if (distance < boid.classInfo.separationRadius)
-                {
-                    // Calculate a normalized separation distance, i.e a value from 0 to 1
-                    float normalizedSeparationDistance = distance / boid.classInfo.separationRadius;
+                // Continue if outside separation radius
+                if (distance > boid.classInfo.separationRadius) continue;
+                
+                // Calculate a normalized separation distance, i.e a value from 0 to 1
+                float normalizedSeparationDistance = distance / boid.classInfo.separationRadius;
                     
-                    // The power of the separation should be stronger the closer the two boids are to each other,
-                    // inversely proportional to the distance (with respect to the separation exponent)
-                    float amount = CalculatePower(1,
-                        1.0f - normalizedSeparationDistance, -boid.classInfo.separationExponent);
+                // The power of the separation should be stronger the closer the two boids are to each other,
+                // inversely proportional to the distance (with respect to the separation exponent)
+                float amount = CalculatePower(1,
+                    1.0f - normalizedSeparationDistance, -boid.classInfo.separationExponent);
                     
-                    // The separation force between the two boids
-                    float3 separation = (boid.pos - neighbour.pos) / distance;
+                // The separation force between the two boids
+                float3 separation = (boid.pos - neighbour.pos) / distance;
 
-                    avgSeparation += separation * amount;
-                    separationDivider += amount;
-                }
+                avgSeparation += separation * amount;
+                separationDivider += amount;
             }
 
             // Calculate separation force
@@ -451,33 +442,29 @@ public class BoidManager : MonoBehaviour
                 
                 float distance = distances[i];
                 
-                // If the enemy boid is within the fear radius...
-                if (distance < boid.classInfo.fearRadius)
-                {
-                    // Normalize distance with respect to fear radius
-                    float normalizedFearDistance = distance / boid.classInfo.fearRadius;
+                // Continue if outside fear radius
+                if (distance > boid.classInfo.fearRadius) continue;
+                
+                // Normalize distance with respect to fear radius
+                float normalizedFearDistance = distance / boid.classInfo.fearRadius;
                     
-                    // Calculate the strength of the fear. This is inversely proportional to some exponent of the normalized distance
-                    float amount =
-                        CalculatePower(1.0f, 1.0f - normalizedFearDistance, -boid.classInfo.fearExponent);
+                // Calculate the strength of the fear. This is inversely proportional to some exponent of the normalized distance
+                float amount =
+                    CalculatePower(1.0f, 1.0f - normalizedFearDistance, -boid.classInfo.fearExponent);
 
-                    // Fear force between the two boids
-                    float3 fear = (boid.pos - neighbour.pos) / distance;
+                // Fear force between the two boids
+                float3 fear = (boid.pos - neighbour.pos) / distance;
 
-                    avgFear += fear * amount;
-                    avgFearDivider += amount;
-                }
+                avgFear += fear * amount;
+                avgFearDivider += amount;
             }
             
             //TODO do we want to normalize all the forces before scaling with the behavior strength?
             //TODO this will make the behavior force equally strong at all times... Might not be what we want
             // Calculate fear force
             // This force is similar to the separation force, but only acts on enemy boids
-            float3 fearForce;
-            if (avgFearDivider == 0.00) fearForce = float3.zero;
-            else fearForce = (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
-
-            return fearForce;
+            if (avgFearDivider == 0.00) return float3.zero;
+            return (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
         }
         
         private int FindTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
@@ -495,20 +482,19 @@ public class BoidManager : MonoBehaviour
                 
                 float distance = distances[i];
                 
-                // If the enemy boid is closer than the currently stored one
-                if (distance < distToClosestEnemyInRange)
-                {
-                    bool enemyInRange = BoidIndexInAttackRange(neighbour.pos - boid.pos,
-                            distance,
-                            boid.forward,
-                            boid.classInfo.attackDistRange,
-                            boid.classInfo.attackAngleRange);
+                // If the enemy boid is closer than the currently stored one...
+                if (distance > distToClosestEnemyInRange) continue;
+                
+                bool enemyInRange = BoidIndexInAttackRange(neighbour.pos - boid.pos,
+                    distance,
+                    boid.forward,
+                    boid.classInfo.attackDistRange,
+                    boid.classInfo.attackAngleRange);
                     
-                    if (enemyInRange) // and in range, update target
-                    { 
-                        targetBoidIndex = neighbours[i];
-                        distToClosestEnemyInRange = distance;
-                    }
+                if (enemyInRange) // and in range, update target
+                { 
+                    targetBoidIndex = neighbours[i];
+                    distToClosestEnemyInRange = distance;
                 }
             }
 
