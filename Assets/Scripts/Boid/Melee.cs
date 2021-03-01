@@ -9,9 +9,16 @@ public class Melee : Boid {
 
     private float _nextAttackTime;
 
+    private Shader _attackAnimationShader;
+
     // Start is called before the first frame update
     void Start() {
         base.Start();
+        
+        dead = false;
+        collisionMask = LayerMask.GetMask("Wall", "Obstacle");
+        _attackAnimationShader = Shader.Find("Sprites/Default");
+        
 
         cost = 10;
         health = 100;
@@ -20,13 +27,9 @@ public class Melee : Boid {
         targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        hover_Ki = 2f;
-        hover_Kp = 10f;
+        hoverKi = 2f;
+        hoverKp = 10f;
         timeBetweenAttacks = 0.1f;
-        dead = false;
-        //mesh = ;
-        collisionMask = LayerMask.GetMask("Wall", "Obstacle");
-
 
         classInfo = new ClassInfo {
             viewRadius = 3f,
@@ -70,7 +73,7 @@ public class Melee : Boid {
 
     private void AnimateAttack(Vector3 fromPos, Vector3 toPos) {
         LineRenderer lineRenderer = new GameObject("Line").AddComponent<LineRenderer>();
-        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+        lineRenderer.material = new Material(_attackAnimationShader);
         lineRenderer.startWidth = 0.1f;
         lineRenderer.endWidth = 0.01f;
         lineRenderer.startColor = owner.color;
