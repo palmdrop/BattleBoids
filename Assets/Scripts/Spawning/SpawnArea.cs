@@ -104,6 +104,9 @@ public class SpawnArea : MonoBehaviour
                 }
                 holding.Clear();
                 gridWidth = 0;
+                
+                // Tell owner the flock has been updated
+                owner.FlockUpdate = true;
             } else if (Physics.Raycast(ray, out hit, Mathf.Infinity, ~LayerMask.GetMask("Spawn Area"))) {
                 // Pick up entity
                 if (spawned.Contains(hit.collider.gameObject)) {

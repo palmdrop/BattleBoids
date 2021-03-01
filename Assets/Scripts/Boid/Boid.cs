@@ -38,7 +38,7 @@ public abstract class Boid : Selectable
         public float fearStrength, fearExponent; 
         
         // Attack range
-        public float attackDstRange;
+        public float attackDistRange;
         public float attackAngleRange; // Angle relative local z-axis in rad
         
         public float attackMovementStrength, attackMovementExponent; // Controls attack impulse
