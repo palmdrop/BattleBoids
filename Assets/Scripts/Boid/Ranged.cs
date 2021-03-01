@@ -25,8 +25,8 @@ public class Ranged : Boid {
         targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        hover_Ki = 2f;
-        hover_Kp = 10f;
+        hoverKi = 2f;
+        hoverKp = 10f;
         timeBetweenAttacks = 2f;
         dead = false;
         //mesh = ;
@@ -51,7 +51,7 @@ public class Ranged : Boid {
             fearStrength = 140.0f,
             fearExponent = 1.0f,
             
-            attackDstRange = 3f,
+            attackDistRange = 3f,
             attackAngleRange = Mathf.PI,
             
             attackMovementStrength = 20.1f,
