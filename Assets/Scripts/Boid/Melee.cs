@@ -46,7 +46,7 @@ public class Melee : Boid {
             fearStrength = 140.0f,
             fearExponent = 1.0f,
             
-            attackDstRange = 1f,
+            attackDistRange = 1f,
             attackAngleRange = Mathf.PI / 4.0f,
             
             attackMovementStrength = 20.1f,

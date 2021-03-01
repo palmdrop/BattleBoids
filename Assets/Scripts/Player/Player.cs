@@ -22,6 +22,7 @@ public class Player : MonoBehaviour
     [SerializeField] private bool ready;
 
     private FlockInfo _flockInfo;
+    public bool FlockUpdate { get; set; } = false;
 
     // Start is called before the first frame update
     void Start()
@@ -37,7 +38,6 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
     }
 
     public List<GameObject> GetFlock()
@@ -104,4 +104,5 @@ public class Player : MonoBehaviour
     {
         this._flockInfo = flockInfo;
     }
+
 }
