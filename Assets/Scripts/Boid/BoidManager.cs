@@ -94,8 +94,7 @@ public class BoidManager : MonoBehaviour
         {
             randomFloats[i] = (float)random.NextDouble();
         }
-        NativeArray<bool> enemyInRanges = new NativeArray<bool>(_boids.Count, Allocator.TempJob);
-        NativeArray<int> boidIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
+        NativeArray<int> targetIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
 
         BoidStructJob boidJob = new BoidStructJob
         {
@@ -103,8 +102,7 @@ public class BoidManager : MonoBehaviour
             flocks = flockInfos,
             boids = boidInfos,
             forces = forces,
-            enemyInRanges = enemyInRanges,
-            boidIndices = boidIndices,
+            targetIndices = targetIndices,
             grid = _grid
         };
 
@@ -122,8 +120,8 @@ public class BoidManager : MonoBehaviour
         for (int i = 0; i < _boids.Count; i++)
         {
             _boids[i].UpdateBoid(forces[i]);
-            if (enemyInRanges[i]) { // If enemy in attack range
-                _boids[i].SetTarget(_boids[boidIndices[i]]);
+            if (targetIndices[i] != -1) { // If enemy in attack range
+                _boids[i].SetTarget(_boids[targetIndices[i]]);
             } else {
                 _boids[i].SetTarget(null);
             }
@@ -134,8 +132,7 @@ public class BoidManager : MonoBehaviour
         boidInfos.Dispose();
         forces.Dispose();
         flockInfos.Dispose();
-        enemyInRanges.Dispose();
-        boidIndices.Dispose();
+        targetIndices.Dispose();
         _grid.Dispose();
     }
 
@@ -205,8 +202,7 @@ public class BoidManager : MonoBehaviour
         [ReadOnly] public NativeArray<Player.FlockInfo> flocks;
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
         [WriteOnly] public NativeArray<float3> forces;
-        [WriteOnly] public NativeArray<bool> enemyInRanges;
-        [WriteOnly] public NativeArray<int> boidIndices;
+        [WriteOnly] public NativeArray<int> targetIndices;
         [ReadOnly] public BoidGrid grid;
 
         // Translates a squared distance into a normalized distance representation,
@@ -565,8 +561,7 @@ public class BoidManager : MonoBehaviour
             forces[index] = force;
 
             // Update attack info
-            enemyInRanges[index] = enemyInRange;
-            boidIndices[index] = targetBoidIndex;
+            targetIndices[index] = targetBoidIndex;
             
             neighbours.Dispose();
             distances.Dispose();
