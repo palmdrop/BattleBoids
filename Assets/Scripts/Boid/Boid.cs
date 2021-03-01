@@ -11,8 +11,8 @@ public abstract class Boid : Selectable
     protected float targetHeight;
     protected float collisionAvoidanceDistance;
     protected float avoidCollisionWeight;
-    protected float hover_Ki;
-    protected float hover_Kp;
+    protected float hoverKi;
+    protected float hoverKp;
     protected float timeBetweenAttacks;
     protected bool dead;
     protected Mesh mesh;
@@ -108,7 +108,9 @@ public abstract class Boid : Selectable
         {
             _rigidbody.velocity = _rigidbody.velocity.normalized * maxSpeed;
         }
-        transform.forward = new Vector3(_rigidbody.velocity.x, 0, _rigidbody.velocity.z);
+
+        Vector3 velocity = _rigidbody.velocity;
+        transform.forward = new Vector3(velocity.x, 0, velocity.z);
     }
 
     private Vector3 HoverForce()
@@ -126,7 +128,7 @@ public abstract class Boid : Selectable
         float velY = GetVel().y;
 
         //Formula to determine whether to hover or fall, uses a PI-regulator with values Ki and Kp
-        Vector3 yForce = new Vector3(0, (deltaY > 0 && !dead ? (hover_Kp * deltaY - hover_Ki * velY) : 0), 0);
+        Vector3 yForce = new Vector3(0, (deltaY > 0 && !dead ? (hoverKp * deltaY - hoverKi * velY) : 0), 0);
         
         return yForce;
     }
@@ -135,7 +137,7 @@ public abstract class Boid : Selectable
     {
         for (int i = 0; i < 3; i++) //Send 3 rays. This is to avoid tangentially going too close to an obstacle.
         {
-            float angle = ((i + 1) / 2) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
+            float angle = ((i + 1) / 2.0f) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
             int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
 
             Vector3 dir = RotationMatrix_y(angle * sign, GetVel()).normalized;
@@ -155,7 +157,7 @@ public abstract class Boid : Selectable
     {
         for (int i = 3; i < 300 / _rayCastTheta; i++)
         {
-            float angle = ((i + 1) / 2) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
+            float angle = ((i + 1) / 2.0f) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
             int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
 
             Vector3 dir = RotationMatrix_y(angle * sign, GetVel()).normalized;
@@ -241,14 +243,14 @@ public abstract class Boid : Selectable
 
     private Vector3 GetCenterForwardPoint()
     {
-        if (mesh == null || _localScale == null)
+        if (mesh == null)
             return Vector3.zero;
         return new Vector3(transform.forward.x * _localScale.x * mesh.bounds.size.z / 2, mesh.bounds.size.z * _localScale.y, transform.forward.z * _localScale.z * mesh.bounds.size.z / 2);
     }
 
     private Vector3 GetMiddlePoint()
     {
-        if (mesh == null || _localScale == null)
+        if (mesh == null)
             return Vector3.zero;
         return new Vector3(0, mesh.bounds.size.z * _localScale.y, 0);
     }
