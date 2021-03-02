@@ -33,32 +33,32 @@ public class Healer : Boid {
         classInfo = new ClassInfo {
             viewRadius = 3f,
             separationRadius = 0.3f,
-            fearRadius = 1.0f,
-            maxForce = 2f,
+            fearRadius = 1.3f,
+            maxForce = 2.0f,
             
-            alignmentStrength = 5.6f,
+            alignmentStrength = 6.0f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 4.0f,
+            cohesionStrength = 6.0f,
             cohesionExponent = 0.0f,
             
             separationStrength = 120.0f,
             separationExponent = 1.0f,
             
-            fearStrength = 140.0f,
-            fearExponent = 1.0f,
+            fearStrength = 100.0f,
+            fearExponent = 0.5f,
             
-            attackDistRange = 1f,
+            attackDistRange = 0f,
             attackAngleRange = Mathf.PI / 4.0f,
             
-            attackMovementStrength = 20.1f,
-            attackMovementExponent = 0.5f,
+            attackMovementStrength = 0.0f,
+            attackMovementExponent = 0.0f,
             
             emotionalState = 0f,
             morale = 1f,
-            aggressionStrength = 10.4f,
+            aggressionStrength = 8.4f,
             
-            randomMovements = 6.0f,
+            randomMovements = 4.0f,
         };
     }
 
