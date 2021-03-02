@@ -94,7 +94,14 @@ public class Ranged : Boid {
             projectile.GetComponent<RangedProjectile>().SetOwner(owner);
             projectile.GetComponent<RangedProjectile>().SetDamage(damage);
             projectile.GetComponent<Rigidbody>().AddForce(launchVector, ForceMode.VelocityChange);
+
+            PlayAttackSound();
         }
+    }
+    
+    private void PlayAttackSound()
+    {
+        FindObjectOfType<AudioManager>().Play("RangedFire");
     }
 
     private float FindTimeToImpact() {

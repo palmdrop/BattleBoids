@@ -64,6 +64,7 @@ public class Melee : Boid {
         if (target != null && Time.time > _nextAttackTime) {
             _nextAttackTime = Time.time + timeBetweenAttacks;
             target.TakeDamage(damage);
+            PlayAttackSound();
             AnimateAttack(this.GetPos(), target.GetPos());
         }
     }
@@ -79,5 +80,15 @@ public class Melee : Boid {
         lineRenderer.SetPosition(0, fromPos);
         lineRenderer.SetPosition(1, toPos);
         Destroy(lineRenderer, 0.1f);
+    }
+
+    private void PlayAttackSound()
+    {
+        //if (Random.Range(0f, 1f) < 0.9) return;
+
+        float random = Random.Range(0f, 1f);
+        if (random < 0.33f) FindObjectOfType<AudioManager>().Play("Laser1");
+        else if (random < 0.67f) FindObjectOfType<AudioManager>().Play("Laser2");
+        else FindObjectOfType<AudioManager>().Play("Laser3");
     }
 }

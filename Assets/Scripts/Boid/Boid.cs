@@ -171,6 +171,12 @@ public abstract class Boid : Selectable
 
     private void OnCollisionEnter(Collision collision) {
         //TakeDamage((int) collision.impulse.magnitude * 10);
+
+        if (/*collision.collider.gameObject.layer == LayerMask.NameToLayer("Wall")
+            || */collision.collider.gameObject.layer == LayerMask.NameToLayer("Obstacle"))
+        {
+            FindObjectOfType<AudioManager>().Play("Collision");
+        }
     }
 
     public void SetOwner(Player owner) {
@@ -285,6 +291,5 @@ public abstract class Boid : Selectable
     }
 
     public abstract void Attack();
-    
-    
+
 }
