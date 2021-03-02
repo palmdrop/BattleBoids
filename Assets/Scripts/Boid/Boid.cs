@@ -254,11 +254,6 @@ public abstract class Boid : Selectable
         return dead;
     }
 
-    public Player GetOwner()
-    {
-        return owner;
-    }
-
     private Vector3 GetCenterForwardPoint()
     {
         if (mesh == null)
