@@ -4,9 +4,10 @@ using UnityEngine;
 using System;
 using UnityEngine.Audio;
 
+// A class for managing playing sounds
 public class AudioManager : MonoBehaviour
 {
-
+    // The sounds that can be played from this manager
     public Sound[] sounds;
 
     
@@ -22,7 +23,8 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-
+    // Plays a sound from a given name. Name must be in a Sound object of the sounds array
+    // Call this method from an event when you want to play a sound
     public void Play(string name)
     {
         Sound s = Array.Find(sounds, sound => sound.name == name);

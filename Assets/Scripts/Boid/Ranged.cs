@@ -99,6 +99,7 @@ public class Ranged : Boid {
         }
     }
     
+    // Plays a ranged attack sound
     private void PlayAttackSound()
     {
         FindObjectOfType<AudioManager>().Play("RangedFire");

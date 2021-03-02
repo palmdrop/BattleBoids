@@ -82,10 +82,13 @@ public class Melee : Boid {
         Destroy(lineRenderer, 0.1f);
     }
 
+    // Plays an attack sound
     private void PlayAttackSound()
     {
+        // If there are too many sounds, this line can be uncommented
         //if (Random.Range(0f, 1f) < 0.9) return;
 
+        // Plays one of three variations of an attack sound randomly
         float random = Random.Range(0f, 1f);
         if (random < 0.33f) FindObjectOfType<AudioManager>().Play("Laser1");
         else if (random < 0.67f) FindObjectOfType<AudioManager>().Play("Laser2");

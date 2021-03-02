@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
+// A class for storing audio information
 [System.Serializable]
 public class Sound
 {
