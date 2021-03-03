@@ -7,8 +7,6 @@ using Random = UnityEngine.Random;
 
 public class Melee : Boid {
 
-    private float _nextAttackTime;
-
     private Shader _attackAnimationShader;
 
     // Start is called before the first frame update
@@ -29,7 +27,7 @@ public class Melee : Boid {
         avoidCollisionWeight = 5f;
         hoverKi = 2f;
         hoverKp = 10f;
-        timeBetweenAttacks = 0.1f;
+        timeBetweenActions = 0.1f;
 
         classInfo = new ClassInfo {
             viewRadius = 3f,
@@ -63,9 +61,15 @@ public class Melee : Boid {
         };
     }
 
-    public override void Attack() {
-        if (target != null && Time.time > _nextAttackTime) {
-            _nextAttackTime = Time.time + timeBetweenAttacks;
+    public override void Act()
+    {
+        Attack();
+    }
+
+    private void Attack() 
+    {
+        if (target != null) {
+            //_nextAttackTime = Time.time + timeBetweenAttacks;
             target.TakeDamage(damage);
             AnimateAttack(this.GetPos(), target.GetPos());
         }

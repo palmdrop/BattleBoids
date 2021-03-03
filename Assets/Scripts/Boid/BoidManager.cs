@@ -227,7 +227,7 @@ public class BoidManager : MonoBehaviour
             // each behavior.
             NativeArray<float> distances = CalculateDistances(boid, neighbours);
             
-            int targetBoidIndex = FindTargetIndex(boid, neighbours, distances);
+            int targetBoidIndex = FindEnemyTargetIndex(boid, neighbours, distances);
             bool enemyInRange = targetBoidIndex != -1;
             
             // Sum all the forces
@@ -465,10 +465,10 @@ public class BoidManager : MonoBehaviour
             return (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
         }
         
-        private int FindTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
+        private int FindEnemyTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
             // Init attack info
-            int targetBoidIndex = -1; // index of target boid in _boids
+            int targetIndex = -1; // index of target boid in _boids
             float distToClosestEnemyInRange = boid.classInfo.attackDistRange;
 
             for (int i = 0; i < neighbours.Length; i++)
@@ -491,12 +491,19 @@ public class BoidManager : MonoBehaviour
                     
                 if (enemyInRange) // and in range, update target
                 { 
-                    targetBoidIndex = neighbours[i];
+                    targetIndex = neighbours[i];
                     distToClosestEnemyInRange = distance;
                 }
             }
 
-            return targetBoidIndex;
+            return targetIndex;
+        }
+
+        private int FindBoidToHealIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
+        {
+            int healIndex = -1;
+
+            return -1;
         }
 
         private float3 AttackForce(Boid.BoidInfo boid, bool enemyInRange, int targetBoidIndex)

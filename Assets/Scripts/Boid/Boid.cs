@@ -13,13 +13,15 @@ public abstract class Boid : Selectable
     protected float avoidCollisionWeight;
     protected float hoverKi;
     protected float hoverKp;
-    protected float timeBetweenAttacks;
     protected bool dead;
     protected Mesh mesh;
     protected LayerMask collisionMask;
     protected ClassInfo classInfo;
     protected Boid target;
     protected Player owner;
+    
+    protected float timeBetweenActions;
+    private float _previousActionTime = 0.0f;
 
     public struct ClassInfo {
         // The field of view of the boid
@@ -93,7 +95,13 @@ public abstract class Boid : Selectable
             _rigidbody.AddForce(AvoidCollisionDir() * avoidCollisionWeight, ForceMode.Acceleration);
         }
 
-        Attack();
+        // Wait until next action is ready
+        if ((Time.time - _previousActionTime) >= timeBetweenActions)
+        {
+            Act();
+            _previousActionTime = Time.time;
+        }
+
     }
 
     // Called by the boid manager
@@ -286,7 +294,7 @@ public abstract class Boid : Selectable
         return _rigidbody;
     }
 
-    public abstract void Attack();
+    public abstract void Act();
     
     
 }

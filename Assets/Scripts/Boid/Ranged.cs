@@ -7,7 +7,6 @@ public class Ranged : Boid {
 
     [SerializeField] private GameObject projectilePrefeb;
 
-    private float _nextAttackTime;
     private float _projSpeed = 8;
 
     private Vector3 _p;
@@ -27,7 +26,7 @@ public class Ranged : Boid {
         avoidCollisionWeight = 5f;
         hoverKi = 2f;
         hoverKp = 10f;
-        timeBetweenAttacks = 2f;
+        timeBetweenActions = 2f;
         dead = false;
         //mesh = ;
         collisionMask = LayerMask.GetMask("Wall", "Obstacle");
@@ -65,8 +64,13 @@ public class Ranged : Boid {
         };
     }
 
-    public override void Attack() {
-        if (target != null && Time.time > _nextAttackTime) {
+    public override void Act()
+    {
+        Attack();
+    }
+
+    private void Attack() {
+        if (target != null) {
             _p = target.GetPos() - GetPos();
             _v = target.GetVel() - GetVel();
 
@@ -81,7 +85,6 @@ public class Ranged : Boid {
             if (float.IsNaN(inclination)) { // Not possible to fire on target
                 return;
             }
-            _nextAttackTime = Time.time + timeBetweenAttacks;
             
             // Set launch vector
             Vector3 launchVector = RemoveYComp(aimPos);

@@ -5,9 +5,13 @@ using UnityEngine;
 using Unity.Mathematics;
 using Random = UnityEngine.Random;
 
-public class Healer : Boid {
+public class Healer : Boid
+{
 
-    private float _nextAttackTime;
+    private float _nextHealTime;
+    private float timeBetweenHeals;
+    private float _healAmount;
+    
     private Shader _attackAnimationShader;
 
     // Start is called before the first frame update
@@ -17,7 +21,8 @@ public class Healer : Boid {
         dead = false;
         collisionMask = LayerMask.GetMask("Wall", "Obstacle");
         _attackAnimationShader = Shader.Find("Sprites/Default");
-        
+
+        _nextHealTime = Time.time;
 
         cost = 10;
         health = 100;
@@ -28,8 +33,8 @@ public class Healer : Boid {
         avoidCollisionWeight = 5f;
         hoverKi = 2f;
         hoverKp = 10f;
-        timeBetweenAttacks = 0.1f;
-
+        timeBetweenHeals = 0.1f;
+        
         classInfo = new ClassInfo {
             viewRadius = 3f,
             separationRadius = 0.3f,
@@ -62,7 +67,7 @@ public class Healer : Boid {
         };
     }
 
-    public override void Attack()
+    public override void Act()
     {
         // Healers cannot attack
         return;
