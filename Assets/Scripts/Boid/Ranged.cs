@@ -27,10 +27,6 @@ public class Ranged : Boid {
         hoverKi = 2f;
         hoverKp = 10f;
         timeBetweenActions = 2f;
-        dead = false;
-        //mesh = ;
-        collisionMask = LayerMask.GetMask("Wall", "Obstacle");
-
 
         classInfo = new ClassInfo {
             viewRadius = 3f,

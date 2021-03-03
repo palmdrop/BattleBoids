@@ -18,8 +18,6 @@ public class Healer : Boid
     void Start() {
         base.Start();
         
-        dead = false;
-        collisionMask = LayerMask.GetMask("Wall", "Obstacle");
         _attackAnimationShader = Shader.Find("Sprites/Default");
 
         _nextHealTime = Time.time;

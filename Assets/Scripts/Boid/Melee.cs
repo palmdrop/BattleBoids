@@ -13,10 +13,7 @@ public class Melee : Boid {
     void Start() {
         base.Start();
         
-        dead = false;
-        collisionMask = LayerMask.GetMask("Wall", "Obstacle");
         _attackAnimationShader = Shader.Find("Sprites/Default");
-        
 
         cost = 10;
         health = 100;
@@ -69,7 +66,6 @@ public class Melee : Boid {
     private void Attack() 
     {
         if (target != null) {
-            //_nextAttackTime = Time.time + timeBetweenAttacks;
             target.TakeDamage(damage);
             AnimateAttack(this.GetPos(), target.GetPos());
         }
