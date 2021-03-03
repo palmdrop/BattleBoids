@@ -31,7 +31,8 @@ public class Ranged : Boid {
         dead = false;
         //mesh = ;
         collisionMask = LayerMask.GetMask("Wall", "Obstacle");
-
+        emotionalState = 0f;
+        morale = 1f;
 
         classInfo = new ClassInfo {
             viewRadius = 3f,
@@ -57,8 +58,6 @@ public class Ranged : Boid {
             attackMovementStrength = 20.1f,
             attackMovementExponent = 0.5f,
             
-            emotionalState = 0f,
-            morale = 1f,
             aggressionStrength = 10.4f,
             
             randomMovements = 6.0f,
