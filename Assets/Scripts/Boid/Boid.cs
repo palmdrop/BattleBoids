@@ -23,6 +23,8 @@ public abstract class Boid : Selectable
     protected ClassInfo classInfo;
     protected Boid target;
     protected Player owner;
+    protected float emotionalState;
+    protected float morale;
 
     public struct ClassInfo {
         // The field of view of the boid
@@ -46,9 +48,6 @@ public abstract class Boid : Selectable
         
         public float attackMovementStrength, attackMovementExponent; // Controls attack impulse
         
-        // Internal state of boid
-        public float emotionalState;
-        public float morale;
         public float aggressionStrength; // Controls how much the boid is attracted to the enemy flock
 
         // Misc behaviors
@@ -61,6 +60,8 @@ public abstract class Boid : Selectable
         public float3 forward;
         public ClassInfo classInfo;
         public int flockId;
+        public float emotionalState;
+        public float morale;
 
         public bool Equals(BoidInfo other)
         {
@@ -212,6 +213,8 @@ public abstract class Boid : Selectable
         info.vel = GetVel();
         info.classInfo = classInfo;
         info.flockId = owner.id;
+        info.emotionalState = emotionalState;
+        info.morale = morale;
         return info;
     }
 

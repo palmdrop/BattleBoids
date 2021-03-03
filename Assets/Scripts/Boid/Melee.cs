@@ -30,6 +30,8 @@ public class Melee : Boid {
         hoverKi = 2f;
         hoverKp = 10f;
         timeBetweenAttacks = 0.1f;
+        emotionalState = 0f;
+        morale = 1f;
 
         classInfo = new ClassInfo {
             viewRadius = 3f,
@@ -55,8 +57,6 @@ public class Melee : Boid {
             attackMovementStrength = 20.1f,
             attackMovementExponent = 0.5f,
             
-            emotionalState = 0f,
-            morale = 1f,
             aggressionStrength = 10.4f,
             
             randomMovements = 6.0f,
