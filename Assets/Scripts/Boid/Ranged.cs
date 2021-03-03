@@ -49,8 +49,8 @@ public class Ranged : Boid {
             attackDistRange = 3f,
             attackAngleRange = Mathf.PI,
             
-            attackMovementStrength = 20.1f,
-            attackMovementExponent = 0.5f,
+            approachMovementStrength = 20.1f,
+            approachMovementExponent = 0.5f,
             
             emotionalState = 0f,
             morale = 1f,

@@ -8,8 +8,6 @@ using Random = UnityEngine.Random;
 public class Healer : Boid
 {
 
-    private float _nextHealTime;
-    private float timeBetweenHeals;
     private float _healAmount;
     
     private Shader _attackAnimationShader;
@@ -20,8 +18,6 @@ public class Healer : Boid
         
         _attackAnimationShader = Shader.Find("Sprites/Default");
 
-        _nextHealTime = Time.time;
-
         cost = 10;
         health = 100;
         damage = 1;
@@ -31,7 +27,9 @@ public class Healer : Boid
         avoidCollisionWeight = 5f;
         hoverKi = 2f;
         hoverKp = 10f;
-        timeBetweenHeals = 0.1f;
+        
+        timeBetweenActions = 0.5f;
+        _healAmount = 10;
         
         classInfo = new ClassInfo {
             viewRadius = 3f,
@@ -51,11 +49,14 @@ public class Healer : Boid
             fearStrength = 100.0f,
             fearExponent = 0.5f,
             
-            attackDistRange = 0f,
+            // Negative attack distance implies that healing distance should be used instead
+            attackDistRange = -1f,
             attackAngleRange = Mathf.PI / 4.0f,
             
-            attackMovementStrength = 0.0f,
-            attackMovementExponent = 0.0f,
+            healDistRange = 3f,
+            
+            approachMovementStrength = 20.0f,
+            approachMovementExponent = 0.5f,
             
             emotionalState = 0f,
             morale = 1f,
@@ -68,7 +69,14 @@ public class Healer : Boid
     public override void Act()
     {
         // Healers cannot attack
-        return;
+        Heal();
+    }
+
+    private void Heal()
+    {
+        if (target == null) return;
+        
+        //target.        
     }
 
     /*public override void Attack() {

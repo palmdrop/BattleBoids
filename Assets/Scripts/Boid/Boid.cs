@@ -44,7 +44,10 @@ public abstract class Boid : Selectable
         public float attackDistRange;
         public float attackAngleRange; // Angle relative local z-axis in rad
         
-        public float attackMovementStrength, attackMovementExponent; // Controls attack impulse
+        // Heal range
+        public float healDistRange;
+        
+        public float approachMovementStrength, approachMovementExponent; // Controls attack impulse
         
         // Internal state of boid
         public float emotionalState;
@@ -59,6 +62,8 @@ public abstract class Boid : Selectable
         public float3 vel;
         public float3 pos;
         public float3 forward;
+        public int health;
+        
         public ClassInfo classInfo;
         public int flockId;
 
@@ -216,6 +221,7 @@ public abstract class Boid : Selectable
         info.pos = GetPos();
         info.forward = transform.forward;
         info.vel = GetVel();
+        info.health = health;
         info.classInfo = classInfo;
         info.flockId = owner.id;
         return info;
@@ -243,6 +249,11 @@ public abstract class Boid : Selectable
         {
             Die();
         }
+    }
+
+    public void ReceiveHealth(int healthReceived)
+    {
+        //health = math.min(health + healthReceived, )
     }
 
     public void Die()
