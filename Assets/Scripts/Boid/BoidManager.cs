@@ -229,8 +229,8 @@ public class BoidManager : MonoBehaviour
 
             int targetBoidIndex =
                 boid.classInfo.attackDistRange < 0
-                    ? FindEnemyTargetIndex(boid, neighbours, distances)
-                    : FindBoidToHealIndex(boid, neighbours, distances);
+                    ? FindBoidToHealIndex(boid, neighbours, distances)
+                    : FindEnemyTargetIndex(boid, neighbours, distances);
             
             // Sum all the forces
             float3 desire = 
