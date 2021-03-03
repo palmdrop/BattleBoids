@@ -18,7 +18,7 @@ public class Ranged : Boid {
         base.Start();
 
         cost = 10;
-        health = 100;
+        health = maxHealth = 100;
         damage = 25;
         maxSpeed = 4f;
         targetHeight = 2f;
@@ -27,6 +27,8 @@ public class Ranged : Boid {
         hoverKi = 2f;
         hoverKp = 10f;
         timeBetweenActions = 2f;
+        emotionalState = 0f;
+        morale = 1f;
 
         classInfo = new ClassInfo {
             viewRadius = 3f,
@@ -52,8 +54,6 @@ public class Ranged : Boid {
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
             
-            emotionalState = 0f,
-            morale = 1f,
             aggressionStrength = 10.4f,
             
             randomMovements = 6.0f,

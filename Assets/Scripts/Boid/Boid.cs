@@ -4,8 +4,11 @@ using Unity.Mathematics;
 
 public abstract class Boid : Selectable
 {
+    [SerializeField] private GameObject healthBarPrefab;
+
     protected int cost;
     protected int health;
+    protected int maxHealth;
     protected int damage;
     protected float maxSpeed;
     protected float targetHeight;
@@ -23,6 +26,8 @@ public abstract class Boid : Selectable
     private bool _dead;
     private Mesh _mesh;
     private LayerMask _collisionMask;
+    protected float emotionalState;
+    protected float morale;
 
     public struct ClassInfo {
         // The field of view of the boid
@@ -49,9 +54,6 @@ public abstract class Boid : Selectable
         
         public float approachMovementStrength, approachMovementExponent; // Controls attack impulse
         
-        // Internal state of boid
-        public float emotionalState;
-        public float morale;
         public float aggressionStrength; // Controls how much the boid is attracted to the enemy flock
 
         // Misc behaviors
@@ -66,6 +68,8 @@ public abstract class Boid : Selectable
         
         public ClassInfo classInfo;
         public int flockId;
+        public float emotionalState;
+        public float morale;
 
         public bool Equals(BoidInfo other)
         {
@@ -77,6 +81,7 @@ public abstract class Boid : Selectable
     private Vector3 _localScale;
     private float _rayCastTheta = 10;
     private Map.Map _map;
+    private GameObject _healthBar;
 
     // Start is called before the first frame update
     protected void Start()
@@ -94,6 +99,8 @@ public abstract class Boid : Selectable
             this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
         _localScale = transform.GetChild(0).transform.localScale;
+        _healthBar = Instantiate(healthBarPrefab, transform.position, Quaternion.identity);
+        _healthBar.GetComponent<HealthBar>().SetOwner(this);
     }
 
     public void FixedUpdate()
@@ -224,6 +231,8 @@ public abstract class Boid : Selectable
         info.health = health;
         info.classInfo = classInfo;
         info.flockId = owner.id;
+        info.emotionalState = emotionalState;
+        info.morale = morale;
         return info;
     }
 
@@ -235,6 +244,11 @@ public abstract class Boid : Selectable
     public float GetHealth()
     {
         return health;
+    }
+
+    public float GetMaxHealth()
+    {
+        return maxHealth;
     }
 
     public int GetDamage()

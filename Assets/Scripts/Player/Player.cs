@@ -19,6 +19,7 @@ public class Player : MonoBehaviour
     [SerializeField] public Color color; // Player color
     [SerializeField] private string nickname; // Unique
     [SerializeField] private SpawnArea spawnArea;
+    [SerializeField] private GameUI gameUI;
     [SerializeField] private bool ready;
 
     private FlockInfo _flockInfo;
@@ -78,6 +79,11 @@ public class Player : MonoBehaviour
     public SpawnArea GetSpawnArea()
     {
         return spawnArea;
+    }
+
+    public GameUI GetGameUI()
+    {
+        return gameUI;
     }
 
     public bool IsReady()

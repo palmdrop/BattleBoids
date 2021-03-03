@@ -16,7 +16,7 @@ public class Melee : Boid {
         _attackAnimationShader = Shader.Find("Sprites/Default");
 
         cost = 10;
-        health = 100;
+        health = maxHealth = 100;
         damage = 1;
         maxSpeed = 4f;
         targetHeight = 2f;
@@ -25,6 +25,8 @@ public class Melee : Boid {
         hoverKi = 2f;
         hoverKp = 10f;
         timeBetweenActions = 0.1f;
+        emotionalState = 0f;
+        morale = 1f;
 
         classInfo = new ClassInfo {
             viewRadius = 3f,
@@ -50,8 +52,6 @@ public class Melee : Boid {
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
             
-            emotionalState = 0f,
-            morale = 1f,
             aggressionStrength = 10.4f,
             
             randomMovements = 6.0f,

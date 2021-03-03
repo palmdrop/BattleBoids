@@ -27,6 +27,8 @@ public class Healer : Boid
         avoidCollisionWeight = 5f;
         hoverKi = 2f;
         hoverKp = 10f;
+        emotionalState = 0f;
+        morale = 1f;
         
         timeBetweenActions = 0.5f;
         _healAmount = 10;
@@ -58,8 +60,6 @@ public class Healer : Boid
             approachMovementStrength = 20.0f,
             approachMovementExponent = 0.5f,
             
-            emotionalState = 0f,
-            morale = 1f,
             aggressionStrength = 8.4f,
             
             randomMovements = 4.0f,

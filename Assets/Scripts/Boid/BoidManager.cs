@@ -336,7 +336,7 @@ public class BoidManager : MonoBehaviour
                 float normalizedViewDistance = distance / boid.classInfo.viewRadius;
                 
                 // Contribute to average velocity
-                float amount = CalculatePower(boid.classInfo.morale,
+                float amount = CalculatePower(boid.morale,
                     normalizedViewDistance, boid.classInfo.alignmentExponent);
                 
                 //TODO possible variation: use heading of neighbouring boids instead of velocity! this way, faster
@@ -366,7 +366,7 @@ public class BoidManager : MonoBehaviour
                 float normalizedViewDistance = distance / boid.classInfo.viewRadius;
 
                 // Add to average position for cohesion, weighted using morale
-                float amount = CalculatePower(boid.classInfo.morale, normalizedViewDistance,
+                float amount = CalculatePower(boid.morale, normalizedViewDistance,
                     boid.classInfo.cohesionExponent);
 
                 avgNeighborPos += neighbour.pos * amount;
