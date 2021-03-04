@@ -7,9 +7,9 @@ using Random = UnityEngine.Random;
 
 public class Melee : Boid {
 
-    private float _nextAttackTime;
+    [SerializeField] private GameObject laser;
 
-    private Shader _attackAnimationShader;
+    private float _nextAttackTime;
 
     // Start is called before the first frame update
     void Start() {
@@ -17,8 +17,6 @@ public class Melee : Boid {
         
         dead = false;
         collisionMask = LayerMask.GetMask("Wall", "Obstacle");
-        _attackAnimationShader = Shader.Find("Sprites/Default");
-        
         type = Type.Melee;
         cost = 10;
         health = maxHealth = 100;
@@ -29,7 +27,7 @@ public class Melee : Boid {
         avoidCollisionWeight = 5f;
         hoverKi = 2f;
         hoverKp = 10f;
-        timeBetweenAttacks = 0.1f;
+        timeBetweenAttacks = 0.01f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 0;
@@ -62,26 +60,25 @@ public class Melee : Boid {
             
             randomMovements = 6.0f,
         };
+
+        laser.SetActive(false);
     }
 
     public override void Attack() {
         if (target != null && Time.time > _nextAttackTime) {
             _nextAttackTime = Time.time + timeBetweenAttacks;
             target.TakeDamage(damage);
-            AnimateAttack(this.GetPos(), target.GetPos());
+            SetLaser(this.GetPos(), target.GetPos());
+            laser.SetActive(true);
+        } else {
+            laser.SetActive(false);
         }
     }
 
-    private void AnimateAttack(Vector3 fromPos, Vector3 toPos) {
-        LineRenderer lineRenderer = new GameObject("Line").AddComponent<LineRenderer>();
-        lineRenderer.material = new Material(_attackAnimationShader);
-        lineRenderer.startWidth = 0.1f;
-        lineRenderer.endWidth = 0.01f;
+    private void SetLaser(Vector3 fromPos, Vector3 toPos) {
+        LineRenderer lineRenderer = laser.GetComponent<LineRenderer>();
         lineRenderer.startColor = owner.color;
-        lineRenderer.positionCount = 2;
-        lineRenderer.useWorldSpace = true;
-        lineRenderer.SetPosition(0, fromPos);
-        lineRenderer.SetPosition(1, toPos);
-        Destroy(lineRenderer, 0.1f);
+        Vector3[] positions = new Vector3[] {fromPos, toPos};
+        lineRenderer.SetPositions(positions);
     }
 }
