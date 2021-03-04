@@ -84,18 +84,6 @@ public class Hero : Boid {
         }
     }
 
-    private List<Boid> FindEnemiesInSphere(Vector3 position, float radius, int layerMask) {
-        List<Boid> boids = new List<Boid>();
-        Collider[] colliders = Physics.OverlapSphere(position, radius, layerMask);
-        foreach (Collider hit in colliders) {
-            Boid boid = hit.GetComponent<Boid>();
-            if (boid != null && boid.GetOwner() != owner) {
-                boids.Add(boid);
-            }
-        }
-        return boids;
-    }
-
     private IEnumerator AimAndFire(Boid target, float waitTime) {
         while (true) {
             Vector3 targetPos = target.GetPos();
