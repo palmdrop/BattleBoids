@@ -19,7 +19,7 @@ public class Melee : Boid {
         collisionMask = LayerMask.GetMask("Wall", "Obstacle");
         _attackAnimationShader = Shader.Find("Sprites/Default");
         
-
+        type = Type.Melee;
         cost = 10;
         health = maxHealth = 100;
         damage = 1;
@@ -31,7 +31,8 @@ public class Melee : Boid {
         hoverKp = 10f;
         timeBetweenAttacks = 0.1f;
         emotionalState = 0f;
-        morale = 1f;
+        morale = moraleDefault = 1f;
+        abilityDistance = 0;
 
         classInfo = new ClassInfo {
             viewRadius = 3f,

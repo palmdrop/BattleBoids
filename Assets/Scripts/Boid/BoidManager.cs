@@ -110,6 +110,7 @@ public class BoidManager : MonoBehaviour
             randomFloats[i] = (float)_random.NextDouble();
         }
         NativeArray<int> targetIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
+        NativeArray<float> morale = new NativeArray<float>(_boids.Count, Allocator.TempJob);
 
         BoidStructJob boidJob = new BoidStructJob
         {
@@ -118,6 +119,7 @@ public class BoidManager : MonoBehaviour
             boids = boidInfos,
             forces = forces,
             targetIndices = targetIndices,
+            morale = morale,
             grid = _grid
         };
 
@@ -136,6 +138,7 @@ public class BoidManager : MonoBehaviour
         {
             _boids[i].UpdateBoid(forces[i]);
             _boids[i].SetTarget(targetIndices[i] != -1 ? _boids[targetIndices[i]] : null);
+            _boids[i].SetMorale(morale[i]);
         }
 
         // Dispose of all data
@@ -145,6 +148,7 @@ public class BoidManager : MonoBehaviour
         flockInfos.Dispose();
         targetIndices.Dispose();
         _grid.Dispose();
+        morale.Dispose();
     }
 
     public void BeginBattle() {
@@ -213,6 +217,7 @@ public class BoidManager : MonoBehaviour
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
         [WriteOnly] public NativeArray<float3> forces;
         [WriteOnly] public NativeArray<int> targetIndices;
+        [WriteOnly] public NativeArray<float> morale;
         [ReadOnly] public BoidGrid grid;
 
         public void Execute(int index)
@@ -254,6 +259,8 @@ public class BoidManager : MonoBehaviour
 
             // Update attack info
             targetIndices[index] = targetBoidIndex;
+
+            morale[index] = CalculateMorale(boid, neighbours, distances);
             
             neighbours.Dispose();
             distances.Dispose();
@@ -464,7 +471,7 @@ public class BoidManager : MonoBehaviour
             if (avgFearDivider == 0.00) return float3.zero;
             return (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
         }
-        
+
         private int FindTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
             // Init attack info
@@ -497,6 +504,27 @@ public class BoidManager : MonoBehaviour
             }
 
             return targetBoidIndex;
+        }
+
+        private float CalculateMorale(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
+        {
+            float morale = 0;
+            int boost = 0;
+
+            for (int i = 0; i < neighbours.Length; i++) {
+                if (boids[neighbours[i]].type == Boid.Type.Hero // Is Hero
+                && distances[i] < boids[neighbours[i]].abilityDistance) { // and dist < Hero ability dist
+                    boost++;
+                }
+            }
+
+            if (boost > 0) {
+                morale = boost * boid.moraleDefault;
+            } else {
+                morale = boid.moraleDefault;
+            }
+
+            return morale;
         }
 
         private float3 AttackForce(Boid.BoidInfo boid, bool enemyInRange, int targetBoidIndex)
