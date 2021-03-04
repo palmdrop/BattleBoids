@@ -23,6 +23,7 @@ public class GameUI : MonoBehaviour
         InitPlayerDropdown();
         InitUnitButtons();
         InitReadyButton();
+        FindObjectOfType<AudioManager>().Play("MenuMusic");
     }
 
     // Update is called once per frame
@@ -100,6 +101,8 @@ public class GameUI : MonoBehaviour
         {
             // Run game
             players.ForEach(p => p.Ready());
+            FindObjectOfType<AudioManager>().Stop("MenuMusic");
+            FindObjectOfType<AudioManager>().Play("BattleMusic");
         }
     }
 
