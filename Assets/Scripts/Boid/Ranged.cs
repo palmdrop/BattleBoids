@@ -18,6 +18,7 @@ public class Ranged : Boid {
     void Start() {
         base.Start();
 
+        type = Type.Ranged;
         cost = 10;
         health = maxHealth = 100;
         damage = 25;
@@ -32,7 +33,8 @@ public class Ranged : Boid {
         //mesh = ;
         collisionMask = LayerMask.GetMask("Wall", "Obstacle");
         emotionalState = 0f;
-        morale = 1f;
+        morale = moraleDefault = 1f;
+        abilityDistance = 0;
 
         classInfo = new ClassInfo {
             viewRadius = 3f,
