@@ -50,7 +50,7 @@ public abstract class Boid : Selectable
         public float attackAngleRange; // Angle relative local z-axis in rad
         
         // Heal range
-        public float healDistRange;
+        public float healRadius;
         
         public float approachMovementStrength, approachMovementExponent; // Controls attack impulse
         
@@ -267,7 +267,7 @@ public abstract class Boid : Selectable
 
     public void ReceiveHealth(int healthReceived)
     {
-        //health = math.min(health + healthReceived, )
+        health = math.min(health + healthReceived, maxHealth);
     }
 
     public void Die()
