@@ -6,6 +6,7 @@ public abstract class Boid : Selectable
 {
     [SerializeField] private GameObject healthBarPrefab;
 
+    protected Type type;
     protected int cost;
     protected int health;
     protected int maxHealth;
@@ -28,6 +29,8 @@ public abstract class Boid : Selectable
     private LayerMask _collisionMask;
     protected float emotionalState;
     protected float morale;
+    protected float moraleDefault;
+    protected float abilityDistance;
 
     public struct ClassInfo {
         // The field of view of the boid
@@ -61,6 +64,7 @@ public abstract class Boid : Selectable
     }
 
     public struct BoidInfo {
+        public Type type;
         public float3 vel;
         public float3 pos;
         public float3 forward;
@@ -70,11 +74,22 @@ public abstract class Boid : Selectable
         public int flockId;
         public float emotionalState;
         public float morale;
+        public float moraleDefault;
+        public float abilityDistance;
 
         public bool Equals(BoidInfo other)
         {
             return vel.Equals(other.vel) && pos.Equals(other.pos) && flockId == other.flockId;
         }
+    }
+
+    public enum Type {
+        Melee,
+        Ranged,
+        Hero,
+        Scarecrow,
+        Healer,
+        Commander
     }
 
     private Rigidbody _rigidbody;
@@ -211,6 +226,10 @@ public abstract class Boid : Selectable
         this.target = target;
     }
 
+    public void SetMorale(float morale) {
+        this.morale = morale;
+    }
+
     // Returns the position of this boid
     public Vector3 GetPos()
     {
@@ -225,6 +244,7 @@ public abstract class Boid : Selectable
 
     public BoidInfo GetInfo() {
         BoidInfo info;
+        info.type = type;
         info.pos = GetPos();
         info.forward = transform.forward;
         info.vel = GetVel();
@@ -233,6 +253,8 @@ public abstract class Boid : Selectable
         info.flockId = owner.id;
         info.emotionalState = emotionalState;
         info.morale = morale;
+        info.moraleDefault = moraleDefault;
+        info.abilityDistance = abilityDistance;
         return info;
     }
 
