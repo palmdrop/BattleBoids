@@ -8,13 +8,12 @@ using Random = UnityEngine.Random;
 public class Healer : Boid
 {
     private int _healAmount;
-    private static Shader _healAnimationShader;
-
+    
+    [SerializeField] private GameObject healBeam;
+    
     // Start is called before the first frame update
     void Start() {
         base.Start();
-        
-        _healAnimationShader = Shader.Find("Sprites/Default");
 
         cost = 20;
         health = maxHealth = 100;
@@ -72,33 +71,25 @@ public class Healer : Boid
     private void Heal()
     {
         // Do not heal if there is no target or if the target has max health
-        if (target == null || target.GetHealth() == target.GetMaxHealth()) return;
-        
         // Do not heal if target is out of range
-        if (math.distancesq(this.GetPos(), target.GetPos()) > classInfo.healRadius * classInfo.healRadius) return;
+        if (target == null 
+            || target.GetHealth() == target.GetMaxHealth()
+            || math.distancesq(this.GetPos(), target.GetPos()) > classInfo.healRadius * classInfo.healRadius
+            )
+        {
+            healBeam.SetActive(false);
+            return;
+        }
         
         target.ReceiveHealth(_healAmount);
         AnimateHeal(this.GetPos(), target.GetPos());
+        healBeam.SetActive(true);
     }
 
-    /*public override void Attack() {
-        if (target != null && Time.time > _nextAttackTime) {
-            _nextAttackTime = Time.time + timeBetweenAttacks;
-            target.TakeDamage(damage);
-            AnimateAttack(this.GetPos(), target.GetPos());
-        }
-    }*/
-
     private void AnimateHeal(Vector3 fromPos, Vector3 toPos) {
-        LineRenderer lineRenderer = new GameObject("Line").AddComponent<LineRenderer>();
-        lineRenderer.material = new Material(_healAnimationShader);
-        lineRenderer.startWidth = 0.1f;
-        lineRenderer.endWidth = 0.01f;
+        LineRenderer lineRenderer = healBeam.GetComponent<LineRenderer>();
         lineRenderer.startColor = new Color(0.5f, 0.5f, 0.0f, 0.5f);
-        lineRenderer.positionCount = 2;
-        lineRenderer.useWorldSpace = true;
-        lineRenderer.SetPosition(0, fromPos);
-        lineRenderer.SetPosition(1, toPos);
-        Destroy(lineRenderer, 0.1f);
+        Vector3[] positions = new Vector3[] {fromPos, toPos};
+        lineRenderer.SetPositions(positions);
     }
 }
