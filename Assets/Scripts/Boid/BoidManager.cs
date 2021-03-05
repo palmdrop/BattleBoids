@@ -152,10 +152,20 @@ public class BoidManager : MonoBehaviour
     }
 
     public void BeginBattle() {
+        if (!_isBattlePhase)
+        {
+            FindObjectOfType<AudioManager>().Stop("MenuMusic");
+            FindObjectOfType<AudioManager>().Play("BattleMusic");
+        }
         _isBattlePhase = true;
     }
 
     public void StopBattle() {
+        if (_isBattlePhase)
+        {
+            FindObjectOfType<AudioManager>().Stop("BattleMusic");
+            FindObjectOfType<AudioManager>().Play("MenuMusic");
+        }
         _isBattlePhase = false;
     }
 

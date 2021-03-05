@@ -102,8 +102,6 @@ public class GameUI : MonoBehaviour
         {
             // Run game
             players.ForEach(p => p.Ready());
-            FindObjectOfType<AudioManager>().Stop("MenuMusic");
-            FindObjectOfType<AudioManager>().Play("BattleMusic");
         } else if (Input.GetKeyDown("y")) {
             showHealthBars = !showHealthBars;
         }
