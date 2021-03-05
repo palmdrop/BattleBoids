@@ -68,7 +68,6 @@ public class Melee : Boid {
         if (target != null && Time.time > _nextAttackTime) {
             _nextAttackTime = Time.time + timeBetweenAttacks;
             target.TakeDamage(damage);
-            PlayAttackSound();
             SetLaser(this.GetPos(), target.GetPos());
             laser.SetActive(true);
         } else {
@@ -81,18 +80,5 @@ public class Melee : Boid {
         lineRenderer.startColor = owner.color;
         Vector3[] positions = new Vector3[] {fromPos, toPos};
         lineRenderer.SetPositions(positions);
-    }
-
-    // Plays an attack sound
-    private void PlayAttackSound()
-    {
-        // If there are too many sounds, this line can be uncommented
-        //if (Random.Range(0f, 1f) < 0.9) return;
-
-        // Plays one of three variations of an attack sound randomly
-        float random = Random.Range(0f, 1f);
-        if (random < 0.33f) FindObjectOfType<AudioManager>().Play("Laser1");
-        else if (random < 0.67f) FindObjectOfType<AudioManager>().Play("Laser2");
-        else FindObjectOfType<AudioManager>().Play("Laser3");
     }
 }
