@@ -18,20 +18,23 @@ public class Ranged : Boid {
     void Start() {
         base.Start();
 
+        type = Type.Ranged;
         cost = 10;
-        health = 100;
+        health = maxHealth = 100;
         damage = 25;
         maxSpeed = 4f;
         targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        hover_Ki = 2f;
-        hover_Kp = 10f;
+        hoverKi = 2f;
+        hoverKp = 10f;
         timeBetweenAttacks = 2f;
         dead = false;
         //mesh = ;
         collisionMask = LayerMask.GetMask("Wall", "Obstacle");
-
+        emotionalState = 0f;
+        morale = moraleDefault = 1f;
+        abilityDistance = 0;
 
         classInfo = new ClassInfo {
             viewRadius = 3f,
@@ -51,14 +54,12 @@ public class Ranged : Boid {
             fearStrength = 140.0f,
             fearExponent = 1.0f,
             
-            attackDstRange = 3f,
+            attackDistRange = 3f,
             attackAngleRange = Mathf.PI,
             
             attackMovementStrength = 20.1f,
             attackMovementExponent = 0.5f,
             
-            emotionalState = 0f,
-            morale = 1f,
             aggressionStrength = 10.4f,
             
             randomMovements = 6.0f,
