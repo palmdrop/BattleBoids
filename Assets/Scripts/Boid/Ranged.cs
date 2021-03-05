@@ -62,7 +62,7 @@ public class Ranged : Boid {
         };
     }
 
-    public override void Act()
+    protected override void Act()
     {
         Attack();
     }

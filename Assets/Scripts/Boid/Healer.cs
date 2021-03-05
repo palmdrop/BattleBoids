@@ -63,7 +63,7 @@ public class Healer : Boid
         };
     }
 
-    public override void Act()
+    protected override void Act()
     {
         // Healers cannot attack
         Heal();

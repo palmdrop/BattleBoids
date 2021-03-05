@@ -1,9 +1,4 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Unity.Mathematics;
-using Random = UnityEngine.Random;
 
 public class Melee : Boid {
 
@@ -60,7 +55,7 @@ public class Melee : Boid {
         laser.SetActive(false);
     }
 
-    public override void Act()
+    protected override void Act()
     {
         Attack();
     }

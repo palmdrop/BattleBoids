@@ -71,7 +71,7 @@ public class Hero : Boid {
         lockLaser.SetActive(false);
     }
 
-    public override void Act() {
+    protected override void Act() {
         if (target != null && _aiming == false) {
             Boid aimedTarget = target;
             _aiming = true;
