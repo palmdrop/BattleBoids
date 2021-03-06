@@ -27,8 +27,8 @@ public class Healer : Boid
         emotionalState = 0f;
         morale = 1f;
         
-        timeBetweenActions = 0.2f;
-        _healAmount = 4;
+        timeBetweenActions = 0.03f;
+        _healAmount = 1;
         
         classInfo = new ClassInfo {
             viewRadius = 3f,
