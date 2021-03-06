@@ -231,9 +231,11 @@ public class BoidManager : MonoBehaviour
             // and send these distances to each behavior function. This avoids having to recalculate the distances for
             // each behavior.
             NativeArray<float> distances = CalculateDistances(boid, neighbours);
-            
-            int targetBoidIndex = FindTargetIndex(boid, neighbours, distances);
-            bool enemyInRange = targetBoidIndex != -1;
+
+            int targetBoidIndex =
+                boid.classInfo.attackDistRange < 0
+                    ? FindBoidToHealIndex(boid, neighbours, distances)
+                    : FindEnemyTargetIndex(boid, neighbours, distances);
             
             // Sum all the forces
             float3 desire = 
@@ -244,7 +246,7 @@ public class BoidManager : MonoBehaviour
                             // Additional behaviors
                             + AggressionForce(boid)
                             + FearForce(boid, neighbours, distances)
-                            + AttackForce(boid, enemyInRange, targetBoidIndex)
+                            + ApproachForce(boid, targetBoidIndex)
                             + RandomForce(index, boid.classInfo.randomMovements);
 
             float3 force = desire - boid.vel;
@@ -471,11 +473,10 @@ public class BoidManager : MonoBehaviour
             if (avgFearDivider == 0.00) return float3.zero;
             return (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
         }
-
-        private int FindTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
+        private int FindEnemyTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
             // Init attack info
-            int targetBoidIndex = -1; // index of target boid in _boids
+            int targetIndex = -1; // index of target boid in _boids
             float distToClosestEnemyInRange = boid.classInfo.attackDistRange;
 
             for (int i = 0; i < neighbours.Length; i++)
@@ -498,12 +499,35 @@ public class BoidManager : MonoBehaviour
                     
                 if (enemyInRange) // and in range, update target
                 { 
-                    targetBoidIndex = neighbours[i];
+                    targetIndex = neighbours[i];
                     distToClosestEnemyInRange = distance;
                 }
             }
 
-            return targetBoidIndex;
+            return targetIndex;
+        }
+
+        private int FindBoidToHealIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
+        {
+            int healIndex = -1;
+            int lowestAllyHealth = int.MaxValue;
+
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                Boid.BoidInfo neighbour = boids[neighbours[i]];
+                
+                // Enemy boids cannot be healed
+                if (boid.flockId != neighbour.flockId) continue;
+
+                // Store the neighbour with the lowest health
+                if (neighbour.health < lowestAllyHealth)
+                {
+                    healIndex = neighbours[i];
+                    lowestAllyHealth = neighbour.health;
+                }
+            }
+
+            return healIndex;
         }
 
         private float CalculateMorale(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
@@ -534,19 +558,18 @@ public class BoidManager : MonoBehaviour
 
             return morale;
         }
-
-        private float3 AttackForce(Boid.BoidInfo boid, bool enemyInRange, int targetBoidIndex)
+        private float3 ApproachForce(Boid.BoidInfo boid, int targetBoidIndex)
         {
             // Calculate attack force
             // The attack force tries to move the boid towards the target boid
-            if (!enemyInRange) return float3.zero;
+            if (targetBoidIndex == -1) return float3.zero;
 
             //TODO find better solution than to recalculate distance here
             //TODO problem is that targetBoidIndex corresponds to index in boid array, not necessarily in distances array
             
             float3 vector = boids[targetBoidIndex].pos - boid.pos;
             float dist = math.length(vector);
-            return vector * CalculatePower(boid.classInfo.attackMovementStrength, dist / boid.classInfo.attackDistRange, boid.classInfo.attackMovementExponent);
+            return vector * CalculatePower(boid.classInfo.approachMovementStrength, dist / boid.classInfo.attackDistRange, boid.classInfo.approachMovementExponent);
         }
     }
 }

@@ -7,8 +7,6 @@ using Random = UnityEngine.Random;
 
 public class Scarecrow : Boid {
 
-    private float _nextAttackTime;
-
     // Start is called before the first frame update
     void Start() {
         base.Start();
@@ -23,10 +21,7 @@ public class Scarecrow : Boid {
         avoidCollisionWeight = 5f;
         hoverKi = 2f;
         hoverKp = 10f;
-        timeBetweenAttacks = 1f;
-        dead = false;
-        //mesh = ;
-        collisionMask = LayerMask.GetMask("Wall", "Obstacle");
+        timeBetweenActions = 1f;
         morale = moraleDefault = 1f;
         abilityDistance = 2f;
 
@@ -51,8 +46,8 @@ public class Scarecrow : Boid {
             attackDistRange = 2f,
             attackAngleRange = Mathf.PI,
             
-            attackMovementStrength = 20.1f,
-            attackMovementExponent = 0.5f,
+            approachMovementStrength = 20.1f,
+            approachMovementExponent = 0.5f,
             
             aggressionStrength = 10.4f,
             
@@ -62,9 +57,8 @@ public class Scarecrow : Boid {
         SetColor();
     }
 
-    public override void Attack() {
-        if (target != null && Time.time > _nextAttackTime) {
-            _nextAttackTime = Time.time + timeBetweenAttacks;
+    public override void Act() {
+        if (target != null) {
             List<Boid> enemies = FindEnemiesInSphere(GetPos(), classInfo.attackDistRange, LayerMask.GetMask("Units"));
             foreach (Boid enemy in enemies) {
                 enemy.TakeDamage(damage);
