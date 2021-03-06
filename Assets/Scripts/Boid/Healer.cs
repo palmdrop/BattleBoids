@@ -10,6 +10,7 @@ public class Healer : Boid
     private int _healAmount;
     
     [SerializeField] private GameObject healBeam;
+    private LineRenderer healBeamRenderer;
     
     // Start is called before the first frame update
     void Start() {
@@ -60,6 +61,8 @@ public class Healer : Boid
             
             randomMovements = 4.0f,
         };
+        
+        healBeamRenderer = healBeam.GetComponent<LineRenderer>();
     }
 
     protected override void Act()
@@ -87,9 +90,9 @@ public class Healer : Boid
     }
 
     private void AnimateHeal(Vector3 fromPos, Vector3 toPos) {
-        LineRenderer lineRenderer = healBeam.GetComponent<LineRenderer>();
-        lineRenderer.startColor = new Color(0.5f, 0.5f, 0.0f, 0.5f);
+        //LineRenderer lineRenderer = healBeam.GetComponent<LineRenderer>();
+        healBeamRenderer.startColor = new Color(0.5f, 0.5f, 0.0f, 0.5f);
         Vector3[] positions = new Vector3[] {fromPos, toPos};
-        lineRenderer.SetPositions(positions);
+        healBeamRenderer.SetPositions(positions);
     }
 }
