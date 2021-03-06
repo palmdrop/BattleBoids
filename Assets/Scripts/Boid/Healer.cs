@@ -72,7 +72,7 @@ public class Healer : Boid
     {
         // Do not heal if there is no target or if the target has max health
         // Do not heal if target is out of range
-        if (target == null 
+        if (!HasTarget()
             || target.GetHealth() == target.GetMaxHealth()
             || math.distancesq(this.GetPos(), target.GetPos()) > classInfo.healRadius * classInfo.healRadius
             )

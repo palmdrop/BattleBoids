@@ -72,7 +72,7 @@ public class Hero : Boid {
     }
 
     protected override void Act() {
-        if (target != null && _aiming == false) {
+        if (HasTarget() && _aiming == false) {
             Boid aimedTarget = target;
             _aiming = true;
             _aimLockCompleteTime = Time.time + aimLockTime;

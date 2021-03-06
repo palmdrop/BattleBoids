@@ -62,7 +62,7 @@ public class Melee : Boid {
 
     private void Attack() 
     {
-        if (target != null) {
+        if (HasTarget()) {
             target.TakeDamage(damage);
             SetLaser(this.GetPos(), target.GetPos());
             laser.SetActive(true);

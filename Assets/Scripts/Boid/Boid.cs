@@ -34,8 +34,10 @@ public abstract class Boid : Selectable
 
     protected Type type;
     protected ClassInfo classInfo;
-    protected Boid target;
     protected Player owner;
+    
+    protected Boid target;
+    private bool _hasTarget = false;
     
     protected int cost;
     protected int health;
@@ -249,6 +251,12 @@ public abstract class Boid : Selectable
 
     public void SetTarget(Boid target) {
         this.target = target;
+        _hasTarget = target != null;
+    }
+
+    public bool HasTarget()
+    {
+        return _hasTarget;
     }
 
     public void SetMorale(float morale) {
