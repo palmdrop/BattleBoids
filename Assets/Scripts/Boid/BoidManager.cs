@@ -532,21 +532,29 @@ public class BoidManager : MonoBehaviour
 
         private float CalculateMorale(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
-            float morale = 0;
             int boost = 0;
+            Boid.BoidInfo neighbour;
 
             for (int i = 0; i < neighbours.Length; i++) {
-                if (boids[neighbours[i]].type == Boid.Type.Hero // Is Hero
-                && distances[i] < boids[neighbours[i]].abilityDistance) { // and dist < Hero ability dist
+                neighbour = boids[neighbours[i]];
+
+                if (neighbour.flockId == boid.flockId           // Same flock
+                 && neighbour.type == Boid.Type.Hero            // Is Hero
+                 && neighbour.abilityDistance > distances[i]) { // and dist < Hero ability dist
                     boost++;
+                } else if (neighbour.flockId != boid.flockId           // Different flock
+                        && neighbour.type == Boid.Type.Scarecrow       // Is Scarecrow
+                        && neighbour.abilityDistance > distances[i]) { // and dist < Scarecrow ability dist
+                    boost--;
                 }
             }
 
-            if (boost > 0) {
-                morale = boost * boid.moraleDefault;
-            } else {
-                morale = boid.moraleDefault;
-            }
+            // NOTE
+            // moraleBoostStrength is arbitrary and can be changed for balancing reasons
+            // if no. Heros == no. Scarecrows, the effect is canceled and modifier is 1
+            float moraleModifyStrength = 10f;
+            float modifier = math.pow(moraleModifyStrength, boost);
+            float morale = boid.moraleDefault * modifier;
 
             return morale;
         }

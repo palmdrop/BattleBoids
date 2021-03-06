@@ -1,6 +1,6 @@
 using UnityEngine;
 using Unity.Mathematics;
-
+using System.Collections.Generic;
 
 public abstract class Boid : Selectable
 {
@@ -227,6 +227,18 @@ public abstract class Boid : Selectable
         //TakeDamage((int) collision.impulse.magnitude * 10);
     }
 
+    public List<Boid> FindEnemiesInSphere(Vector3 position, float radius, int layerMask) {
+        List<Boid> boids = new List<Boid>();
+        Collider[] colliders = Physics.OverlapSphere(position, radius, layerMask);
+        foreach (Collider hit in colliders) {
+            Boid boid = hit.GetComponent<Boid>();
+            if (boid != null && boid.GetOwner() != owner) {
+                boids.Add(boid);
+            }
+        }
+        return boids;
+    }
+
     public void SetOwner(Player owner) {
         this.owner = owner;
     }
@@ -309,6 +321,7 @@ public abstract class Boid : Selectable
     {
         this._dead = true;
         target = null;
+        Destroy(GetComponent<ParticleSystem>());
     }
 
     public bool IsDead() {
