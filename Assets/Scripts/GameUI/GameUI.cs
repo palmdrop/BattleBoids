@@ -60,6 +60,7 @@ public class GameUI : MonoBehaviour
             button.transform.SetParent(buttons.transform);
             button.name = unitPrefabs[i].name;
             RectTransform buttonRectTransform = button.transform.GetComponent<RectTransform>();
+            buttonRectTransform.localScale = new Vector3(1, 1, 1);
             float width = buttonRectTransform.sizeDelta.x * buttonRectTransform.localScale.x;
             float height = buttonRectTransform.sizeDelta.y * buttonRectTransform.localScale.y;
             button.transform.localPosition = new Vector3(
