@@ -128,8 +128,7 @@ public class Hero : Boid {
     }
 
     private void SetLaser(Vector3 fromPos, Vector3 toPos, float width) {
-        Vector3[] positions;
-        positions = new Vector3[] {fromPos, toPos};
+        Vector3[] positions = new Vector3[] {fromPos, toPos};
         _lockLaserRenderer.SetPositions(positions);
         _lockLaserRenderer.startColor = owner.color;
         _lockLaserRenderer.startWidth = width;

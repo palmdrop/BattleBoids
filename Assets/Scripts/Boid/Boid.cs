@@ -329,8 +329,7 @@ public abstract class Boid : Selectable
     public void Die()
     {
         this._dead = true;
-        target = null;
-        _hasTarget = false;
+        SetTarget(null);
         Destroy(GetComponent<ParticleSystem>());
     }
 

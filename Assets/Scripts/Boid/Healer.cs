@@ -52,8 +52,7 @@ public class Healer : Boid
             fearStrength = 200.0f,
             fearExponent = 2.0f,
             
-            // Negative attack distance implies that healing distance should be used instead
-            attackDistRange = -1f,
+            attackDistRange = 0f,
             attackAngleRange = Mathf.PI / 4.0f,
             
             approachMovementStrength = 35.0f,

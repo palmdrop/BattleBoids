@@ -234,7 +234,7 @@ public class BoidManager : MonoBehaviour
 
             int targetBoidIndex = -1;
             float targetViewDistance = 0.0f;
-            if (boid.classInfo.attackDistRange < 0)
+            if (boid.type == Boid.Type.Healer) 
             {
                 targetBoidIndex = FindBoidToHealIndex(boid, neighbours, distances);
                 targetViewDistance = boid.classInfo.viewRadius;
@@ -567,7 +567,8 @@ public class BoidManager : MonoBehaviour
             float modifier = math.pow(moraleModifyStrength, boost);
             float morale = boid.moraleDefault * modifier;
 
-            return morale;
+            // Prevent negative morale
+            return math.max(morale, 0.0f);
         }
         private float3 ApproachForce(Boid.BoidInfo boid, int targetBoidIndex, float targetDistRange)
         {
