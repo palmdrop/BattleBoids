@@ -356,7 +356,7 @@ public class BoidManager : MonoBehaviour
                 
                 //TODO possible variation: use heading of neighbouring boids instead of velocity! this way, faster
                 //TODO boids do not have more influence (although this might be desirable)
-                avgVel += neighbour.vel * amount;
+                avgVel += neighbour.vel * amount * neighbour.classInfo.gravity;
             }
             
             // Calculate alignment force
@@ -384,8 +384,8 @@ public class BoidManager : MonoBehaviour
                 float amount = CalculatePower(boid.morale, normalizedViewDistance,
                     boid.classInfo.cohesionExponent);
 
-                avgNeighborPos += neighbour.pos * amount;
-                avgNeighborPosDivider += amount;
+                avgNeighborPos += neighbour.pos * amount * neighbour.classInfo.gravity;
+                avgNeighborPosDivider += amount * neighbour.classInfo.gravity;
             }
 
             // Calculate cohesion force

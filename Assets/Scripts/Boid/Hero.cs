@@ -58,6 +58,8 @@ public class Hero : Boid {
             fearStrength = 140.0f,
             fearExponent = 1.0f,
 
+            gravity = 1f,
+
             attackDistRange = 3f,
             attackAngleRange = 2f * Mathf.PI / 3f,
 

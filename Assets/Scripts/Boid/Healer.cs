@@ -49,6 +49,8 @@ public class Healer : Boid
             
             separationStrength = 120.0f,
             separationExponent = 1.0f,
+
+            gravity = 1f,
             
             fearStrength = 250.0f,
             fearExponent = 1.4f,
