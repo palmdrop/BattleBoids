@@ -95,7 +95,7 @@ public abstract class Boid : Selectable
         public float3 vel;
         public float3 pos;
         public float3 forward;
-        public int health;
+        public int health, maxHealth;
         
         public ClassInfo classInfo;
         public int flockId;
@@ -282,6 +282,7 @@ public abstract class Boid : Selectable
         info.forward = transform.forward;
         info.vel = GetVel();
         info.health = health;
+        info.maxHealth = maxHealth;
         info.classInfo = classInfo;
         info.flockId = owner.id;
         info.emotionalState = emotionalState;

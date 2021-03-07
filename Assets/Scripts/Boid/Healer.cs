@@ -16,6 +16,7 @@ public class Healer : Boid
     void Start() {
         base.Start();
 
+        type = Type.Healer;
         cost = 20;
         health = maxHealth = 100;
         damage = 0;
@@ -26,7 +27,8 @@ public class Healer : Boid
         hoverKi = 2f;
         hoverKp = 10f;
         emotionalState = 0f;
-        morale = 1f;
+        morale = moraleDefault = 1f;
+        abilityDistance = 1f;
         
         timeBetweenActions = 0.03f;
         _healAmount = 1;
@@ -34,21 +36,21 @@ public class Healer : Boid
         classInfo = new ClassInfo {
             viewRadius = 3f,
             separationRadius = 0.3f,
-            fearRadius = 1.2f,
+            fearRadius = 1.0f,
             maxForce = 2.0f,
             healRadius = 1f,
             
             alignmentStrength = 6.0f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 10.0f,
+            cohesionStrength = 5.0f,
             cohesionExponent = 0.0f,
             
             separationStrength = 120.0f,
             separationExponent = 1.0f,
             
             fearStrength = 200.0f,
-            fearExponent = 1.5f,
+            fearExponent = 2.0f,
             
             // Negative attack distance implies that healing distance should be used instead
             attackDistRange = -1f,
@@ -57,7 +59,7 @@ public class Healer : Boid
             approachMovementStrength = 35.0f,
             approachMovementExponent = 0.5f,
             
-            aggressionStrength = 8.4f,
+            aggressionStrength = 9.4f,
             
             randomMovements = 4.0f,
         };
@@ -90,7 +92,6 @@ public class Healer : Boid
     }
 
     private void AnimateHeal(Vector3 fromPos, Vector3 toPos) {
-        //LineRenderer lineRenderer = healBeam.GetComponent<LineRenderer>();
         _healBeamRenderer.startColor = new Color(0.5f, 0.5f, 0.0f, 0.5f);
         Vector3[] positions = new Vector3[] {fromPos, toPos};
         _healBeamRenderer.SetPositions(positions);
