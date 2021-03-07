@@ -45,6 +45,9 @@ public abstract class Boid : Selectable
         public float cohesionStrength, cohesionExponent;
         public float separationStrength, separationExponent;
 
+        // How much this unit affects friendly units
+        public float gravity;
+
         // Fear keeps boid from moving too close to enemies
         public float fearStrength, fearExponent; 
         
@@ -137,7 +140,7 @@ public abstract class Boid : Selectable
 
     // Called by the boid manager
     // Updates the boid according to the standard flocking behaviour
-    public void UpdateBoid(Vector3 force)
+    public virtual void UpdateBoid(Vector3 force)
     {
         _rigidbody.AddForce(force, ForceMode.Acceleration);
 

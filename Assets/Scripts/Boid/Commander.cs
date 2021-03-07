@@ -1,19 +1,19 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.Mathematics;
-using Random = UnityEngine.Random;
 
-public class Melee : Boid {
+public class Commander : Boid
+{
+    [SerializeField] private GameObject waypointPrefab;
 
-    [SerializeField] private GameObject laser;
+    private List<GameObject> _path = new List<GameObject>();
 
     // Start is called before the first frame update
-    void Start() {
+    void Start()
+    {
         base.Start();
-        
-        type = Type.Melee;
+
+        type = Type.Commander;
         cost = 10;
         health = maxHealth = 100;
         damage = 1;
@@ -33,55 +33,65 @@ public class Melee : Boid {
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
-            
+
             alignmentStrength = 5.6f,
-            alignmentExponent = 0.0f, 
-            
+            alignmentExponent = 0.0f,
+
             cohesionStrength = 4.0f,
             cohesionExponent = 0.0f,
-            
+
             separationStrength = 120.0f,
             separationExponent = 1.0f,
-
-            gravity = 1f,
             
+            gravity = 40f,
+
             fearStrength = 140.0f,
             fearExponent = 1.0f,
-            
+
             attackDistRange = 1f,
             attackAngleRange = Mathf.PI / 4.0f,
-            
+
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
-            
+
             aggressionStrength = 10.4f,
-            
+
             randomMovements = 6.0f,
         };
-
-        laser.SetActive(false);
     }
 
-    public override void Act()
+    void Update()
     {
-        Attack();
-    }
-
-    private void Attack() 
-    {
-        if (target != null) {
-            target.TakeDamage(damage);
-            SetLaser(this.GetPos(), target.GetPos());
-            laser.SetActive(true);
-        } else {
-            laser.SetActive(false);
+        if (IsSelected() && Input.GetMouseButtonDown(2)) {
+            RaycastHit hit;
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, LayerMask.GetMask("Ground"))) {
+                var waypoint = Instantiate(waypointPrefab, hit.point, Quaternion.identity);
+                _path.Add(waypoint);
+            }
         }
     }
 
-    private void SetLaser(Vector3 fromPos, Vector3 toPos) {
-        LineRenderer lineRenderer = laser.GetComponent<LineRenderer>();
-        lineRenderer.startColor = owner.color;
-        Vector3[] positions = new Vector3[] {fromPos, toPos};
-        lineRenderer.SetPositions(positions);
+    public override void UpdateBoid(Vector3 force)
+    {
+        if (_path.Count == 0) {
+            base.UpdateBoid(force);
+        } else {
+            var pathVec = _path[0].transform.position - GetPos();
+            base.UpdateBoid(force + pathVec.normalized * 3f);
+            if (pathVec.magnitude < 3f) {
+                _path.RemoveAt(0);
+            }
+        }
+    }
+
+    void OnDestroy()
+    {
+        foreach (var waypoint in _path) {
+            Destroy(waypoint);
+        }
+    }
+
+    public override void Act() {
     }
 }
