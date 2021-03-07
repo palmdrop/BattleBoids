@@ -6,6 +6,7 @@ public abstract class Selectable : MonoBehaviour, ISelectable
 {
     [SerializeField] private GameObject selectionIndicatorPrefab;
     private GameObject selectionIndicator;
+    private bool _selected = false;
 
     private void Awake()
     {
@@ -18,5 +19,11 @@ public abstract class Selectable : MonoBehaviour, ISelectable
     {
         // TODO: now highlight indicator needs to be the second child of the Boid container, should be solved differently
         selectionIndicator.SetActive(isSelected);
+        _selected = isSelected;
+    }
+
+    public bool IsSelected()
+    {
+        return _selected;
     }
 }

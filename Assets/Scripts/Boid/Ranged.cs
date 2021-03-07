@@ -47,9 +47,11 @@ public class Ranged : Boid {
             separationStrength = 120.0f,
             separationExponent = 1.0f,
             
+            gravity = 1f,
+            
             fearStrength = 140.0f,
             fearExponent = 1.0f,
-            
+
             attackDistRange = 3f,
             attackAngleRange = Mathf.PI,
             
