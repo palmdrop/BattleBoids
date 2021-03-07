@@ -15,13 +15,14 @@ public class HealthBar : MonoBehaviour
     {
         _images = GetComponentsInChildren<Image>();
         _renderer = GetComponent<Renderer>();
+        transform.localPosition = new Vector3(0, 1, 0);
+        _boid = GetComponentInParent<Boid>();
     }
 
     // Update is called once per frame
     void Update()
     {
         fill.fillAmount = _boid.GetHealth() / _boid.GetMaxHealth();
-        transform.position = _boid.GetPos() + new Vector3(0, 1, 0);
         transform.forward = Camera.main.transform.forward;
         if (_boid.IsDead()) {
             Destroy(gameObject);
@@ -36,10 +37,5 @@ public class HealthBar : MonoBehaviour
             }
             img.color = col;
         }
-    }
-
-    public void SetOwner(Boid b)
-    {
-        this._boid = b;
     }
 }
