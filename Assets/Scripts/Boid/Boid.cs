@@ -76,9 +76,6 @@ public abstract class Boid : Selectable
         public float attackDistRange;
         public float attackAngleRange; // Angle relative local z-axis in rad
         
-        // Heal range
-        public float healRadius;
-        
         public float approachMovementStrength, approachMovementExponent; // Controls attack impulse
         
         public float aggressionStrength; // Controls how much the boid is attracted to the enemy flock

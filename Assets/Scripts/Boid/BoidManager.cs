@@ -527,7 +527,7 @@ public class BoidManager : MonoBehaviour
                 // Enemy boids cannot be healed
                 // And do not try to heal boids with max health
                 if (boid.flockId != neighbour.flockId 
-                    || distances[i] > boid.classInfo.viewRadius
+                    || distances[i] > boid.abilityDistance
                     || neighbour.health == neighbour.maxHealth) continue;
 
                 // Store the neighbour with the lowest health
