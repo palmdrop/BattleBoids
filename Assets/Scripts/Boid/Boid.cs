@@ -124,9 +124,7 @@ public abstract class Boid : Selectable
             this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
 
-        _healthBar = Instantiate(healthBarPrefab, transform.position, Quaternion.identity);
-        _healthBar.GetComponent<HealthBar>().SetOwner(this);
-        
+        _healthBar = Instantiate(healthBarPrefab, transform);
     }
 
     public void FixedUpdate()
