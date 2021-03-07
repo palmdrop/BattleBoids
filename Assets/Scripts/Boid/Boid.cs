@@ -7,7 +7,6 @@ public abstract class Boid : Selectable
     [SerializeField] private GameObject healthBarPrefab;
 
     protected Type type;
-    protected int cost;
     protected int health;
     protected int maxHealth;
     protected int damage;
@@ -272,7 +271,7 @@ public abstract class Boid : Selectable
 
     public int GetCost()
     {
-        return cost;
+        return Cost;
     }
 
     public float GetHealth()

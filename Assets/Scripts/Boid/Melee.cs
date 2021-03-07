@@ -14,7 +14,7 @@ public class Melee : Boid {
         base.Start();
         
         type = Type.Melee;
-        cost = 10;
+        Cost = 10;
         health = maxHealth = 100;
         damage = 1;
         maxSpeed = 4f;

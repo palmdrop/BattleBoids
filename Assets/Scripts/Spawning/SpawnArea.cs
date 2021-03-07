@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -17,6 +16,12 @@ public class SpawnArea : MonoBehaviour
     bool canPlace = true;
 
     bool active = false;
+    
+    
+    // Used for bounds creation
+    Bounds spawnBounds;
+    Vector3 minBoundPosition;
+    Vector3 boundSize;
 
     // Start is called before the first frame update
     void Start()
@@ -24,18 +29,27 @@ public class SpawnArea : MonoBehaviour
         spawned = owner.GetFlock();
     }
 
-    void UpdateGrid(Vector3 gridCenter) {
+    private void Awake()
+    {
+        // Creates a rectangle bounds around the spawn area
+        spawnBounds = transform.GetComponent<Collider>().bounds;
+        minBoundPosition = spawnBounds.min;
+        boundSize = spawnBounds.extents;
+    }
+
+    void UpdateGrid(Vector3 gridCenter)
+    {
         while (holding.Count < gridWidth * gridWidth) {
             GameObject currentEntity;
             currentEntity = Instantiate(entityToSpawn, new Vector3(0, 0, 0), Quaternion.identity);
             currentEntity.GetComponent<Boid>().SetOwner(owner);
             currentEntity.name = "Player_" + owner.id + "_Unit_" + instanceNumber++;
-            currentEntity.GetComponent<Boid>().SetColor(new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f));
             holding.Add(currentEntity);
         }
         
         while (holding.Count > gridWidth * gridWidth) {
             GameObject currentEntity = holding[0];
+            currentEntity.GetComponent<Boid>().Die();
             Destroy(currentEntity);
             holding.RemoveAt(0);
         }
@@ -64,8 +78,7 @@ public class SpawnArea : MonoBehaviour
                 
                 currentEntity.transform.position = position;
                 // Check if within spawn area
-                RaycastHit hit;
-                if (this.GetComponent<Collider>().Raycast(new Ray(new Vector3(position.x, 1000f, position.z), transform.TransformDirection(Vector3.down)), out hit, 2000f))
+                if (IsInside(currentEntity))
                 {
                     currentEntity.GetComponent<Boid>().SetColor(new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f));
                 } else
@@ -99,6 +112,7 @@ public class SpawnArea : MonoBehaviour
         if (Input.GetMouseButtonDown(0)) {
             if (holding.Count > 0 && canPlace && PurchaseSuccess()) {
                 // Place entity
+                
                 foreach (GameObject currentEntity in holding) {
                     spawned.Add(currentEntity);
                 }
@@ -109,6 +123,7 @@ public class SpawnArea : MonoBehaviour
                 owner.FlockUpdate = true;
             } else if (Physics.Raycast(ray, out hit, Mathf.Infinity, ~LayerMask.GetMask("Spawn Area"))) {
                 // Pick up entity
+                /*
                 if (spawned.Contains(hit.collider.gameObject)) {
                     spawned.Remove(hit.collider.gameObject);
                     GameObject currentEntity = hit.collider.gameObject;
@@ -116,9 +131,30 @@ public class SpawnArea : MonoBehaviour
                     PurchaseReturn();
                     gridWidth = 1;
                 }
+                */
             }
 
         }
+    }
+
+    public bool IsInside(GameObject gameObject)
+    {
+        Vector3 goTransformPosition = gameObject.transform.position;
+        Vector2 goPosition = new Vector2(goTransformPosition.x, goTransformPosition.z);
+        
+        
+        Rect bounds2D = new Rect(minBoundPosition.x, minBoundPosition.z, boundSize.x * 2, boundSize.z * 2);
+
+        Boid boid = gameObject.GetComponent<Boid>();
+        
+        if (bounds2D.Contains(goPosition))
+        {
+            boid.SetColor(owner.color);
+            return true;
+        }
+
+        boid.SetColor(new Color(1.0f, 1.0f, 1.0f, 0.5f));
+        return false;
     }
 
     bool PurchaseSuccess()
@@ -166,5 +202,10 @@ public class SpawnArea : MonoBehaviour
 
     public void Deactivate() {
         active = false;
+    }
+
+    public bool isHolding()
+    {
+        return holding.Count > 0;
     }
 }
