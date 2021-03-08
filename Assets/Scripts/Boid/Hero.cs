@@ -34,10 +34,7 @@ public class Hero : Boid {
         avoidCollisionWeight = 5f;
         hoverKi = 2f;
         hoverKp = 10f;
-        timeBetweenAttacks = 5f;
-        dead = false;
-        //mesh = ;
-        collisionMask = LayerMask.GetMask("Wall", "Obstacle");
+        timeBetweenActions = 5f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 2f;
@@ -63,8 +60,8 @@ public class Hero : Boid {
             attackDistRange = 3f,
             attackAngleRange = 2f * Mathf.PI / 3f,
 
-            attackMovementStrength = 20.1f,
-            attackMovementExponent = 0.5f,
+            approachMovementStrength = 20.1f,
+            approachMovementExponent = 0.5f,
 
             aggressionStrength = 10.4f,
 
@@ -74,26 +71,14 @@ public class Hero : Boid {
         lockLaser.SetActive(false);
     }
 
-    public override void Attack() {
-        if (target != null && Time.time > _nextAttackTime && _aiming == false) {
+    public override void Act() {
+        if (target != null && _aiming == false) {
             Boid aimedTarget = target;
             _aiming = true;
             _aimLockCompleteTime = Time.time + aimLockTime;
             IEnumerator aimAndFire = AimAndFire(aimedTarget, laserDrawTime);
             StartCoroutine(aimAndFire);
         }
-    }
-
-    private List<Boid> FindEnemiesInSphere(Vector3 position, float radius, int layerMask) {
-        List<Boid> boids = new List<Boid>();
-        Collider[] colliders = Physics.OverlapSphere(position, radius, layerMask);
-        foreach (Collider hit in colliders) {
-            Boid boid = hit.GetComponent<Boid>();
-            if (boid != null && boid.GetOwner() != owner) {
-                boids.Add(boid);
-            }
-        }
-        return boids;
     }
 
     private IEnumerator AimAndFire(Boid target, float waitTime) {
@@ -106,7 +91,6 @@ public class Hero : Boid {
             lockLaser.SetActive(true);
 
             if (Time.time > _aimLockCompleteTime) { // Aiming done, fire
-                _nextAttackTime = Time.time + timeBetweenAttacks;
                 _aiming = false;
                 lockLaser.SetActive(false);
                 Fire(targetPos);

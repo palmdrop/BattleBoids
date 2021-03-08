@@ -9,14 +9,10 @@ public class Melee : Boid {
 
     [SerializeField] private GameObject laser;
 
-    private float _nextAttackTime;
-
     // Start is called before the first frame update
     void Start() {
         base.Start();
         
-        dead = false;
-        collisionMask = LayerMask.GetMask("Wall", "Obstacle");
         type = Type.Melee;
         cost = 10;
         health = maxHealth = 100;
@@ -27,7 +23,7 @@ public class Melee : Boid {
         avoidCollisionWeight = 5f;
         hoverKi = 2f;
         hoverKp = 10f;
-        timeBetweenAttacks = 0.01f;
+        timeBetweenActions = 0.01f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 0;
@@ -53,8 +49,8 @@ public class Melee : Boid {
             attackDistRange = 1f,
             attackAngleRange = Mathf.PI / 4.0f,
             
-            attackMovementStrength = 20.1f,
-            attackMovementExponent = 0.5f,
+            approachMovementStrength = 20.1f,
+            approachMovementExponent = 0.5f,
             
             aggressionStrength = 10.4f,
             
@@ -64,9 +60,14 @@ public class Melee : Boid {
         laser.SetActive(false);
     }
 
-    public override void Attack() {
-        if (target != null && Time.time > _nextAttackTime) {
-            _nextAttackTime = Time.time + timeBetweenAttacks;
+    public override void Act()
+    {
+        Attack();
+    }
+
+    private void Attack() 
+    {
+        if (target != null) {
             target.TakeDamage(damage);
             SetLaser(this.GetPos(), target.GetPos());
             laser.SetActive(true);

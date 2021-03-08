@@ -1,6 +1,6 @@
 using UnityEngine;
 using Unity.Mathematics;
-
+using System.Collections.Generic;
 
 public abstract class Boid : Selectable
 {
@@ -17,13 +17,16 @@ public abstract class Boid : Selectable
     protected float avoidCollisionWeight;
     protected float hoverKi;
     protected float hoverKp;
-    protected float timeBetweenAttacks;
-    protected bool dead;
-    protected Mesh mesh;
-    protected LayerMask collisionMask;
     protected ClassInfo classInfo;
     protected Boid target;
     protected Player owner;
+    
+    protected float timeBetweenActions;
+    private float _previousActionTime = 0.0f;
+    
+    private bool _dead;
+    private Mesh _mesh;
+    private LayerMask _collisionMask;
     protected float emotionalState;
     protected float morale;
     protected float moraleDefault;
@@ -49,7 +52,10 @@ public abstract class Boid : Selectable
         public float attackDistRange;
         public float attackAngleRange; // Angle relative local z-axis in rad
         
-        public float attackMovementStrength, attackMovementExponent; // Controls attack impulse
+        // Heal range
+        public float healRadius;
+        
+        public float approachMovementStrength, approachMovementExponent; // Controls attack impulse
         
         public float aggressionStrength; // Controls how much the boid is attracted to the enemy flock
 
@@ -62,6 +68,8 @@ public abstract class Boid : Selectable
         public float3 vel;
         public float3 pos;
         public float3 forward;
+        public int health;
+        
         public ClassInfo classInfo;
         public int flockId;
         public float emotionalState;
@@ -96,26 +104,34 @@ public abstract class Boid : Selectable
         // To start off, we don't want to show that the boid is selected 
         SetSelectionIndicator(false);
         
+        _collisionMask = LayerMask.GetMask("Wall", "Obstacle");
+        _dead = false;
         _rigidbody = GetComponent<Rigidbody>();
+        
         GameObject map = GameObject.FindGameObjectWithTag("Map");
         if (map != null)
         {
             this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
         _localScale = transform.GetChild(0).transform.localScale;
-        _healthBar = Instantiate(healthBarPrefab, transform.position, Quaternion.identity);
-        _healthBar.GetComponent<HealthBar>().SetOwner(this);
+        _healthBar = Instantiate(healthBarPrefab, transform);
     }
 
     public void FixedUpdate()
     {
         _rigidbody.AddForce(HoverForce(), ForceMode.Acceleration);
 
-        if (!dead && HeadedForCollisionWithMapBoundary()) {
+        if (!_dead && HeadedForCollisionWithMapBoundary()) {
             _rigidbody.AddForce(AvoidCollisionDir() * avoidCollisionWeight, ForceMode.Acceleration);
         }
 
-        Attack();
+        // Wait until next action is ready
+        if ((Time.time - _previousActionTime) >= timeBetweenActions)
+        {
+            Act();
+            _previousActionTime = Time.time;
+        }
+
     }
 
     // Called by the boid manager
@@ -148,7 +164,7 @@ public abstract class Boid : Selectable
         float velY = GetVel().y;
 
         //Formula to determine whether to hover or fall, uses a PI-regulator with values Ki and Kp
-        Vector3 yForce = new Vector3(0, (deltaY > 0 && !dead ? (hoverKp * deltaY - hoverKi * velY) : 0), 0);
+        Vector3 yForce = new Vector3(0, (deltaY > 0 && !_dead ? (hoverKp * deltaY - hoverKi * velY) : 0), 0);
         
         return yForce;
     }
@@ -164,7 +180,7 @@ public abstract class Boid : Selectable
 
             Ray ray = new Ray(GetPos() + GetCenterForwardPoint(), dir);
 
-            if (Physics.Raycast(ray, collisionAvoidanceDistance, collisionMask))   //Cast rays to nearby boundaries
+            if (Physics.Raycast(ray, collisionAvoidanceDistance, _collisionMask))   //Cast rays to nearby boundaries
             {
                 return true;
             }
@@ -184,7 +200,7 @@ public abstract class Boid : Selectable
 
             Ray ray = new Ray(GetPos() + GetCenterForwardPoint(), dir);
 
-            if (!Physics.Raycast(ray, collisionAvoidanceDistance, collisionMask))   //Cast rays to nearby boundaries
+            if (!Physics.Raycast(ray, collisionAvoidanceDistance, _collisionMask))   //Cast rays to nearby boundaries
             {
                 //Should only affect turn component of velocity. Should not accellerate forwards or backwards.
                 return sign < 0 ? transform.right : -transform.right;
@@ -207,6 +223,18 @@ public abstract class Boid : Selectable
         {
             FindObjectOfType<AudioManager>().Play("Collision");
         }
+    }
+
+    public List<Boid> FindEnemiesInSphere(Vector3 position, float radius, int layerMask) {
+        List<Boid> boids = new List<Boid>();
+        Collider[] colliders = Physics.OverlapSphere(position, radius, layerMask);
+        foreach (Collider hit in colliders) {
+            Boid boid = hit.GetComponent<Boid>();
+            if (boid != null && boid.GetOwner() != owner) {
+                boids.Add(boid);
+            }
+        }
+        return boids;
     }
 
     public void SetOwner(Player owner) {
@@ -243,6 +271,7 @@ public abstract class Boid : Selectable
         info.pos = GetPos();
         info.forward = transform.forward;
         info.vel = GetVel();
+        info.health = health;
         info.classInfo = classInfo;
         info.flockId = owner.id;
         info.emotionalState = emotionalState;
@@ -281,28 +310,34 @@ public abstract class Boid : Selectable
         }
     }
 
+    public void ReceiveHealth(int healthReceived)
+    {
+        health = math.min(health + healthReceived, maxHealth);
+    }
+
     public void Die()
     {
-        this.dead = true;
+        this._dead = true;
         target = null;
+        Destroy(GetComponent<ParticleSystem>());
     }
 
     public bool IsDead() {
-        return dead;
+        return _dead;
     }
 
     private Vector3 GetCenterForwardPoint()
     {
-        if (mesh == null)
+        if (_mesh == null)
             return Vector3.zero;
-        return new Vector3(transform.forward.x * _localScale.x * mesh.bounds.size.z / 2, mesh.bounds.size.z * _localScale.y, transform.forward.z * _localScale.z * mesh.bounds.size.z / 2);
+        return new Vector3(transform.forward.x * _localScale.x * _mesh.bounds.size.z / 2, _mesh.bounds.size.z * _localScale.y, transform.forward.z * _localScale.z * _mesh.bounds.size.z / 2);
     }
 
     private Vector3 GetMiddlePoint()
     {
-        if (mesh == null)
+        if (_mesh == null)
             return Vector3.zero;
-        return new Vector3(0, mesh.bounds.size.z * _localScale.y, 0);
+        return new Vector3(0, _mesh.bounds.size.z * _localScale.y, 0);
     }
 
     private Vector3 RotationMatrix_y(float angle, Vector3 vector)
@@ -334,6 +369,7 @@ public abstract class Boid : Selectable
         return _rigidbody;
     }
 
-    public abstract void Attack();
-
+    public abstract void Act();
+    
+    
 }
