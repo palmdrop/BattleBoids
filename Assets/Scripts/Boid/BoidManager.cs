@@ -232,10 +232,18 @@ public class BoidManager : MonoBehaviour
             // each behavior.
             NativeArray<float> distances = CalculateDistances(boid, neighbours);
 
-            int targetBoidIndex =
-                boid.classInfo.attackDistRange < 0
-                    ? FindBoidToHealIndex(boid, neighbours, distances)
-                    : FindEnemyTargetIndex(boid, neighbours, distances);
+            int targetBoidIndex = -1;
+            float targetViewDistance = 0.0f;
+            if (boid.type == Boid.Type.Healer) 
+            {
+                targetBoidIndex = FindBoidToHealIndex(boid, neighbours, distances);
+                targetViewDistance = boid.classInfo.viewRadius;
+            }
+            else
+            { 
+                targetBoidIndex = FindEnemyTargetIndex(boid, neighbours, distances);
+                targetViewDistance = boid.classInfo.attackDistRange;
+            }
             
             // Sum all the forces
             float3 desire = 
@@ -246,7 +254,7 @@ public class BoidManager : MonoBehaviour
                             // Additional behaviors
                             + AggressionForce(boid)
                             + FearForce(boid, neighbours, distances)
-                            + ApproachForce(boid, targetBoidIndex)
+                            + ApproachForce(boid, targetBoidIndex, targetViewDistance)
                             + RandomForce(index, boid.classInfo.randomMovements);
 
             float3 force = desire - boid.vel;
@@ -517,7 +525,10 @@ public class BoidManager : MonoBehaviour
                 Boid.BoidInfo neighbour = boids[neighbours[i]];
                 
                 // Enemy boids cannot be healed
-                if (boid.flockId != neighbour.flockId) continue;
+                // And do not try to heal boids with max health
+                if (boid.flockId != neighbour.flockId 
+                    || distances[i] > boid.abilityDistance
+                    || neighbour.health == neighbour.maxHealth) continue;
 
                 // Store the neighbour with the lowest health
                 if (neighbour.health < lowestAllyHealth)
@@ -556,9 +567,10 @@ public class BoidManager : MonoBehaviour
             float modifier = math.pow(moraleModifyStrength, boost);
             float morale = boid.moraleDefault * modifier;
 
-            return morale;
+            // Prevent negative morale
+            return math.max(morale, 0.0f);
         }
-        private float3 ApproachForce(Boid.BoidInfo boid, int targetBoidIndex)
+        private float3 ApproachForce(Boid.BoidInfo boid, int targetBoidIndex, float targetDistRange)
         {
             // Calculate attack force
             // The attack force tries to move the boid towards the target boid
@@ -569,7 +581,10 @@ public class BoidManager : MonoBehaviour
             
             float3 vector = boids[targetBoidIndex].pos - boid.pos;
             float dist = math.length(vector);
-            return vector * CalculatePower(boid.classInfo.approachMovementStrength, dist / boid.classInfo.attackDistRange, boid.classInfo.approachMovementExponent);
+            return vector * 
+                   CalculatePower(boid.classInfo.approachMovementStrength, 
+                       dist / targetDistRange, 
+                       boid.classInfo.approachMovementExponent);
         }
     }
 }

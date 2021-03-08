@@ -57,8 +57,8 @@ public class Scarecrow : Boid {
         SetColor();
     }
 
-    public override void Act() {
-        if (target != null) {
+    protected override void Act() {
+        if (HasTarget()) {
             List<Boid> enemies = FindEnemiesInSphere(GetPos(), classInfo.attackDistRange, LayerMask.GetMask("Units"));
             foreach (Boid enemy in enemies) {
                 enemy.TakeDamage(damage);
