@@ -1,29 +1,33 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class BoxSelection : MonoBehaviour
+public class Selection : MonoBehaviour
 {
+    [SerializeField] private SelectionManager selectionManager;
+
     // The camera that is used for the projection from world view to screen view
     [SerializeField] private Camera selectionCamera;
-    
+
     // This is the selection area displayed on the UI
     [SerializeField] private RectTransform selectionAreaUI;
-    
+
     // The UI component used to get the active player flock
     [SerializeField] private GameUI gameUI;
 
     // This is the selection invisible selection area in the game
     private Rect _selectionArea;
+
     // The position of the boid projected on to the screen
     private Vector3 entityScreenPosition;
-    
+
     // Start and end position for the selection area
     private Vector2 _startSelectionPosition;
     private Vector2 _endSelectionPosition;
-    
 
+    // Offset for finding closest boid when clicking
+    private const float Offset = 10f;
+
+    
     private void Start()
     {
         ResetDrawUISelectionArea();
@@ -31,16 +35,31 @@ public class BoxSelection : MonoBehaviour
 
     private void Update()
     {
+        // You can't select if you are currently purchasing new units
+        if (gameUI.GetActivePlayer().GetSpawnArea().isHolding())
+        {
+            return;     
+        }
+        
+        // If you are currently moving entities around, you can't select new ones before they are placed
+        if (!selectionManager.IsPlaceable())
+        {
+            return;
+        }
+        
         // When you click the left mouse button
         if (Input.GetMouseButtonDown(0))
         {
-            DeselectEntities();
+            selectionManager.Deselect();
+
 
             // Get the position of the mouse once
             _startSelectionPosition = Input.mousePosition;
 
             _selectionArea = new Rect();
         }
+
+        
 
         // When the left mouse button is held down
         if (Input.GetMouseButton(0))
@@ -54,37 +73,30 @@ public class BoxSelection : MonoBehaviour
              * Calculate the selection area in the world view
              */
             
-            // When we are on the left side of the mouse position
-            if (Input.mousePosition.x < _startSelectionPosition.x)
-            {
-                _selectionArea.xMin = Input.mousePosition.x;
-                _selectionArea.xMax = _startSelectionPosition.x;
-            }
-            //  Right side...
-            else
-            {
-                _selectionArea.xMin =  _startSelectionPosition.x;
-                _selectionArea.xMax = Input.mousePosition.x;
-            }
+            _selectionArea.xMin = Mathf.Min(Input.mousePosition.x, _startSelectionPosition.x);
+            _selectionArea.yMin = Mathf.Min(Input.mousePosition.y, _startSelectionPosition.y);
             
-            // For y...
-            if (Input.mousePosition.y < _startSelectionPosition.y)
-            {
-                _selectionArea.yMin = Input.mousePosition.y;
-                _selectionArea.yMax = _startSelectionPosition.y;
-            }
-            else
-            {
-                _selectionArea.yMin =  _startSelectionPosition.y;
-                _selectionArea.yMax = Input.mousePosition.y;
-            }
+            _selectionArea.xMax = Mathf.Max(Input.mousePosition.x, _startSelectionPosition.x);
+            _selectionArea.yMax = Mathf.Max(Input.mousePosition.y, _startSelectionPosition.y);
+            
         }
 
         // When the left mouse button is released
         if (Input.GetMouseButtonUp(0))
         {
+            // Detects if the mouse is clicked in without moving
+            if (_startSelectionPosition == _endSelectionPosition)
+            {
+                _selectionArea.xMin = Input.mousePosition.x - Offset;
+                _selectionArea.xMax = Input.mousePosition.x + Offset;
+                
+                _selectionArea.yMin = Input.mousePosition.y - Offset;
+                _selectionArea.yMax = Input.mousePosition.y + Offset;
+            }
+            
             SelectPlayerFlockEntities();
             ResetDrawUISelectionArea();
+            
         }
 }
 
@@ -123,17 +135,14 @@ public class BoxSelection : MonoBehaviour
             
             if (_selectionArea.Contains(entityScreenPosition))
             {
-                SelectionManager.AddToSelected(selected);
                 selected.SetSelectionIndicator(true);
+                selectionManager.Select(selected);
+                
             }
+
+            
         }
 
-    }
-    
-    private void DeselectEntities()
-    {
-        
-        SelectionManager.RemoveSelected();
     }
     
 }

@@ -26,7 +26,7 @@ public class Hero : Boid {
         base.Start();
 
         type = Type.Hero;
-        cost = 100;
+        Cost = 100;
         health = maxHealth = 200;
         damage = 100;
         maxSpeed = 4f;

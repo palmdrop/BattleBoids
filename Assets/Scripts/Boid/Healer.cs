@@ -17,8 +17,8 @@ public class Healer : Boid
     void Start() {
         base.Start();
 
+        Cost = 20;
         type = Type.Healer;
-        cost = 20;
         health = maxHealth = 100;
         damage = 0;
         maxSpeed = 4f;

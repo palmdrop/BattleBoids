@@ -46,6 +46,12 @@ public class Player : MonoBehaviour
         return flock;
     }
 
+    public void RemoveFromFlock(Selectable selectable)
+    {
+        selectable.GetComponent<Boid>().Die();
+        flock.Remove(selectable.gameObject);
+    }
+
     public void AddBoins(int boinsToAdd)
     {
         boins += boinsToAdd;

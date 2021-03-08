@@ -18,7 +18,7 @@ public class Ranged : Boid {
         base.Start();
 
         type = Type.Ranged;
-        cost = 10;
+        Cost = 10;
         health = maxHealth = 100;
         damage = 25;
         maxSpeed = 4f;

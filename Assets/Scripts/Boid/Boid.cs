@@ -39,7 +39,6 @@ public abstract class Boid : Selectable
     protected Boid target;
     private bool _hasTarget = false;
     
-    protected int cost;
     protected int health;
     protected int maxHealth;
     protected int damage;
@@ -292,7 +291,7 @@ public abstract class Boid : Selectable
 
     public int GetCost()
     {
-        return cost;
+        return Cost;
     }
 
     public float GetHealth()
