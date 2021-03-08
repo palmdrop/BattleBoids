@@ -8,6 +8,7 @@ public abstract class Selectable : MonoBehaviour, ISelectable
     
     [SerializeField] private GameObject selectionIndicatorPrefab;
     private GameObject selectionIndicator;
+    private bool _selected = false;
 
     private Vector3 offset;
     private Vector3 positionBeforeMoved;
@@ -28,6 +29,7 @@ public abstract class Selectable : MonoBehaviour, ISelectable
     public void SetSelectionIndicator(bool isSelected)
     {
         selectionIndicator.SetActive(isSelected);
+        _selected = isSelected;
     }
 
     public void SetOffset(Vector3 anchor)
@@ -53,5 +55,10 @@ public abstract class Selectable : MonoBehaviour, ISelectable
     public int GetCost()
     {
         return Cost;
+    }
+    
+    public bool IsSelected()
+    {
+        return _selected;
     }
 }

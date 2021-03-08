@@ -1,13 +1,9 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Unity.Mathematics;
-using Random = UnityEngine.Random;
 
 public class Melee : Boid {
 
     [SerializeField] private GameObject laser;
+    private LineRenderer _laserRenderer;
 
     // Start is called before the first frame update
     void Start() {
@@ -42,6 +38,8 @@ public class Melee : Boid {
             
             separationStrength = 120.0f,
             separationExponent = 1.0f,
+
+            gravity = 1f,
             
             fearStrength = 140.0f,
             fearExponent = 1.0f,
@@ -57,17 +55,18 @@ public class Melee : Boid {
             randomMovements = 6.0f,
         };
 
+        _laserRenderer = laser.GetComponent<LineRenderer>();
         laser.SetActive(false);
     }
 
-    public override void Act()
+    protected override void Act()
     {
         Attack();
     }
 
     private void Attack() 
     {
-        if (target != null) {
+        if (HasTarget()) {
             target.TakeDamage(damage);
             SetLaser(this.GetPos(), target.GetPos());
             laser.SetActive(true);
@@ -77,9 +76,8 @@ public class Melee : Boid {
     }
 
     private void SetLaser(Vector3 fromPos, Vector3 toPos) {
-        LineRenderer lineRenderer = laser.GetComponent<LineRenderer>();
-        lineRenderer.startColor = owner.color;
+        _laserRenderer.startColor = owner.color;
         Vector3[] positions = new Vector3[] {fromPos, toPos};
-        lineRenderer.SetPositions(positions);
+        _laserRenderer.SetPositions(positions);
     }
 }

@@ -15,8 +15,9 @@ public class Hero : Boid {
     [SerializeField] private float damageRadius;
     [SerializeField] private float forcePower;
 
-    private float _nextAttackTime;
-    private float _nextBoostTime;
+    private LineRenderer _lockLaserRenderer;
+
+    //private float _nextBoostTime;
     private float _aimLockCompleteTime;
     private bool _aiming;
 
@@ -57,6 +58,8 @@ public class Hero : Boid {
             fearStrength = 140.0f,
             fearExponent = 1.0f,
 
+            gravity = 1f,
+
             attackDistRange = 3f,
             attackAngleRange = 2f * Mathf.PI / 3f,
 
@@ -68,11 +71,12 @@ public class Hero : Boid {
             randomMovements = 6.0f,
         };
 
+        _lockLaserRenderer = lockLaser.GetComponent<LineRenderer>();
         lockLaser.SetActive(false);
     }
 
-    public override void Act() {
-        if (target != null && _aiming == false) {
+    protected override void Act() {
+        if (HasTarget() && _aiming == false) {
             Boid aimedTarget = target;
             _aiming = true;
             _aimLockCompleteTime = Time.time + aimLockTime;
@@ -118,7 +122,7 @@ public class Hero : Boid {
         // Set explosion forces and damage
         List<Boid> enemies = FindEnemiesInSphere(position, damageRadius, LayerMask.GetMask("Units"));
         foreach (Boid enemy in enemies) {
-            enemy.GetComponent<Rigidbody>().AddExplosionForce(forcePower, position, damageRadius);
+            enemy.GetRigidbody().AddExplosionForce(forcePower, position, damageRadius);
             float sqrDist = (enemy.GetPos() - position).sqrMagnitude;
             int takeDamage = (int) (damage / sqrDist);
             enemy.TakeDamage(takeDamage);
@@ -126,13 +130,11 @@ public class Hero : Boid {
     }
 
     private void SetLaser(Vector3 fromPos, Vector3 toPos, float width) {
-        Vector3[] positions;
-        positions = new Vector3[] {fromPos, toPos};
-        LineRenderer laser = lockLaser.GetComponent<LineRenderer>();
-        laser.SetPositions(positions);
-        laser.startColor = owner.color;
-        laser.startWidth = width;
-        laser.endWidth = width;
+        Vector3[] positions = new Vector3[] {fromPos, toPos};
+        _lockLaserRenderer.SetPositions(positions);
+        _lockLaserRenderer.startColor = owner.color;
+        _lockLaserRenderer.startWidth = width;
+        _lockLaserRenderer.endWidth = width;
     }
 
     private bool NotReachable(Vector3 pos) {
