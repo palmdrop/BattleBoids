@@ -34,6 +34,8 @@ public class Melee : Boid {
             fearRadius = 1.0f,
             maxForce = 2f,
             
+            confidenceThreshold = 1.0f,
+            
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
             

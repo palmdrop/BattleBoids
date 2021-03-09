@@ -62,6 +62,11 @@ public abstract class Boid : Selectable
         public float separationRadius;
         public float fearRadius;
         public float maxForce;
+        
+        // The confidence threshold controls how friendly boids / enemy boids are required
+        // for the boid to remain confident. When a boid looses confidence, they will no longer be
+        // aggressive and will start searching for friendly boids instead.
+        public float confidenceThreshold;
 
         // Weights for the three basic flocking behaviors
         // NOTE: an exponent of 0.0 would make the behavior ignore the distance to the neighbouring boid

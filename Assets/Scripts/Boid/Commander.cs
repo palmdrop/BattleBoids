@@ -33,6 +33,8 @@ public class Commander : Boid
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
+            
+            confidenceThreshold = 0.5f,
 
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f,

@@ -40,6 +40,8 @@ public class Ranged : Boid {
             fearRadius = 1.0f,
             maxForce = 2f,
             
+            confidenceThreshold = 3.0f,
+            
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
             
