@@ -41,6 +41,8 @@ public class Healer : Boid
             fearRadius = 1.0f,
             maxForce = 2.0f,
             
+            confidenceThreshold = 2.0f,
+            
             alignmentStrength = 6.0f,
             alignmentExponent = 0.0f, 
             

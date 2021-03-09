@@ -245,17 +245,23 @@ public class BoidManager : MonoBehaviour
                 targetViewDistance = boid.classInfo.attackDistRange;
             }
             
+            // Calculate the confidence of the current boid
+            float confidence = CalculateConfidence(boid, neighbours);
+            
             // Sum all the forces
-            float3 desire = 
-                            // Reynolds behaviors
-                              AlignmentForce(boid, neighbours, distances) 
-                            + CohesionForce(boid, neighbours, distances)
-                            + SeparationForce(boid, neighbours, distances)
-                            // Additional behaviors
-                            + AggressionForce(boid)
-                            + FearForce(boid, neighbours, distances)
-                            + ApproachForce(boid, targetBoidIndex, targetViewDistance)
-                            + RandomForce(index, boid.classInfo.randomMovements);
+            float3 desire =
+                // Reynolds behaviors
+                AlignmentForce(boid, neighbours, distances)
+                + CohesionForce(boid, neighbours, distances)
+                + SeparationForce(boid, neighbours, distances)
+                // Additional behaviors
+                + (confidence >= boid.classInfo.confidenceThreshold
+                    ? AggressionForce(boid)
+                    : SearchForce(boid))
+                //+ AggressionForce(boid)
+                + FearForce(boid, neighbours, distances)
+                + ApproachForce(boid, targetBoidIndex, targetViewDistance)
+                + RandomForce(index, boid.classInfo.randomMovements);
 
             float3 force = desire - boid.vel;
 
@@ -275,7 +281,8 @@ public class BoidManager : MonoBehaviour
             neighbours.Dispose();
             distances.Dispose();
         }
-        
+
+
         // Calculates the power of a certain behavior. This is a combination of the weight for that behavior,
         // the distance to the target, and the falloff exponent
         private static float CalculatePower(float weight, float normalizedDist, float exponent)
@@ -333,6 +340,37 @@ public class BoidManager : MonoBehaviour
 
             return distances;
         }
+        
+        private float CalculateConfidence(Boid.BoidInfo boid, NativeArray<int> neighbours)
+        {
+            // Count the number of neighbouring allies and enemies
+            int allyCounter = 0;
+            int enemyCounter = 0;
+
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                int index = neighbours[i];
+                Boid.BoidInfo neighbour = boids[index];
+                if (boid.flockId == neighbour.flockId)
+                {
+                    allyCounter++;
+                }
+                else
+                {
+                    enemyCounter++;
+                }
+            }
+
+            // If there's no enemies, set the confidence to the max value
+            if (enemyCounter == 0)
+            {
+                return float.MaxValue;
+            }
+            
+            // Otherwise, calculate the confidence...
+            return (float)allyCounter / enemyCounter;
+        }
+
        
         private float3 AlignmentForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
@@ -440,6 +478,15 @@ public class BoidManager : MonoBehaviour
             
             if (enemyFlock.boidCount == 0) return float3.zero;
             return math.normalize(enemyFlock.avgPos - boid.pos) * boid.classInfo.aggressionStrength;
+        }
+        
+        private float3 SearchForce(Boid.BoidInfo boid)
+        {
+            Player.FlockInfo flock = flocks[boid.flockId - 1];
+            
+            if (flock.boidCount <= 1) return float3.zero;
+            //TODO do not use aggression strength for search as well?
+            return math.normalize(flock.avgPos - boid.pos) * boid.classInfo.aggressionStrength;
         }
 
         private float3 FearForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
