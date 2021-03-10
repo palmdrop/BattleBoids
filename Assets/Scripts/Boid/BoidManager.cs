@@ -229,7 +229,7 @@ public class BoidManager : MonoBehaviour
                     ? AggressionForce(boid)
                     : SearchForce(boid))
                 //+ AggressionForce(boid)
-                + FearForce(boid, neighbours, distances)
+                + FearForce(boid, neighbours, distances, confidence)
                 + ApproachForce(boid, targetBoidIndex, targetViewDistance)
                 + RandomForce(index, boid.classInfo.randomMovements);
 
@@ -331,10 +331,10 @@ public class BoidManager : MonoBehaviour
                 }
             }
 
-            // If there's no enemies, set the confidence to the max value
+            // If there's no enemies, set confidence to same as ally counter
             if (enemyCounter == 0)
             {
-                return float.MaxValue;
+                return allyCounter;
             }
             
             // Otherwise, calculate the confidence...
@@ -459,7 +459,7 @@ public class BoidManager : MonoBehaviour
             return math.normalize(flock.avgPos - boid.pos) * boid.classInfo.aggressionStrength;
         }
 
-        private float3 FearForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
+        private float3 FearForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances, float confidence)
         {
             // Fear force acting on the boid (a boid fears enemy boids)
             float3 avgFear = float3.zero;
@@ -496,7 +496,8 @@ public class BoidManager : MonoBehaviour
             // Calculate fear force
             // This force is similar to the separation force, but only acts on enemy boids
             if (avgFearDivider == 0.00) return float3.zero;
-            return (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
+            return (confidence <= boid.classInfo.confidenceThreshold ? 2 : 1) *
+                (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
         }
         private int FindEnemyTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
