@@ -18,10 +18,14 @@ public class BoidManager : MonoBehaviour
     // Data structure for efficiently looking up neighbouring boids
     private BoidGrid _grid;
 
+    //Needed for burst rays
+    private static Unity.Physics.Systems.BuildPhysicsWorld _bpw;
+
     // Start is called before the first frame update
     void Start()
     {
         players = GetComponentInParent<GameManager>().GetPlayers();
+        _bpw = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetExistingSystem<Unity.Physics.Systems.BuildPhysicsWorld>();
     }
 
     // Fetches the boids from the respective players and places them in the boids list
@@ -98,7 +102,8 @@ public class BoidManager : MonoBehaviour
             forces = forces,
             targetIndices = targetIndices,
             morale = morale,
-            grid = _grid
+            grid = _grid,
+            cw = _bpw.PhysicsWorld.CollisionWorld
         };
 
         // Schedule job
@@ -189,6 +194,7 @@ public class BoidManager : MonoBehaviour
         [WriteOnly] public NativeArray<int> targetIndices;
         [WriteOnly] public NativeArray<float> morale;
         [ReadOnly] public BoidGrid grid;
+        [ReadOnly] public Unity.Physics.CollisionWorld cw;
 
         public void Execute(int index)
         {
@@ -226,6 +232,12 @@ public class BoidManager : MonoBehaviour
                             + FearForce(boid, neighbours, distances)
                             + ApproachForce(boid, targetBoidIndex, targetViewDistance)
                             + RandomForce(index, boid.classInfo.randomMovements);
+
+            if (HeadedForCollisionWithMapBoundary(boid))
+            {
+                desire += AvoidCollisionDir(boid) * boid.classInfo.avoidCollisionWeight;
+            }
+
 
             float3 force = desire - boid.vel;
 
@@ -555,6 +567,89 @@ public class BoidManager : MonoBehaviour
                    CalculatePower(boid.classInfo.approachMovementStrength, 
                        dist / targetDistRange, 
                        boid.classInfo.approachMovementExponent);
+        }
+
+        private float3 AttackForce(Boid.BoidInfo boid, bool enemyInRange, int targetBoidIndex)
+        {
+            // Calculate attack force
+            // The attack force tries to move the boid towards the target boid
+            if (!enemyInRange) return float3.zero;
+
+            //TODO find better solution than to recalculate distance here
+            //TODO problem is that targetBoidIndex corresponds to index in boid array, not necessarily in distances array
+
+            float3 vector = boids[targetBoidIndex].pos - boid.pos;
+            float dist = math.length(vector);
+            return vector * CalculatePower(boid.classInfo.attackMovementStrength, dist / boid.classInfo.attackDistRange, boid.classInfo.attackMovementExponent);
+        }
+
+        private bool HeadedForCollisionWithMapBoundary(Boid.BoidInfo boid)
+        {
+            float rayCastTheta = 10f;
+
+            for (int i = 0; i < 3; i++) //Send 3 rays. This is to avoid tangentially going too close to an obstacle.
+            {
+                float angle = ((i + 1) / 2) * rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
+                int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
+
+                float3 dir = math.normalize(RotationMatrix_y(angle * sign, boid.vel));
+
+                Unity.Physics.RaycastInput ray = new Unity.Physics.RaycastInput
+                {
+                    Start = boid.pos,
+                    End = boid.pos + dir * boid.collisionAvoidanceDistance,
+                    Filter = new Unity.Physics.CollisionFilter
+                    {
+                        BelongsTo = boid.collisionMask,
+                        CollidesWith = boid.collisionMask
+                    }
+                };
+
+                if (cw.CastRay(ray))   //Cast rays to nearby boundaries
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private float3 AvoidCollisionDir(Boid.BoidInfo boid)
+        {
+            float rayCastTheta = 10f;
+
+            for (int i = 3; i < 300 / rayCastTheta; i++)
+            {
+                float angle = ((i + 1) / 2) * rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
+                int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
+
+                float3 dir = math.normalize(RotationMatrix_y(angle * sign, boid.vel));
+
+                Unity.Physics.RaycastInput ray = new Unity.Physics.RaycastInput
+                {
+                    Start = boid.pos,
+                    End = boid.pos + dir * boid.collisionAvoidanceDistance,
+                    Filter = new Unity.Physics.CollisionFilter
+                    {
+                        BelongsTo = boid.collisionMask,
+                        CollidesWith = boid.collisionMask
+                    }
+                };
+
+                if (!(cw.CastRay(ray)))   //Cast rays to nearby boundaries
+                {
+                    //Should only affect turn component of velocity. Should not accellerate forwards or backwards.
+                    return sign < 0 ? boid.right : -boid.right;
+                }
+            }
+            return new float3(0, 0, 0);
+        }
+
+        private float3 RotationMatrix_y(float angle, float3 vector)
+        {
+            float cos = math.cos(angle * math.PI / 180);
+            float sin = math.sin(angle * math.PI / 180);
+
+            return new float3(vector.x * cos - vector.z * sin, 0, vector.x * sin + vector.z * cos);
         }
     }
 }
