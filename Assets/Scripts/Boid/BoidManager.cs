@@ -224,12 +224,15 @@ public class BoidManager : MonoBehaviour
                 AlignmentForce(boid, neighbours, distances)
                 + CohesionForce(boid, neighbours, distances)
                 + SeparationForce(boid, neighbours, distances)
+                
                 // Additional behaviors
                 + (confidence >= boid.classInfo.confidenceThreshold
-                    ? AggressionForce(boid)
-                    : SearchForce(boid))
-                //+ AggressionForce(boid)
-                + FearForce(boid, neighbours, distances, confidence)
+                    // If confidence is high, be aggressive and have normal fear levels
+                    ? AggressionForce(boid) + 1 * FearForce(boid, neighbours, distances) 
+                    // If confidence is low, search for the ally flock and duplicate fear levels
+                    : SearchForce(boid)     + 2 * FearForce(boid, neighbours, distances))
+                
+                // 
                 + ApproachForce(boid, targetBoidIndex, targetViewDistance)
                 + RandomForce(index, boid.classInfo.randomMovements);
 
@@ -459,7 +462,7 @@ public class BoidManager : MonoBehaviour
             return math.normalize(flock.avgPos - boid.pos) * boid.classInfo.aggressionStrength;
         }
 
-        private float3 FearForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances, float confidence)
+        private float3 FearForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
             // Fear force acting on the boid (a boid fears enemy boids)
             float3 avgFear = float3.zero;
@@ -496,8 +499,7 @@ public class BoidManager : MonoBehaviour
             // Calculate fear force
             // This force is similar to the separation force, but only acts on enemy boids
             if (avgFearDivider == 0.00) return float3.zero;
-            return (confidence <= boid.classInfo.confidenceThreshold ? 2 : 1) *
-                (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
+            return (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
         }
         private int FindEnemyTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
