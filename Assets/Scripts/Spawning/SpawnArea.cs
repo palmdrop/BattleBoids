@@ -11,7 +11,7 @@ public class SpawnArea : MonoBehaviour
 
     int instanceNumber = 1;
 
-    List<GameObject> spawned;
+    List<Boid> spawned;
     List<GameObject> holding = new List<GameObject>();
     int gridWidth = 0;
     bool canPlace = true;
@@ -116,26 +116,14 @@ public class SpawnArea : MonoBehaviour
                 // Place entity
                 
                 foreach (GameObject currentEntity in holding) {
-                    spawned.Add(currentEntity);
+                    spawned.Add(currentEntity.GetComponent<Boid>());
                 }
                 holding.Clear();
                 gridWidth = 0;
                 
                 // Tell owner the flock has been updated
                 _owner.FlockUpdate = true;
-            } else if (Physics.Raycast(ray, out hit, Mathf.Infinity, ~LayerMask.GetMask("Spawn Area"))) {
-                // Pick up entity
-                /*
-                if (spawned.Contains(hit.collider.gameObject)) {
-                    spawned.Remove(hit.collider.gameObject);
-                    GameObject currentEntity = hit.collider.gameObject;
-                    holding.Add(currentEntity);
-                    PurchaseReturn();
-                    gridWidth = 1;
-                }
-                */
             }
-
         }
     }
 

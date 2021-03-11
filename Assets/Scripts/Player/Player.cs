@@ -12,7 +12,7 @@ public class Player : MonoBehaviour
         public int boidCount;
     }
     
-    [SerializeField] private List<GameObject> flock = new List<GameObject>();
+    [SerializeField] private List<Boid> flock = new List<Boid>();
     [SerializeField] private int boins; // Currency to buy boids
     [SerializeField] private int score; // Points obtained during a match
     [SerializeField] public int id; // Identifier
@@ -44,7 +44,7 @@ public class Player : MonoBehaviour
     {
     }
 
-    public List<GameObject> GetFlock()
+    public List<Boid> GetFlock()
     {
         return flock;
     }
@@ -52,7 +52,7 @@ public class Player : MonoBehaviour
     public void RemoveFromFlock(Selectable selectable)
     {
         selectable.GetComponent<Boid>().Die();
-        flock.Remove(selectable.gameObject);
+        flock.Remove(selectable.gameObject.GetComponent<Boid>());
     }
 
     public void AddBoins(int boinsToAdd)
