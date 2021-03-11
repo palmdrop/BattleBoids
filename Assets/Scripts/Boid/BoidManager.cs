@@ -8,8 +8,7 @@ using Random = System.Random;
 
 public class BoidManager : MonoBehaviour
 {
-    [SerializeField] private List<Player> players = new List<Player>();
-    private bool _isBattlePhase;
+    private List<Player> players;
 
     private readonly List<Boid> _boids = new List<Boid>();
     
@@ -22,30 +21,15 @@ public class BoidManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        players = GetComponentInParent<GameManager>().GetPlayers();
     }
 
     // Fetches the boids from the respective players and places them in the boids list
-    private void AddPlayerBoids()
+    public void AddPlayerBoids()
     {
-        // Check if there's been an update to the player flocks
-        // TODO improve, player/spawnarea should be able to tell boid manager update occured
-        bool update = false;
-        foreach (Player p in players)
-        {
-            if (p.FlockUpdate)
-            {
-                update = true;
-                break;
-            }
-        }
-
-        // If no update, return
-        if (!update) return;
-        
-        // Otherwise, clear all boids and add them once again to the list
+        // Clear all boids and add them to the list
         _boids.Clear();
-        
+
         foreach (Player p in players)
         {
             foreach (GameObject b in p.GetFlock()) {
@@ -64,13 +48,6 @@ public class BoidManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // When game is started, clear boids and fetch all the new boids from the 
-        // corresponding players
-        if (_isBattlePhase)
-        {
-            AddPlayerBoids();
-        }
-
         // Remove all dead boids
         ClearDeadBoids();
 
@@ -149,14 +126,6 @@ public class BoidManager : MonoBehaviour
         targetIndices.Dispose();
         _grid.Dispose();
         morale.Dispose();
-    }
-
-    public void BeginBattle() {
-        _isBattlePhase = true;
-    }
-
-    public void StopBattle() {
-        _isBattlePhase = false;
     }
 
     // This job calculates information specific for the entire flock, such as 

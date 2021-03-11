@@ -18,16 +18,19 @@ public class Player : MonoBehaviour
     [SerializeField] public int id; // Identifier
     [SerializeField] public Color color; // Player color
     [SerializeField] private string nickname; // Unique
-    [SerializeField] private SpawnArea spawnArea;
-    [SerializeField] private GameUI gameUI;
     [SerializeField] private bool ready;
+
+    private GameUI _gameUI;
 
     private FlockInfo _flockInfo;
     public bool FlockUpdate { get; set; } = false;
 
+    private bool _active = false;
+
     // Start is called before the first frame update
     void Start()
     {
+        _gameUI = GetComponentInParent<GameManager>().GetGameUI();
         _flockInfo = new FlockInfo()
         {
             avgPos = float3.zero,
@@ -84,12 +87,12 @@ public class Player : MonoBehaviour
 
     public SpawnArea GetSpawnArea()
     {
-        return spawnArea;
+        return GetComponentInChildren<SpawnArea>();
     }
 
     public GameUI GetGameUI()
     {
-        return gameUI;
+        return _gameUI;
     }
 
     public bool IsReady()
@@ -115,6 +118,22 @@ public class Player : MonoBehaviour
     public void SetFlockInfo(FlockInfo flockInfo)
     {
         this._flockInfo = flockInfo;
+    }
+
+    public void SetActive(bool active)
+    {
+        _active = active;
+        var state = GetComponentInParent<GameManager>().GetState();
+        if (_active && state == GameManager.GameState.Placement) {
+            GetComponentInChildren<SpawnArea>().Activate();
+        } else {
+            GetComponentInChildren<SpawnArea>().Deactivate();
+        }
+        foreach (var boid in flock) {
+            foreach (Renderer r in boid.GetComponentsInChildren<Renderer>()) {
+                r.enabled = _active || state != GameManager.GameState.Placement;
+            }
+        }
     }
 
 }

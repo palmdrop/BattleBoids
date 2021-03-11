@@ -5,8 +5,9 @@ public class SpawnArea : MonoBehaviour
 {
     public GameObject entityToSpawn;
     public Camera camera;
-    public Player owner;
     public Map.Map map;
+
+    private Player _owner;
 
     int instanceNumber = 1;
 
@@ -26,7 +27,8 @@ public class SpawnArea : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        spawned = owner.GetFlock();
+        _owner = GetComponentInParent<Player>();
+        spawned = _owner.GetFlock();
     }
 
     private void Awake()
@@ -42,8 +44,8 @@ public class SpawnArea : MonoBehaviour
         while (holding.Count < gridWidth * gridWidth) {
             GameObject currentEntity;
             currentEntity = Instantiate(entityToSpawn, new Vector3(0, 0, 0), Quaternion.identity);
-            currentEntity.GetComponent<Boid>().SetOwner(owner);
-            currentEntity.name = "Player_" + owner.id + "_Unit_" + instanceNumber++;
+            currentEntity.GetComponent<Boid>().SetOwner(_owner);
+            currentEntity.name = "Player_" + _owner.id + "_Unit_" + instanceNumber++;
             holding.Add(currentEntity);
         }
         
@@ -80,7 +82,7 @@ public class SpawnArea : MonoBehaviour
                 // Check if within spawn area
                 if (IsInside(currentEntity))
                 {
-                    currentEntity.GetComponent<Boid>().SetColor(new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f));
+                    currentEntity.GetComponent<Boid>().SetColor(new Color(_owner.color.r, _owner.color.g, _owner.color.b, 0.5f));
                 } else
                 {
                     currentEntity.GetComponent<Boid>().SetColor(new Color(1.0f, 1.0f, 1.0f, 0.5f));
@@ -120,7 +122,7 @@ public class SpawnArea : MonoBehaviour
                 gridWidth = 0;
                 
                 // Tell owner the flock has been updated
-                owner.FlockUpdate = true;
+                _owner.FlockUpdate = true;
             } else if (Physics.Raycast(ray, out hit, Mathf.Infinity, ~LayerMask.GetMask("Spawn Area"))) {
                 // Pick up entity
                 /*
@@ -149,7 +151,7 @@ public class SpawnArea : MonoBehaviour
         
         if (bounds2D.Contains(goPosition))
         {
-            boid.SetColor(owner.color);
+            boid.SetColor(_owner.color);
             return true;
         }
 
@@ -159,12 +161,12 @@ public class SpawnArea : MonoBehaviour
 
     bool PurchaseSuccess()
     {
-        return owner.RemoveBoins(SumHoldingCost());
+        return _owner.RemoveBoins(SumHoldingCost());
     }
 
     void PurchaseReturn()
     {
-        owner.AddBoins(SumHoldingCost());
+        _owner.AddBoins(SumHoldingCost());
     }
 
     int SumHoldingCost()
