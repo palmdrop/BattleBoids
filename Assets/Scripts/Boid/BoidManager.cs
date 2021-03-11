@@ -33,6 +33,7 @@ public class BoidManager : MonoBehaviour
         foreach (Player p in players)
         {
             foreach (Boid b in p.GetFlock()) {
+                b.StartBoid();
                 _boids.Add(b);
             }
             p.FlockUpdate = false;
