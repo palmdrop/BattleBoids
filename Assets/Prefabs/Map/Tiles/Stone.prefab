@@ -10,7 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1539979187725696623}
   - component: {fileID: 8561437325213516518}
-  m_Layer: 0
+  - component: {fileID: 2079164286592153748}
+  m_Layer: 10
   m_Name: Stone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41,10 +42,23 @@ BoxCollider:
   m_GameObject: {fileID: 617121989079994487}
   m_Material: {fileID: 13400000, guid: 85a86b29d395e3a1a88d08e06b397e64, type: 2}
   m_IsTrigger: 1
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2079164286592153748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 617121989079994487}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ConversionMode: 1
 --- !u!1 &7312325576327795352
 GameObject:
   m_ObjectHideFlags: 0
@@ -56,7 +70,7 @@ GameObject:
   - component: {fileID: 9191478874808304691}
   - component: {fileID: 4392430936319580414}
   - component: {fileID: 1282926459084854663}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Top
   m_TagString: Untagged
   m_Icon: {fileID: 0}
