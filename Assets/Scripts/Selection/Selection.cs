@@ -128,9 +128,9 @@ public class Selection : MonoBehaviour
     private void SelectPlayerFlockEntities()
     {
         // The current players flock
-        List<GameObject> activePlayerFlock = _gameUI.GetActivePlayer().GetFlock();
+        List<Boid> activePlayerFlock = _gameUI.GetActivePlayer().GetFlock();
         
-        foreach (GameObject entity in activePlayerFlock)
+        foreach (Boid entity in activePlayerFlock)
         {
             Selectable selected = entity.GetComponent<Selectable>();
             

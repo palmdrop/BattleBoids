@@ -32,8 +32,8 @@ public class BoidManager : MonoBehaviour
 
         foreach (Player p in players)
         {
-            foreach (GameObject b in p.GetFlock()) {
-                _boids.Add(b.GetComponent<Boid>());
+            foreach (Boid b in p.GetFlock()) {
+                _boids.Add(b);
             }
             p.FlockUpdate = false;
         }
