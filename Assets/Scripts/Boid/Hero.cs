@@ -68,6 +68,8 @@ public class Hero : Boid {
 
             aggressionStrength = 10.4f,
 
+            avoidCollisionWeight = 100f,
+
             randomMovements = 6.0f,
         };
 
