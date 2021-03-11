@@ -8,8 +8,7 @@ using Random = System.Random;
 
 public class BoidManager : MonoBehaviour
 {
-    [SerializeField] private List<Player> players = new List<Player>();
-    private bool _isBattlePhase;
+    private List<Player> players;
 
     private readonly List<Boid> _boids = new List<Boid>();
     
@@ -22,34 +21,20 @@ public class BoidManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        players = GetComponentInParent<GameManager>().GetPlayers();
     }
 
     // Fetches the boids from the respective players and places them in the boids list
-    private void AddPlayerBoids()
+    public void AddPlayerBoids()
     {
-        // Check if there's been an update to the player flocks
-        // TODO improve, player/spawnarea should be able to tell boid manager update occured
-        bool update = false;
-        foreach (Player p in players)
-        {
-            if (p.FlockUpdate)
-            {
-                update = true;
-                break;
-            }
-        }
-
-        // If no update, return
-        if (!update) return;
-        
-        // Otherwise, clear all boids and add them once again to the list
+        // Clear all boids and add them to the list
         _boids.Clear();
-        
+
         foreach (Player p in players)
         {
-            foreach (GameObject b in p.GetFlock()) {
-                _boids.Add(b.GetComponent<Boid>());
+            foreach (Boid b in p.GetFlock()) {
+                b.StartBoid();
+                _boids.Add(b);
             }
             p.FlockUpdate = false;
         }
@@ -64,13 +49,6 @@ public class BoidManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // When game is started, clear boids and fetch all the new boids from the 
-        // corresponding players
-        if (_isBattlePhase)
-        {
-            AddPlayerBoids();
-        }
-
         // Remove all dead boids
         ClearDeadBoids();
 
@@ -151,24 +129,6 @@ public class BoidManager : MonoBehaviour
         morale.Dispose();
     }
 
-    public void BeginBattle() {
-        if (!_isBattlePhase)
-        {
-            FindObjectOfType<AudioManager>().Stop("MenuMusic");
-            FindObjectOfType<AudioManager>().Play("BattleMusic");
-        }
-        _isBattlePhase = true;
-    }
-
-    public void StopBattle() {
-        if (_isBattlePhase)
-        {
-            FindObjectOfType<AudioManager>().Stop("BattleMusic");
-            FindObjectOfType<AudioManager>().Play("MenuMusic");
-        }
-        _isBattlePhase = false;
-    }
-
     // This job calculates information specific for the entire flock, such as 
     // average velocity, average position and entity count
     [BurstCompile]
@@ -242,10 +202,18 @@ public class BoidManager : MonoBehaviour
             // each behavior.
             NativeArray<float> distances = CalculateDistances(boid, neighbours);
 
-            int targetBoidIndex =
-                boid.classInfo.attackDistRange < 0
-                    ? FindBoidToHealIndex(boid, neighbours, distances)
-                    : FindEnemyTargetIndex(boid, neighbours, distances);
+            int targetBoidIndex = -1;
+            float targetViewDistance = 0.0f;
+            if (boid.type == Boid.Type.Healer) 
+            {
+                targetBoidIndex = FindBoidToHealIndex(boid, neighbours, distances);
+                targetViewDistance = boid.classInfo.viewRadius;
+            }
+            else
+            { 
+                targetBoidIndex = FindEnemyTargetIndex(boid, neighbours, distances);
+                targetViewDistance = boid.classInfo.attackDistRange;
+            }
             
             // Sum all the forces
             float3 desire = 
@@ -256,7 +224,7 @@ public class BoidManager : MonoBehaviour
                             // Additional behaviors
                             + AggressionForce(boid)
                             + FearForce(boid, neighbours, distances)
-                            + ApproachForce(boid, targetBoidIndex)
+                            + ApproachForce(boid, targetBoidIndex, targetViewDistance)
                             + RandomForce(index, boid.classInfo.randomMovements);
 
             float3 force = desire - boid.vel;
@@ -358,7 +326,7 @@ public class BoidManager : MonoBehaviour
                 
                 //TODO possible variation: use heading of neighbouring boids instead of velocity! this way, faster
                 //TODO boids do not have more influence (although this might be desirable)
-                avgVel += neighbour.vel * amount;
+                avgVel += neighbour.vel * amount * neighbour.classInfo.gravity;
             }
             
             // Calculate alignment force
@@ -386,8 +354,8 @@ public class BoidManager : MonoBehaviour
                 float amount = CalculatePower(boid.morale, normalizedViewDistance,
                     boid.classInfo.cohesionExponent);
 
-                avgNeighborPos += neighbour.pos * amount;
-                avgNeighborPosDivider += amount;
+                avgNeighborPos += neighbour.pos * amount * neighbour.classInfo.gravity;
+                avgNeighborPosDivider += amount * neighbour.classInfo.gravity;
             }
 
             // Calculate cohesion force
@@ -527,7 +495,10 @@ public class BoidManager : MonoBehaviour
                 Boid.BoidInfo neighbour = boids[neighbours[i]];
                 
                 // Enemy boids cannot be healed
-                if (boid.flockId != neighbour.flockId) continue;
+                // And do not try to heal boids with max health
+                if (boid.flockId != neighbour.flockId 
+                    || distances[i] > boid.abilityDistance
+                    || neighbour.health == neighbour.maxHealth) continue;
 
                 // Store the neighbour with the lowest health
                 if (neighbour.health < lowestAllyHealth)
@@ -566,9 +537,10 @@ public class BoidManager : MonoBehaviour
             float modifier = math.pow(moraleModifyStrength, boost);
             float morale = boid.moraleDefault * modifier;
 
-            return morale;
+            // Prevent negative morale
+            return math.max(morale, 0.0f);
         }
-        private float3 ApproachForce(Boid.BoidInfo boid, int targetBoidIndex)
+        private float3 ApproachForce(Boid.BoidInfo boid, int targetBoidIndex, float targetDistRange)
         {
             // Calculate attack force
             // The attack force tries to move the boid towards the target boid
@@ -579,7 +551,10 @@ public class BoidManager : MonoBehaviour
             
             float3 vector = boids[targetBoidIndex].pos - boid.pos;
             float dist = math.length(vector);
-            return vector * CalculatePower(boid.classInfo.approachMovementStrength, dist / boid.classInfo.attackDistRange, boid.classInfo.approachMovementExponent);
+            return vector * 
+                   CalculatePower(boid.classInfo.approachMovementStrength, 
+                       dist / targetDistRange, 
+                       boid.classInfo.approachMovementExponent);
         }
     }
 }

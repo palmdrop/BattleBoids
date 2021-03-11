@@ -4,10 +4,42 @@ using System.Collections.Generic;
 
 public abstract class Boid : Selectable
 {
+    // The possible boid types
+    public enum Type {
+        Melee,
+        Ranged,
+        Hero,
+        Scarecrow,
+        Healer,
+        Commander
+    }
+    
     [SerializeField] private GameObject healthBarPrefab;
+    [SerializeField] private LayerMask collisionMask;
+    
+    private Rigidbody _rigidbody;
+    private Collider _collider;
+    private Material _material;
+    private bool _hasMaterial = false;
+    // Cache shader property to avoid expensive shader uniform lookups
+    private static readonly int Color = Shader.PropertyToID("_Color");
+    
+    private Map.Map _map;
+    private bool _hasMap = false;
+    
+    private GameObject _healthBar;
+    private float _rayCastTheta = 10;
+    private float _previousActionTime = 0.0f;
+    
+    private bool _dead;
 
     protected Type type;
-    protected int cost;
+    protected ClassInfo classInfo;
+    protected Player owner;
+    
+    protected Boid target;
+    private bool _hasTarget = false;
+    
     protected int health;
     protected int maxHealth;
     protected int damage;
@@ -17,16 +49,8 @@ public abstract class Boid : Selectable
     protected float avoidCollisionWeight;
     protected float hoverKi;
     protected float hoverKp;
-    protected ClassInfo classInfo;
-    protected Boid target;
-    protected Player owner;
-    
     protected float timeBetweenActions;
-    private float _previousActionTime = 0.0f;
     
-    private bool _dead;
-    private Mesh _mesh;
-    private LayerMask _collisionMask;
     protected float emotionalState;
     protected float morale;
     protected float moraleDefault;
@@ -45,15 +69,15 @@ public abstract class Boid : Selectable
         public float cohesionStrength, cohesionExponent;
         public float separationStrength, separationExponent;
 
+        // How much this unit affects friendly units
+        public float gravity;
+
         // Fear keeps boid from moving too close to enemies
         public float fearStrength, fearExponent; 
         
         // Attack range
         public float attackDistRange;
         public float attackAngleRange; // Angle relative local z-axis in rad
-        
-        // Heal range
-        public float healRadius;
         
         public float approachMovementStrength, approachMovementExponent; // Controls attack impulse
         
@@ -63,12 +87,15 @@ public abstract class Boid : Selectable
         public float randomMovements;
     }
 
+    // Struct for holding relevant information about the boid
+    // This struct is used in a Burst job in order to calculate the forces 
+    // acting on the boid, among other things.
     public struct BoidInfo {
         public Type type;
         public float3 vel;
         public float3 pos;
         public float3 forward;
-        public int health;
+        public int health, maxHealth;
         
         public ClassInfo classInfo;
         public int flockId;
@@ -83,38 +110,31 @@ public abstract class Boid : Selectable
         }
     }
 
-    public enum Type {
-        Melee,
-        Ranged,
-        Hero,
-        Scarecrow,
-        Healer,
-        Commander
-    }
-
-    private Rigidbody _rigidbody;
-    private Vector3 _localScale;
-    private float _rayCastTheta = 10;
-    private Map.Map _map;
-    private GameObject _healthBar;
-
     // Start is called before the first frame update
     protected void Start()
     {
         // To start off, we don't want to show that the boid is selected 
         SetSelectionIndicator(false);
         
-        _collisionMask = LayerMask.GetMask("Wall", "Obstacle");
+        //_collisionMask = LayerMask.GetMask("Wall", "Obstacle");
         _dead = false;
         _rigidbody = GetComponent<Rigidbody>();
+        _collider = GetComponent<Collider>();
+        _collider.enabled = false;
         
         GameObject map = GameObject.FindGameObjectWithTag("Map");
         if (map != null)
         {
+            _hasMap = true;
             this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
-        _localScale = transform.GetChild(0).transform.localScale;
+
         _healthBar = Instantiate(healthBarPrefab, transform);
+    }
+
+    public void StartBoid()
+    {
+        _collider.enabled = true;
     }
 
     public void FixedUpdate()
@@ -136,7 +156,7 @@ public abstract class Boid : Selectable
 
     // Called by the boid manager
     // Updates the boid according to the standard flocking behaviour
-    public void UpdateBoid(Vector3 force)
+    public virtual void UpdateBoid(Vector3 force)
     {
         _rigidbody.AddForce(force, ForceMode.Acceleration);
 
@@ -151,7 +171,7 @@ public abstract class Boid : Selectable
 
     private Vector3 HoverForce()
     {
-        if (_map == null)
+        if (!_hasMap)
         {
             return Vector3.zero;
         }
@@ -178,9 +198,9 @@ public abstract class Boid : Selectable
 
             Vector3 dir = RotationMatrix_y(angle * sign, GetVel()).normalized;
 
-            Ray ray = new Ray(GetPos() + GetCenterForwardPoint(), dir);
+            Ray ray = new Ray(GetPos(), dir);
 
-            if (Physics.Raycast(ray, collisionAvoidanceDistance, _collisionMask))   //Cast rays to nearby boundaries
+            if (Physics.Raycast(ray, collisionAvoidanceDistance, collisionMask))   //Cast rays to nearby boundaries
             {
                 return true;
             }
@@ -198,12 +218,13 @@ public abstract class Boid : Selectable
 
             Vector3 dir = RotationMatrix_y(angle * sign, GetVel()).normalized;
 
-            Ray ray = new Ray(GetPos() + GetCenterForwardPoint(), dir);
+            Ray ray = new Ray(GetPos(), dir);
 
-            if (!Physics.Raycast(ray, collisionAvoidanceDistance, _collisionMask))   //Cast rays to nearby boundaries
+            if (!Physics.Raycast(ray, collisionAvoidanceDistance, collisionMask))   //Cast rays to nearby boundaries
             {
                 //Should only affect turn component of velocity. Should not accellerate forwards or backwards.
-                return sign < 0 ? transform.right : -transform.right;
+                var right = transform.right;
+                return sign < 0 ? right : -right;
             }
         }
         return new Vector3(0, 0, 0);
@@ -247,6 +268,12 @@ public abstract class Boid : Selectable
 
     public void SetTarget(Boid target) {
         this.target = target;
+        _hasTarget = target != null;
+    }
+
+    public bool HasTarget()
+    {
+        return _hasTarget;
     }
 
     public void SetMorale(float morale) {
@@ -272,6 +299,7 @@ public abstract class Boid : Selectable
         info.forward = transform.forward;
         info.vel = GetVel();
         info.health = health;
+        info.maxHealth = maxHealth;
         info.classInfo = classInfo;
         info.flockId = owner.id;
         info.emotionalState = emotionalState;
@@ -283,7 +311,7 @@ public abstract class Boid : Selectable
 
     public int GetCost()
     {
-        return cost;
+        return Cost;
     }
 
     public float GetHealth()
@@ -318,26 +346,12 @@ public abstract class Boid : Selectable
     public void Die()
     {
         this._dead = true;
-        target = null;
+        SetTarget(null);
         Destroy(GetComponent<ParticleSystem>());
     }
 
     public bool IsDead() {
         return _dead;
-    }
-
-    private Vector3 GetCenterForwardPoint()
-    {
-        if (_mesh == null)
-            return Vector3.zero;
-        return new Vector3(transform.forward.x * _localScale.x * _mesh.bounds.size.z / 2, _mesh.bounds.size.z * _localScale.y, transform.forward.z * _localScale.z * _mesh.bounds.size.z / 2);
-    }
-
-    private Vector3 GetMiddlePoint()
-    {
-        if (_mesh == null)
-            return Vector3.zero;
-        return new Vector3(0, _mesh.bounds.size.z * _localScale.y, 0);
     }
 
     private Vector3 RotationMatrix_y(float angle, Vector3 vector)
@@ -360,8 +374,12 @@ public abstract class Boid : Selectable
 
     public void SetColor(Color color)
     {
-        //NOTE: ugly solution, assumes prefab structure... TODO improve somehow
-        transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+        // Cache material in order to avoid having to do multiple expensive lookups
+        if(!_hasMaterial) {
+            _material = transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material;
+            _hasMaterial = true;
+        }
+        _material.SetColor(Color, color);
     }
 
     public Rigidbody GetRigidbody()
@@ -369,7 +387,5 @@ public abstract class Boid : Selectable
         return _rigidbody;
     }
 
-    public abstract void Act();
-    
-    
+    protected abstract void Act();
 }

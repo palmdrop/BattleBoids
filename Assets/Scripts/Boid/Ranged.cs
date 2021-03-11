@@ -20,7 +20,7 @@ public class Ranged : Boid {
         base.Start();
 
         type = Type.Ranged;
-        cost = 10;
+        Cost = 10;
         health = maxHealth = 100;
         damage = 25;
         maxSpeed = 4f;
@@ -49,9 +49,11 @@ public class Ranged : Boid {
             separationStrength = 120.0f,
             separationExponent = 1.0f,
             
+            gravity = 1f,
+            
             fearStrength = 140.0f,
             fearExponent = 1.0f,
-            
+
             attackDistRange = 3f,
             attackAngleRange = Mathf.PI,
             
@@ -64,18 +66,18 @@ public class Ranged : Boid {
         };
     }
 
-    public override void Act()
+    protected override void Act()
     {
         Attack();
     }
 
     private void Attack() {
-        if (target != null) {
+        if (HasTarget()) {
             _p = target.GetPos() - GetPos();
             _v = target.GetVel() - GetVel();
 
             float t = FindTimeToImpact();
-            Vector3 aimPos = _p + _v * t + 0.5f * _g * t * t;
+            Vector3 aimPos = _p + _v * t + _g * (0.5f * t * t);
 
             // Set spawn position of projectile
             Vector3 launchPos = GetPos();

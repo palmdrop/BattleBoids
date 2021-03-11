@@ -190,6 +190,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selectionIndicatorPrefab: {fileID: 1473401980719432369, guid: d1755760120f61e43879ab4b335b27b3, type: 3}
   healthBarPrefab: {fileID: 7905063384867870836, guid: ebcc6bc324f8b80879127b201ed2e8f5, type: 3}
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 1536
   healBeam: {fileID: 8790152316409199103}
   healingAudio: {fileID: 8300000, guid: aa7286137d6fd1642a5ccadcc62830ca, type: 3}
   healingAudioVolume: 0.5

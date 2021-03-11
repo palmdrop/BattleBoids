@@ -12,7 +12,7 @@ public class Scarecrow : Boid {
         base.Start();
 
         type = Type.Scarecrow;
-        cost = 50;
+        Cost = 50;
         health = maxHealth = 100;
         damage = 1;
         maxSpeed = 3f;
@@ -40,6 +40,8 @@ public class Scarecrow : Boid {
             separationStrength = 120.0f,
             separationExponent = 1.0f,
             
+            gravity = 1f,
+            
             fearStrength = 140.0f,
             fearExponent = 1.0f,
             
@@ -57,8 +59,8 @@ public class Scarecrow : Boid {
         SetColor();
     }
 
-    public override void Act() {
-        if (target != null) {
+    protected override void Act() {
+        if (HasTarget()) {
             List<Boid> enemies = FindEnemiesInSphere(GetPos(), classInfo.attackDistRange, LayerMask.GetMask("Units"));
             foreach (Boid enemy in enemies) {
                 enemy.TakeDamage(damage);
