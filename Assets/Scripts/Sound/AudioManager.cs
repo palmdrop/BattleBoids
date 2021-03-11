@@ -9,6 +9,9 @@ public class AudioManager : MonoBehaviour
 {
     // The sounds that can be played from this manager
     public Sound[] sounds;
+    private float _masterVolume = 1f;
+    private float _savedVolume = 1f;
+    private bool _isMuted = false;
 
     
     void Awake()
@@ -36,5 +39,50 @@ public class AudioManager : MonoBehaviour
     {
         Sound s = Array.Find(sounds, sound => sound.name == name);
         s.source.Stop();
+    }
+
+
+    public void PlayAtPoint(AudioClip clip, Vector3 point, float volume)
+    {
+        AudioSource.PlayClipAtPoint(clip, point, _masterVolume * volume);
+    }
+
+
+    public void SetMasterVolume(float volume)
+    {
+        // Make sure the volume is between 0 and 1
+        _masterVolume = Math.Min(Math.Max(0f, volume), 1f);
+        
+        // Update the sounds (music) that are playing
+        foreach (Sound s in sounds)
+        {
+            s.source.volume = s.volume * _masterVolume;
+        }
+
+        _isMuted = false;
+    }
+
+    public float GetMasterVolume()
+    {
+        return _masterVolume;
+    }
+
+    // Toggles music and sounds to mute
+    public void ToggleMute()
+    {
+        bool tempIsMuted = _isMuted;
+
+        if (!_isMuted)
+        {
+            // If we just muted, save the current volume to be able to toggle back to it
+            _savedVolume = _masterVolume;
+            SetMasterVolume(0f);
+        } else
+        {
+            // Toggle back to the saved volume
+            SetMasterVolume(_savedVolume);
+        }
+
+        _isMuted = !tempIsMuted;
     }
 }

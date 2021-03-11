@@ -80,6 +80,8 @@ MonoBehaviour:
   selectionIndicatorPrefab: {fileID: 1473401980719432369, guid: d1755760120f61e43879ab4b335b27b3, type: 3}
   healthBarPrefab: {fileID: 7905063384867870836, guid: ebcc6bc324f8b80879127b201ed2e8f5, type: 3}
   laser: {fileID: 3147866935077136496}
+  laserAudio: {fileID: 8300000, guid: 55c47692ceccae54b8bbc025de521a50, type: 3}
+  laserAudioVolume: 0.1
 --- !u!23 &8824354153650340697
 MeshRenderer:
   m_ObjectHideFlags: 0

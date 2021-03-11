@@ -8,6 +8,8 @@ using Random = UnityEngine.Random;
 public class Melee : Boid {
 
     [SerializeField] private GameObject laser;
+    [SerializeField] private AudioClip laserAudio;
+    [Range(0f, 1f)] public float laserAudioVolume;
 
     // Start is called before the first frame update
     void Start() {
@@ -71,6 +73,7 @@ public class Melee : Boid {
             target.TakeDamage(damage);
             SetLaser(this.GetPos(), target.GetPos());
             laser.SetActive(true);
+            FindObjectOfType<AudioManager>().PlayAtPoint(laserAudio, GetPos(), laserAudioVolume);
         } else {
             laser.SetActive(false);
         }
