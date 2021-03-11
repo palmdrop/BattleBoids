@@ -824,19 +824,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28cb7f6f09fe6f6d6ab78250f9adb855, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  players:
-  - {fileID: 0}
-  - {fileID: 0}
   boins: {fileID: 7854776976458075818}
   playerSelect: {fileID: 7854776976724604311}
   activePlayer: {fileID: 0}
   buttons: {fileID: 7854776976272426939}
   buttonPrefab: {fileID: 5678443921526638308, guid: 81bcdc779f6d35332bba9c32d6c91469, type: 3}
   unitPrefabs: []
+  unitSprites: []
   ready: {fileID: 7854776977554715556}
   unitButtonRows: 0
   unitButtonCols: 0
-  boidManager: {fileID: 0}
+  gameManager: {fileID: 0}
   showHealthBars: 0
 --- !u!222 &7854776976437878691
 CanvasRenderer:
