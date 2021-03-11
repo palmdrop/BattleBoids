@@ -16,6 +16,7 @@ public class GameUI : MonoBehaviour
     [SerializeField] private int unitButtonRows;
     [SerializeField] private int unitButtonCols;
     [SerializeField] private bool showHealthBars;
+    [SerializeField] private Text victoryText;
 
     private GameManager _gameManager;
     private List<Player> players;
@@ -28,6 +29,7 @@ public class GameUI : MonoBehaviour
         InitPlayerDropdown();
         InitUnitButtons();
         InitReadyButton();
+        victoryText.enabled = false;
     }
 
     // Update is called once per frame
@@ -220,5 +222,11 @@ public class GameUI : MonoBehaviour
     public bool ShowHealthBars()
     {
         return showHealthBars;
+    }
+
+    public void ShowVictor(Player victor)
+    {
+        victoryText.text = victor.GetNickname() + " won!";
+        victoryText.enabled = true;
     }
 }

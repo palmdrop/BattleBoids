@@ -31,9 +31,10 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        var alivePlayers = _players.FindAll(p => p.GetFlock().Count > 0);
+        var alivePlayers = _players.FindAll(p => p.GetFlock().FindAll(b => !b.IsDead()).Count > 0);
         if (_state == GameState.Running && alivePlayers.Count == 1) {
             SetState(GameState.Victory);
+            _gameUI.ShowVictor(alivePlayers[0]);
         }
     }
 
