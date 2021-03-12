@@ -87,6 +87,7 @@ public abstract class Boid : Selectable
         public float approachMovementStrength, approachMovementExponent; // Controls attack impulse
         
         public float aggressionStrength; // Controls how much the boid is attracted to the enemy flock
+        public float searchStrength;
 
         // Misc behaviors
         public float randomMovements;

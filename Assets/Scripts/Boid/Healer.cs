@@ -68,6 +68,7 @@ public class Healer : Boid
             approachMovementExponent = 0.5f,
             
             aggressionStrength = 7.4f,
+            searchStrength = 7.4f,
             
             randomMovements = 4.0f,
         };

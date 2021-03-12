@@ -57,6 +57,7 @@ public class Melee : Boid {
             approachMovementExponent = 0.5f,
             
             aggressionStrength = 10.4f,
+            searchStrength = 10.4f,
             
             randomMovements = 6.0f,
         };
