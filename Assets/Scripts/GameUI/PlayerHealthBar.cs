@@ -23,8 +23,7 @@ public class PlayerHealthBar : MonoBehaviour
     {
         float sumHealth = 0;
         float sumMaxHealth = 0;
-        foreach (GameObject o in player.GetFlock()) {
-            var boid = o.GetComponent<Boid>();
+        foreach (Boid boid in player.GetFlock()) {
             sumHealth += boid.GetHealth();
             sumMaxHealth += boid.GetMaxHealth();
         }

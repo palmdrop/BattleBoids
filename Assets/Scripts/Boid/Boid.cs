@@ -18,6 +18,7 @@ public abstract class Boid : Selectable
     [SerializeField] private LayerMask collisionMask;
     
     private Rigidbody _rigidbody;
+    private Collider _collider;
     private Material _material;
     private bool _hasMaterial = false;
     // Cache shader property to avoid expensive shader uniform lookups
@@ -123,6 +124,8 @@ public abstract class Boid : Selectable
         //_collisionMask = LayerMask.GetMask("Wall", "Obstacle");
         _dead = false;
         _rigidbody = GetComponent<Rigidbody>();
+        _collider = GetComponent<Collider>();
+        _collider.enabled = false;
         
         GameObject map = GameObject.FindGameObjectWithTag("Map");
         if (map != null)
@@ -132,6 +135,11 @@ public abstract class Boid : Selectable
         }
 
         _healthBar = Instantiate(healthBarPrefab, transform);
+    }
+
+    public void StartBoid()
+    {
+        _collider.enabled = true;
     }
 
     public void FixedUpdate()
