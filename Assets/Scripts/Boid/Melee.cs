@@ -3,6 +3,10 @@ using UnityEngine;
 public class Melee : Boid {
 
     [SerializeField] private GameObject laser;
+    [SerializeField] private AudioClip laserAudio;
+    [Range(0f, 1f)] public float laserAudioVolume;
+    public float audioCooldown;
+    private float _previousAudioTime = 0f;
     private LineRenderer _laserRenderer;
 
     // Start is called before the first frame update
@@ -27,6 +31,8 @@ public class Melee : Boid {
             fearRadius = 1.0f,
             maxForce = 2f,
             
+            confidenceThreshold = 1.0f,
+            
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
             
@@ -48,6 +54,8 @@ public class Melee : Boid {
 
             avoidCollisionWeight = 100f,
 
+            searchStrength = 10.4f,
+            
             randomMovements = 6.0f,
 
             hoverKi = 2f,
@@ -70,6 +78,12 @@ public class Melee : Boid {
             target.TakeDamage(damage);
             SetLaser(this.GetPos(), target.GetPos());
             laser.SetActive(true);
+
+            if (Time.time - _previousAudioTime >= audioCooldown)
+            {
+                FindObjectOfType<AudioManager>().PlayAtPoint(laserAudio, GetPos(), laserAudioVolume);
+                _previousAudioTime = Time.time;
+            }
         } else {
             laser.SetActive(false);
         }

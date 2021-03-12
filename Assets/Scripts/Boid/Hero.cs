@@ -42,6 +42,8 @@ public class Hero : Boid {
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
+            
+            confidenceThreshold = 0.5f,
 
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
@@ -64,6 +66,7 @@ public class Hero : Boid {
             approachMovementExponent = 0.5f,
 
             aggressionStrength = 10.4f,
+            searchStrength = 10.4f,
 
             avoidCollisionWeight = 100f,
 

@@ -63,6 +63,11 @@ public abstract class Boid : Selectable
         public float separationRadius;
         public float fearRadius;
         public float maxForce;
+        
+        // The confidence threshold controls how friendly boids / enemy boids are required
+        // for the boid to remain confident. When a boid looses confidence, they will no longer be
+        // aggressive and will start searching for friendly boids instead.
+        public float confidenceThreshold;
 
         // Weights for the three basic flocking behaviors
         // NOTE: an exponent of 0.0 would make the behavior ignore the distance to the neighbouring boid
@@ -85,6 +90,7 @@ public abstract class Boid : Selectable
 
 
         public float aggressionStrength; // Controls how much the boid is attracted to the enemy flock
+        public float searchStrength;
 
         // Misc behaviors
         public float randomMovements;
@@ -183,6 +189,18 @@ public abstract class Boid : Selectable
 
     private void OnCollisionEnter(Collision collision) {
         //TakeDamage((int) collision.impulse.magnitude * 10);
+
+        // Plays a collision sound
+        // Currently only plays the sound when colliding when an object in the Obstacle layer
+        // The reason for not playing the sound when colliding with a wall is that it was very
+        // unclear why the sound was played, since the walls are invisible
+        // If the sound should be played when colliding with a wall,
+        // uncomment the part below
+        if (/*collision.collider.gameObject.layer == LayerMask.NameToLayer("Wall")
+            || */collision.collider.gameObject.layer == LayerMask.NameToLayer("Obstacle"))
+        {
+            FindObjectOfType<AudioManager>().Play("Collision");
+        }
     }
 
     public List<Boid> FindEnemiesInSphere(Vector3 position, float radius, int layerMask) {
