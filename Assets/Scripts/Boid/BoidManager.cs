@@ -459,7 +459,7 @@ public class BoidManager : MonoBehaviour
             
             if (flock.boidCount <= 1) return float3.zero;
             //TODO do not use aggression strength for search as well?
-            return math.normalize(flock.avgPos - boid.pos) * boid.classInfo.aggressionStrength;
+            return math.normalize(flock.avgPos - boid.pos) * boid.classInfo.searchStrength;
         }
 
         private float3 FearForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
