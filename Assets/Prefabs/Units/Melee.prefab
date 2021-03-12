@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2024155122454189306}
   - component: {fileID: 26594132553738016}
   - component: {fileID: 65946813234146026}
+  - component: {fileID: 8824354153650340697}
   m_Layer: 8
   m_Name: Melee
   m_TagString: Boid
@@ -83,7 +84,8 @@ MonoBehaviour:
     m_Bits: 1536
   laser: {fileID: 3147866935077136496}
   laserAudio: {fileID: 8300000, guid: 55c47692ceccae54b8bbc025de521a50, type: 3}
-  laserAudioVolume: 0.1
+  laserAudioVolume: 0.25
+  audioCooldown: 1
 --- !u!23 &8824354153650340697
 MeshRenderer:
   m_ObjectHideFlags: 0

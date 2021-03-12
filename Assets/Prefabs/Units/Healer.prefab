@@ -195,7 +195,8 @@ MonoBehaviour:
     m_Bits: 1536
   healBeam: {fileID: 8790152316409199103}
   healingAudio: {fileID: 8300000, guid: aa7286137d6fd1642a5ccadcc62830ca, type: 3}
-  healingAudioVolume: 0.5
+  healingAudioVolume: 0.25
+  audioCooldown: 1
 --- !u!1001 &1762382113130157911
 PrefabInstance:
   m_ObjectHideFlags: 0
