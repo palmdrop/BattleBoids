@@ -59,13 +59,18 @@ namespace Map
                 GameObject child = _ground.transform.GetChild(i).gameObject;
                 Vector3 position = child.transform.localPosition;
                 
+                
+                Bounds mapBounds = child.GetComponent<Renderer>().bounds;
+                Debug.Log(mapBounds.ToString());
+
+
                 // Find max and min x value
-                minX = Math.Min(minX, position.x);
-                maxX = Math.Max(maxX, position.x);
+                minX = Math.Min(minX, mapBounds.min.x);
+                maxX = Math.Max(maxX, mapBounds.max.x);
                 
                 // Find max and min z value
-                minZ = Math.Min(minZ, position.z);
-                maxZ = Math.Max(maxZ, position.z);
+                minZ = Math.Min(minZ, mapBounds.min.z);
+                maxZ = Math.Max(maxZ, mapBounds.max.z);
             }
 
             // The minimum x and y coordinates represents the upper left corner of the bounds

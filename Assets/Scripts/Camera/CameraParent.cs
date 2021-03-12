@@ -61,6 +61,7 @@ public class CameraParent : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        
         _mapBounds = map.GetBounds();
 
         // If left mouse click is pressed
