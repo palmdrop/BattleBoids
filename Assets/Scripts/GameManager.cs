@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
     public enum GameState {
         Placement,
         Running,
-        Victory,    
+        Victory,
         Paused,
     }
 
@@ -26,7 +26,6 @@ public class GameManager : MonoBehaviour
         _gameUI = GetComponentInChildren<GameUI>();
         _boidManager = GetComponentInChildren<BoidManager>();
         _players = new List<Player>(GetComponentsInChildren<Player>());
-        FindObjectOfType<AudioManager>().Play("MenuMusic");
     }
 
     // Update is called once per frame
@@ -40,12 +39,6 @@ public class GameManager : MonoBehaviour
     }
 
     public void BeginBattle() {
-        // Have to check this because it is called every frame when the battle is running
-        if (_state != GameState.Running)
-        {
-            FindObjectOfType<AudioManager>().Stop("MenuMusic");
-            FindObjectOfType<AudioManager>().Play("BattleMusic");
-        }
         _state = GameState.Running;
         _boidManager.AddPlayerBoids();
         foreach (Player p in _players) {

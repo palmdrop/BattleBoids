@@ -28,8 +28,6 @@ public class Scarecrow : Boid {
             fearRadius = 1.0f,
             maxForce = 2f,
             
-            confidenceThreshold = 0.4f,
-            
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
             
@@ -54,8 +52,6 @@ public class Scarecrow : Boid {
 
             avoidCollisionWeight = 100f,
 
-            searchStrength = 10.4f,
-            
             randomMovements = 6.0f,
 
             hoverKi = 2f,

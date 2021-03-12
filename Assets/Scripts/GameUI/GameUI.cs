@@ -108,16 +108,6 @@ public class GameUI : MonoBehaviour
             players.ForEach(p => p.Ready());
         } else if (Input.GetKeyDown("y")) {
             showHealthBars = !showHealthBars;
-        } else if (Input.GetKeyDown("m")) {
-            FindObjectOfType<AudioManager>().ToggleMute();
-        } else if (Input.GetKeyDown("i"))
-        {
-            AudioManager audioManager = FindObjectOfType<AudioManager>();
-            audioManager.SetMasterVolume(audioManager.GetMasterVolume() + 0.1f);
-        } else if (Input.GetKeyDown("k"))
-        {
-            AudioManager audioManager = FindObjectOfType<AudioManager>();
-            audioManager.SetMasterVolume(audioManager.GetMasterVolume() - 0.1f);
         }
     }
 

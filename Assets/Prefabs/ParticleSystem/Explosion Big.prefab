@@ -4872,7 +4872,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6899507015176962856}
-  - component: {fileID: -5864438947995939870}
   m_Layer: 0
   m_Name: Explosion Big
   m_TagString: Untagged
@@ -4897,20 +4896,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-5864438947995939870
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4196262253894622696}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: efbda0032318b0c4cb3b02102a07dc88, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  clip: {fileID: 8300000, guid: 21498393fded1bb4ca067d596945c74f, type: 3}
-  volume: 1
 --- !u!1 &5794183010311171807
 GameObject:
   m_ObjectHideFlags: 0
