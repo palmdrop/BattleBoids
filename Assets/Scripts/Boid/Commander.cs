@@ -18,11 +18,8 @@ public class Commander : Boid
         health = maxHealth = 100;
         damage = 1;
         maxSpeed = 4f;
-        targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        hoverKi = 2f;
-        hoverKp = 10f;
         timeBetweenActions = 0.01f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
@@ -59,6 +56,10 @@ public class Commander : Boid
             avoidCollisionWeight = 100f,
 
             randomMovements = 6.0f,
+
+            hoverKi = 2f,
+            hoverKp = 10f,
+            targetHeight = 2f
         };
     }
 

@@ -22,11 +22,8 @@ public class Healer : Boid
         health = maxHealth = 100;
         damage = 0;
         maxSpeed = 4f;
-        targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        hoverKi = 2f;
-        hoverKp = 10f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 3.0f;
@@ -66,6 +63,10 @@ public class Healer : Boid
             avoidCollisionWeight = 100f,
 
             randomMovements = 4.0f,
+
+            hoverKi = 2f,
+            hoverKp = 10f,
+            targetHeight = 2f
         };
         
         _healBeamRenderer = healBeam.GetComponent<LineRenderer>();

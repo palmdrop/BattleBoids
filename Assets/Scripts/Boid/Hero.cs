@@ -30,11 +30,8 @@ public class Hero : Boid {
         health = maxHealth = 200;
         damage = 100;
         maxSpeed = 4f;
-        targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        hoverKi = 2f;
-        hoverKp = 10f;
         timeBetweenActions = 5f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
@@ -71,6 +68,10 @@ public class Hero : Boid {
             avoidCollisionWeight = 100f,
 
             randomMovements = 6.0f,
+
+            hoverKi = 2f,
+            hoverKp = 10f,
+            targetHeight = 2f
         };
 
         _lockLaserRenderer = lockLaser.GetComponent<LineRenderer>();

@@ -14,11 +14,8 @@ public class Melee : Boid {
         health = maxHealth = 100;
         damage = 1;
         maxSpeed = 4f;
-        targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        hoverKi = 2f;
-        hoverKp = 10f;
         timeBetweenActions = 0.01f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
@@ -47,15 +44,16 @@ public class Melee : Boid {
             attackDistRange = 1f,
             attackAngleRange = Mathf.PI / 4.0f,
             
-            approachMovementStrength = 20.1f,
-            approachMovementExponent = 0.5f,
-            
             aggressionStrength = 10.4f,
 
             avoidCollisionWeight = 100f,
 
             randomMovements = 6.0f,
-        };
+
+            hoverKi = 2f,
+            hoverKp = 10f,
+            targetHeight = 2f
+    };
 
         _laserRenderer = laser.GetComponent<LineRenderer>();
         laser.SetActive(false);
