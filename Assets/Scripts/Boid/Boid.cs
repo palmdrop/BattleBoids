@@ -232,6 +232,18 @@ public abstract class Boid : Selectable
 
     private void OnCollisionEnter(Collision collision) {
         //TakeDamage((int) collision.impulse.magnitude * 10);
+
+        // Plays a collision sound
+        // Currently only plays the sound when colliding when an object in the Obstacle layer
+        // The reason for not playing the sound when colliding with a wall is that it was very
+        // unclear why the sound was played, since the walls are invisible
+        // If the sound should be played when colliding with a wall,
+        // uncomment the part below
+        if (/*collision.collider.gameObject.layer == LayerMask.NameToLayer("Wall")
+            || */collision.collider.gameObject.layer == LayerMask.NameToLayer("Obstacle"))
+        {
+            FindObjectOfType<AudioManager>().Play("Collision");
+        }
     }
 
     public List<Boid> FindEnemiesInSphere(Vector3 position, float radius, int layerMask) {
