@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2024155122454189306}
   - component: {fileID: 26594132553738016}
   - component: {fileID: 65946813234146026}
+  - component: {fileID: 8824354153650340697}
   m_Layer: 8
   m_Name: Melee
   m_TagString: Boid
@@ -82,6 +83,50 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 1536
   laser: {fileID: 3147866935077136496}
+  laserAudio: {fileID: 8300000, guid: 55c47692ceccae54b8bbc025de521a50, type: 3}
+  laserAudioVolume: 0.25
+  audioCooldown: 1
+--- !u!23 &8824354153650340697
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7175138290131011101}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 1737f1c9cb8ffdfcf96d57b37bacf551, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1001 &248111865555155743
 PrefabInstance:
   m_ObjectHideFlags: 0

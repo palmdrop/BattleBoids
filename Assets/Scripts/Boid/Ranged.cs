@@ -6,6 +6,8 @@ using Unity.Mathematics;
 public class Ranged : Boid {
 
     [SerializeField] private GameObject projectilePrefeb;
+    [SerializeField] private AudioClip rangedFireAudio;
+    [Range(0f, 1f)] public float rangedFireAudioVolume;
 
     private float _projSpeed = 8;
 
@@ -99,6 +101,8 @@ public class Ranged : Boid {
             projectile.GetComponent<RangedProjectile>().SetOwner(owner);
             projectile.GetComponent<RangedProjectile>().SetDamage(damage);
             projectile.GetComponent<Rigidbody>().AddForce(launchVector, ForceMode.VelocityChange);
+
+            FindObjectOfType<AudioManager>().PlayAtPoint(rangedFireAudio, GetPos(), rangedFireAudioVolume);
         }
     }
 
