@@ -247,6 +247,8 @@ public class BoidManager : MonoBehaviour
                 force = math.normalize(force) * boid.classInfo.maxForce;
             }
 
+            force += HoverForce(boid);
+
             forces[index] = force;
 
             // Update attack info
@@ -569,20 +571,6 @@ public class BoidManager : MonoBehaviour
                        boid.classInfo.approachMovementExponent);
         }
 
-        private float3 AttackForce(Boid.BoidInfo boid, bool enemyInRange, int targetBoidIndex)
-        {
-            // Calculate attack force
-            // The attack force tries to move the boid towards the target boid
-            if (!enemyInRange) return float3.zero;
-
-            //TODO find better solution than to recalculate distance here
-            //TODO problem is that targetBoidIndex corresponds to index in boid array, not necessarily in distances array
-
-            float3 vector = boids[targetBoidIndex].pos - boid.pos;
-            float dist = math.length(vector);
-            return vector * CalculatePower(boid.classInfo.attackMovementStrength, dist / boid.classInfo.attackDistRange, boid.classInfo.attackMovementExponent);
-        }
-
         private bool HeadedForCollisionWithMapBoundary(Boid.BoidInfo boid)
         {
             float rayCastTheta = 10f;
@@ -642,6 +630,33 @@ public class BoidManager : MonoBehaviour
                 }
             }
             return new float3(0, 0, 0);
+        }
+
+        private float3 HoverForce(Boid.BoidInfo boid)
+        {
+
+            Unity.Physics.RaycastInput ray = new Unity.Physics.RaycastInput
+            {
+                Start = boid.pos,
+                End = boid.pos + new float3(0,-1,0),
+                Filter = new Unity.Physics.CollisionFilter
+                {
+                    BelongsTo = boid.groundMask,
+                    CollidesWith = boid.groundMask
+                }
+            };
+            Unity.Physics.RaycastHit hit;
+            if (cw.CastRay(ray, out hit))   //Cast rays to nearby boundaries
+            {
+                float deltaY = boid.classInfo.targetHeight - (math.length(boid.pos - hit.Position));
+                float velY = boid.vel.y;
+
+                //Formula to determine whether to hover or fall, uses a PI-regulator with values Ki and Kp
+                Vector3 yForce = new Vector3(0, (deltaY > 0 ? (boid.classInfo.hoverKp * deltaY - boid.classInfo.hoverKi * velY) : 0), 0);
+                return yForce;
+            }
+
+            return new float3(0,0,0);
         }
 
         private float3 RotationMatrix_y(float angle, float3 vector)
