@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
         _boidManager = GetComponentInChildren<BoidManager>();
         _players = new List<Player>(GetComponentsInChildren<Player>());
         FindObjectOfType<AudioManager>().PlayMusic("MenuMusic");
+        ApplyPlayerSettings();
     }
 
     // Update is called once per frame
@@ -38,6 +39,22 @@ public class GameManager : MonoBehaviour
         if (_state == GameState.Running && alivePlayers.Count == 1) {
             SetState(GameState.Victory);
             _gameUI.ShowVictor(alivePlayers[0]);
+        }
+    }
+
+    // Apply PlayerPrefs data to player if it exists
+    private void ApplyPlayerSettings() {
+        for (int i = 0; i < _players.Count; i++) {
+            int number = i + 1;
+            string player = "Player " + number.ToString();
+            if (PlayerPrefs.HasKey(player)) {
+                _players[i].SetId(number);
+                _players[i].SetNickname(PlayerPrefs.GetString(player));
+                Color color;
+                ColorUtility.TryParseHtmlString(PlayerPrefs.GetString("Color " + number.ToString()), out color);
+                _players[i].SetColor(color);
+                _players[i].SetBoins(PlayerPrefs.GetInt("Boins"));
+            }
         }
     }
 

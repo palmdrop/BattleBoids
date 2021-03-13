@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -74,8 +75,14 @@ public class GameUI : MonoBehaviour
                 0
             );
 
-            button.GetComponent<Button>().onClick.AddListener(() => UnitButtonClick(button));
             button.GetComponent<Image>().sprite = unitSprites[i];
+            if (Boolean.Parse(PlayerPrefs.GetString(unitPrefabs[i].name, "True"))) {
+                button.GetComponent<Button>().onClick.AddListener(() => UnitButtonClick(button));
+            } else {
+                Color disabled = new Color(1f, 1f, 1f, 0.25f);
+                button.GetComponent<Image>().color = disabled;
+                Destroy(button.GetComponent<Button>());
+            }
         }
     }
 
