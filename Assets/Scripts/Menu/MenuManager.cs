@@ -22,6 +22,8 @@ public class MenuManager : MonoBehaviour
         _optionsMenu = menus[3];
         _creditsMenu = menus[4];
         _loadingScreen = menus[5];
+
+        FindObjectOfType<AudioManager>().Play("MenuMusic");
     }
 
     public void MainMenu() {
