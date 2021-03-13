@@ -6,12 +6,14 @@ using UnityEngine.SceneManagement;
 public class MenuManager : MonoBehaviour
 {
     [SerializeField] List<GameObject> menus;
+    [SerializeField] GameObject background;
 
     private GameObject _mainMenu;
     private GameObject _campaignMenu;
     private GameObject _multiplayerMenu;
     private GameObject _optionsMenu;
     private GameObject _creditsMenu;
+    private GameObject _loadingScreen;
 
     void Start() {
         _mainMenu = menus[0];
@@ -19,10 +21,7 @@ public class MenuManager : MonoBehaviour
         _multiplayerMenu = menus[2];
         _optionsMenu = menus[3];
         _creditsMenu = menus[4];
-    }
-
-    public void Play() {
-        SceneManager.LoadScene("LevelOne");
+        _loadingScreen = menus[5];
     }
 
     public void MainMenu() {
@@ -47,6 +46,20 @@ public class MenuManager : MonoBehaviour
 
     public void Quit() {
         Application.Quit();
+    }
+
+    public void LoadingScreen() {
+        Show(_loadingScreen);
+        // TODO change background
+    }
+
+    public IEnumerator LoadSceneAsync(string scene) {
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(scene);
+
+        // Wait until the asynchronous scene fully loads
+        while (!asyncLoad.isDone) {
+            yield return null;
+        }
     }
 
     private void Show(GameObject show) {

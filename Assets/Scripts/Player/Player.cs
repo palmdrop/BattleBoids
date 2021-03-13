@@ -136,4 +136,19 @@ public class Player : MonoBehaviour
         }
     }
 
+    public void SetId(int id) {
+        this.id = id;
+    }
+
+    public void SetNickname(string nickname) {
+        this.nickname = nickname;
+    }
+
+    public void SetColor(Color color) {
+        this.color = color;
+    }
+
+    public void SetBoins(int boins) {
+        this.boins = boins;
+    }
 }

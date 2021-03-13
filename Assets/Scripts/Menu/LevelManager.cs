@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class LevelHolder : MonoBehaviour
+public class LevelManager : MonoBehaviour
 {
     [SerializeField] private GameObject dropdown;
 
