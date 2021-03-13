@@ -11,7 +11,7 @@ namespace Map
         [SerializeField] private GameObject wallPrefab;
         
         // The ground plane of the map
-        private GameObject _ground;        
+        private List<GameObject> _ground;        
         
         // Generated walls around the map edges
         //private List<GameObject> _wallTiles;
@@ -31,7 +31,7 @@ namespace Map
         void Start()
         {
             // Get ground child, used to calculate bounds and heightmap
-            _ground = transform.Find("Ground").gameObject;
+            //_ground = transform.Find("Ground").chil;
             
             // Find all GroundTiles and reparent them to the ground container
             MoveGroundTilesToGround();
@@ -43,20 +43,23 @@ namespace Map
             CalculateHeightmap();
             
             // Create wall tiles
-            CreateWallTiles();
+            //CreateWallTiles();
         }
         
-        private void CalculateBounds()
+        public void CalculateBounds()
         {
+            //Has to be done here as well for the editor
+            //_ground = transform.Find("Ground").gameObject;
+
             // Max and min x and z values, used to calculate map dimensions
             float minX = float.MaxValue, maxX = float.MinValue;
             float minZ = float.MaxValue, maxZ = float.MinValue;
             
             // Iterate over all children and calculate max and min xz values
-            for(int i = 0; i < _ground.transform.childCount; i++)
+            for(int i = 0; i < _ground.Count; i++)
             {
                 // Get child position
-                GameObject child = _ground.transform.GetChild(i).gameObject;
+                GameObject child = _ground[i];
                 Vector3 position = child.transform.localPosition;
                 
                 // Find max and min x value
@@ -86,7 +89,7 @@ namespace Map
             return x + y * _heightmapWidth;
         }
         
-        private void CalculateHeightmap() 
+        public void CalculateHeightmap() 
         {
             // Since the map is tiled based, the heightmap doesn't need any more detail 
             // than the number of tiles direction 
@@ -102,10 +105,10 @@ namespace Map
 
             for (int i = 0; i < _heightmap.Length; i++) _heightmap[i] = float.MinValue;
             
-            for (int i = 0; i < _ground.transform.childCount; i++)
+            for (int i = 0; i < _ground.Count; i++)
             {
                 // Get child tile
-                GameObject child = _ground.transform.GetChild(i).gameObject;
+                GameObject child = _ground[i];
                 
                 // Calculate height and assign value to heightmap index
                 Vector3 childPosition = child.transform.localPosition;
@@ -119,9 +122,15 @@ namespace Map
             }
         }
 
-        private void CreateWallTiles()
+        public void CreateWallTiles()
         {
-            _walls = new GameObject("Walls");
+            string holderName = "Walls";
+            if (transform.Find(holderName))
+            {
+                DestroyImmediate(transform.Find(holderName).gameObject);
+            }
+
+            _walls = new GameObject(holderName);
             _walls.transform.parent = this.gameObject.transform;
             
             // Hashset for holding those positions that are already occupied by an invisible tile
@@ -133,10 +142,10 @@ namespace Map
             
             // Keep a counter in order to name the wall tiles appropriately
             int counter = 0;
-            for (int i = 0; i < _ground.transform.childCount; i++)
+            for (int i = 0; i < _ground.Count; i++)
             {
                 // Get child tile and position
-                GameObject child = _ground.transform.GetChild(i).gameObject;
+                GameObject child = _ground[i];
                 Vector3 position = child.transform.localPosition;
                 
                 // Iterate over the four neighbour locations using an offset from the child position
@@ -207,19 +216,30 @@ namespace Map
             return _bounds;
         }
         
-        private void MoveGroundTilesToGround()
+        public void MoveGroundTilesToGround()
         {
+            /*_ground = transform.Find("Ground").gameObject;
+
             GameObject[] groundTiles = GameObject.FindGameObjectsWithTag("GroundTile");
             
             /*for (int i = ground.Count() - 1; i >= 0; --i) {
                 ground[i].transform.SetParent(_ground.transform, true);
             }
-            */
+            
 
             foreach (GameObject groundTile in groundTiles)
             {
                 groundTile.transform.SetParent(_ground.transform); 
+            }*/
+
+            GameObject[] groundTiles = GameObject.FindGameObjectsWithTag("GroundTile");
+            _ground = new List<GameObject>(groundTiles);
+            GameObject tmpGround = transform.Find("Ground").gameObject;
+            for (int i = 0; i < tmpGround.transform.childCount; i++)
+            {
+                _ground.Add(tmpGround.transform.GetChild(i).gameObject);
             }
+
         }
 
         

@@ -15,11 +15,13 @@ public abstract class Boid : Selectable
     }
     
     [SerializeField] private GameObject healthBarPrefab;
-    [SerializeField] private LayerMask collisionMask;
+    [SerializeField] protected LayerMask collisionMask;
+    [SerializeField] protected LayerMask groundMask;
     
     private Rigidbody _rigidbody;
     private Collider _collider;
     private Material _material;
+    private Vector3 _localScale;
     private bool _hasMaterial = false;
     // Cache shader property to avoid expensive shader uniform lookups
     private static readonly int Color = Shader.PropertyToID("_Color");
@@ -44,17 +46,16 @@ public abstract class Boid : Selectable
     protected int maxHealth;
     protected int damage;
     protected float maxSpeed;
-    protected float targetHeight;
     protected float collisionAvoidanceDistance;
     protected float avoidCollisionWeight;
-    protected float hoverKi;
-    protected float hoverKp;
     protected float timeBetweenActions;
     
     protected float emotionalState;
     protected float morale;
     protected float moraleDefault;
     protected float abilityDistance;
+
+    public float3 hoverForce;
 
     public struct ClassInfo {
         // The field of view of the boid
@@ -73,6 +74,7 @@ public abstract class Boid : Selectable
         public float alignmentStrength, alignmentExponent;
         public float cohesionStrength, cohesionExponent;
         public float separationStrength, separationExponent;
+        public float avoidCollisionWeight;
 
         // How much this unit affects friendly units
         public float gravity;
@@ -85,12 +87,17 @@ public abstract class Boid : Selectable
         public float attackAngleRange; // Angle relative local z-axis in rad
         
         public float approachMovementStrength, approachMovementExponent; // Controls attack impulse
-        
+
+
         public float aggressionStrength; // Controls how much the boid is attracted to the enemy flock
         public float searchStrength;
 
         // Misc behaviors
         public float randomMovements;
+
+        public float targetHeight;
+        public float hoverKi;
+        public float hoverKp;
     }
 
     // Struct for holding relevant information about the boid
@@ -101,6 +108,8 @@ public abstract class Boid : Selectable
         public float3 vel;
         public float3 pos;
         public float3 forward;
+        public float3 right;
+        public float3 localScale;
         public int health, maxHealth;
         
         public ClassInfo classInfo;
@@ -109,6 +118,9 @@ public abstract class Boid : Selectable
         public float morale;
         public float moraleDefault;
         public float abilityDistance;
+        public float collisionAvoidanceDistance;
+        public uint collisionMask;
+        public uint groundMask;
 
         public bool Equals(BoidInfo other)
         {
@@ -122,7 +134,9 @@ public abstract class Boid : Selectable
         // To start off, we don't want to show that the boid is selected 
         SetSelectionIndicator(false);
         
-        //_collisionMask = LayerMask.GetMask("Wall", "Obstacle");
+        collisionMask = LayerMask.GetMask("Wall", "Obstacle");
+        groundMask = LayerMask.GetMask("Ground", "Obstacle");
+
         _dead = false;
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
@@ -134,22 +148,20 @@ public abstract class Boid : Selectable
             _hasMap = true;
             this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
-
+        _localScale = transform.GetChild(0).transform.localScale;
         _healthBar = Instantiate(healthBarPrefab, transform);
     }
 
     public void StartBoid()
     {
         _collider.enabled = true;
+        _rigidbody.useGravity = true;
     }
 
     public void FixedUpdate()
     {
-        _rigidbody.AddForce(HoverForce(), ForceMode.Acceleration);
-
-        if (!_dead && HeadedForCollisionWithMapBoundary()) {
-            _rigidbody.AddForce(AvoidCollisionDir() * avoidCollisionWeight, ForceMode.Acceleration);
-        }
+        if(!_dead)
+            _rigidbody.AddForce(hoverForce, ForceMode.Acceleration);
 
         // Wait until next action is ready
         if ((Time.time - _previousActionTime) >= timeBetweenActions)
@@ -164,7 +176,8 @@ public abstract class Boid : Selectable
     // Updates the boid according to the standard flocking behaviour
     public virtual void UpdateBoid(Vector3 force)
     {
-        _rigidbody.AddForce(force, ForceMode.Acceleration);
+        hoverForce = new float3(0,force.y,0);
+        _rigidbody.AddForce(RemoveYComp(force), ForceMode.Acceleration);
 
         if (_rigidbody.velocity.sqrMagnitude > maxSpeed * maxSpeed)
         {
@@ -173,67 +186,6 @@ public abstract class Boid : Selectable
 
         Vector3 velocity = _rigidbody.velocity;
         transform.forward = new Vector3(velocity.x, 0, velocity.z);
-    }
-
-    private Vector3 HoverForce()
-    {
-        if (!_hasMap)
-        {
-            return Vector3.zero;
-        }
-        //Calculate difference in height
-        float targetYPos = targetHeight + _map.HeightmapLookup(GetPos());
-        float currentYPos = GetPos().y;
-
-        //If boid exits map
-        float deltaY = targetYPos > -1000 ? targetYPos - currentYPos : -100;
-        float velY = GetVel().y;
-
-        //Formula to determine whether to hover or fall, uses a PI-regulator with values Ki and Kp
-        Vector3 yForce = new Vector3(0, (deltaY > 0 && !_dead ? (hoverKp * deltaY - hoverKi * velY) : 0), 0);
-        
-        return yForce;
-    }
-
-    private bool HeadedForCollisionWithMapBoundary()
-    {
-        for (int i = 0; i < 3; i++) //Send 3 rays. This is to avoid tangentially going too close to an obstacle.
-        {
-            float angle = ((i + 1) / 2.0f) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
-            int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
-
-            Vector3 dir = RotationMatrix_y(angle * sign, GetVel()).normalized;
-
-            Ray ray = new Ray(GetPos(), dir);
-
-            if (Physics.Raycast(ray, collisionAvoidanceDistance, collisionMask))   //Cast rays to nearby boundaries
-            {
-                return true;
-            }
-
-        }
-        return false;
-    }
-
-    private Vector3 AvoidCollisionDir()
-    {
-        for (int i = 3; i < 300 / _rayCastTheta; i++)
-        {
-            float angle = ((i + 1) / 2.0f) * _rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
-            int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
-
-            Vector3 dir = RotationMatrix_y(angle * sign, GetVel()).normalized;
-
-            Ray ray = new Ray(GetPos(), dir);
-
-            if (!Physics.Raycast(ray, collisionAvoidanceDistance, collisionMask))   //Cast rays to nearby boundaries
-            {
-                //Should only affect turn component of velocity. Should not accellerate forwards or backwards.
-                var right = transform.right;
-                return sign < 0 ? right : -right;
-            }
-        }
-        return new Vector3(0, 0, 0);
     }
 
     private void OnCollisionEnter(Collision collision) {
@@ -312,6 +264,11 @@ public abstract class Boid : Selectable
         info.morale = morale;
         info.moraleDefault = moraleDefault;
         info.abilityDistance = abilityDistance;
+        info.collisionAvoidanceDistance = collisionAvoidanceDistance;
+        info.localScale = _localScale;
+        info.right = transform.right;
+        info.collisionMask = (uint)this.collisionMask.value;
+        info.groundMask = (uint)this.groundMask.value;
         return info;
     }
 
@@ -360,22 +317,9 @@ public abstract class Boid : Selectable
         return _dead;
     }
 
-    private Vector3 RotationMatrix_y(float angle, Vector3 vector)
-    {
-        float cos = math.cos(angle * math.PI / 180);
-        float sin = math.sin(angle * math.PI / 180);
-
-        return new Vector3(vector.x * cos - vector.z * sin, 0, vector.x * sin + vector.z * cos);
-    }
-
     protected Vector3 RemoveYComp(Vector3 v)
     {
         return new Vector3(v.x, 0, v.z);
-    }
-
-    private Vector3 GetYComp(Vector3 v)
-    {
-        return new Vector3(0, v.y, 0);
     }
 
     public void SetColor(Color color)

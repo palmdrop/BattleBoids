@@ -18,10 +18,14 @@ public class BoidManager : MonoBehaviour
     // Data structure for efficiently looking up neighbouring boids
     private BoidGrid _grid;
 
+    //Needed for burst rays
+    private static Unity.Physics.Systems.BuildPhysicsWorld _bpw;
+
     // Start is called before the first frame update
     void Start()
     {
         players = GetComponentInParent<GameManager>().GetPlayers();
+        _bpw = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetExistingSystem<Unity.Physics.Systems.BuildPhysicsWorld>();
     }
 
     // Fetches the boids from the respective players and places them in the boids list
@@ -98,7 +102,8 @@ public class BoidManager : MonoBehaviour
             forces = forces,
             targetIndices = targetIndices,
             morale = morale,
-            grid = _grid
+            grid = _grid,
+            cw = _bpw.PhysicsWorld.CollisionWorld
         };
 
         // Schedule job
@@ -189,6 +194,7 @@ public class BoidManager : MonoBehaviour
         [WriteOnly] public NativeArray<int> targetIndices;
         [WriteOnly] public NativeArray<float> morale;
         [ReadOnly] public BoidGrid grid;
+        [ReadOnly] public Unity.Physics.CollisionWorld cw;
 
         public void Execute(int index)
         {
@@ -236,6 +242,12 @@ public class BoidManager : MonoBehaviour
                 + ApproachForce(boid, targetBoidIndex, targetViewDistance)
                 + RandomForce(index, boid.classInfo.randomMovements);
 
+            if (HeadedForCollisionWithMapBoundary(boid))
+            {
+                desire += AvoidCollisionDir(boid) * boid.classInfo.avoidCollisionWeight;
+            }
+
+
             float3 force = desire - boid.vel;
 
             // Limit the force to max force
@@ -243,6 +255,8 @@ public class BoidManager : MonoBehaviour
             {
                 force = math.normalize(force) * boid.classInfo.maxForce;
             }
+
+            force += HoverForce(boid);
 
             forces[index] = force;
 
@@ -605,6 +619,102 @@ public class BoidManager : MonoBehaviour
                    CalculatePower(boid.classInfo.approachMovementStrength, 
                        dist / targetDistRange, 
                        boid.classInfo.approachMovementExponent);
+        }
+
+        private bool HeadedForCollisionWithMapBoundary(Boid.BoidInfo boid)
+        {
+            float rayCastTheta = 10f;
+
+            for (int i = 0; i < 3; i++) //Send 3 rays. This is to avoid tangentially going too close to an obstacle.
+            {
+                float angle = ((i + 1) / 2) * rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
+                int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
+
+                float3 dir = math.normalize(RotationMatrix_y(angle * sign, boid.vel));
+
+                Unity.Physics.RaycastInput ray = new Unity.Physics.RaycastInput
+                {
+                    Start = boid.pos,
+                    End = boid.pos + dir * boid.collisionAvoidanceDistance,
+                    Filter = new Unity.Physics.CollisionFilter
+                    {
+                        BelongsTo = boid.collisionMask,
+                        CollidesWith = boid.collisionMask
+                    }
+                };
+
+                if (cw.CastRay(ray))   //Cast rays to nearby boundaries
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private float3 AvoidCollisionDir(Boid.BoidInfo boid)
+        {
+            float rayCastTheta = 10f;
+
+            for (int i = 3; i < 300 / rayCastTheta; i++)
+            {
+                float angle = ((i + 1) / 2) * rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
+                int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
+
+                float3 dir = math.normalize(RotationMatrix_y(angle * sign, boid.vel));
+
+                Unity.Physics.RaycastInput ray = new Unity.Physics.RaycastInput
+                {
+                    Start = boid.pos,
+                    End = boid.pos + dir * boid.collisionAvoidanceDistance,
+                    Filter = new Unity.Physics.CollisionFilter
+                    {
+                        BelongsTo = boid.collisionMask,
+                        CollidesWith = boid.collisionMask
+                    }
+                };
+
+                if (!(cw.CastRay(ray)))   //Cast rays to nearby boundaries
+                {
+                    //Should only affect turn component of velocity. Should not accellerate forwards or backwards.
+                    return sign < 0 ? boid.right : -boid.right;
+                }
+            }
+            return new float3(0, 0, 0);
+        }
+
+        private float3 HoverForce(Boid.BoidInfo boid)
+        {
+
+            Unity.Physics.RaycastInput ray = new Unity.Physics.RaycastInput
+            {
+                Start = boid.pos,
+                End = boid.pos + new float3(0,-1,0),
+                Filter = new Unity.Physics.CollisionFilter
+                {
+                    BelongsTo = boid.groundMask,
+                    CollidesWith = boid.groundMask
+                }
+            };
+            Unity.Physics.RaycastHit hit;
+            if (cw.CastRay(ray, out hit))   //Cast rays to nearby boundaries
+            {
+                float deltaY = boid.classInfo.targetHeight - (math.length(boid.pos - hit.Position));
+                float velY = boid.vel.y;
+
+                //Formula to determine whether to hover or fall, uses a PI-regulator with values Ki and Kp
+                Vector3 yForce = new Vector3(0, (deltaY > 0 ? (boid.classInfo.hoverKp * deltaY - boid.classInfo.hoverKi * velY) : 0), 0);
+                return yForce;
+            }
+
+            return new float3(0,0,0);
+        }
+
+        private float3 RotationMatrix_y(float angle, float3 vector)
+        {
+            float cos = math.cos(angle * math.PI / 180);
+            float sin = math.sin(angle * math.PI / 180);
+
+            return new float3(vector.x * cos - vector.z * sin, 0, vector.x * sin + vector.z * cos);
         }
     }
 }
