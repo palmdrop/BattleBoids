@@ -30,9 +30,9 @@ public class SelectionManager : MonoBehaviour
     private const float YOffset = 1f;
     
     
-    RaycastHit mousePositionInWorld;
+    private static RaycastHit mousePositionInWorld;
     // We want to check if the mouse is currently hovering over ground tiles
-    bool mouseOverGround;
+    private bool mouseOverGround;
 
 private void Start()
 { 
@@ -215,5 +215,5 @@ private void Update()
         return canPlaceSelected;
     }
 
-    public RaycastHit MousePositionInWorld => mousePositionInWorld; 
+    public static RaycastHit MousePositionInWorld => mousePositionInWorld; 
 }

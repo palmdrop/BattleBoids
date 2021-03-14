@@ -55,7 +55,7 @@ namespace Map
             // Iterate over all children and calculate max and min xz values
             for(int i = 0; i < _ground.transform.childCount; i++)
             {
-                // Get child position
+                // Get rendered positions of each child
                 GameObject child = _ground.transform.GetChild(i).gameObject;
                 Bounds objectBound = child.GetComponent<Renderer>().bounds;
 
@@ -109,6 +109,7 @@ namespace Map
                 
                 // Calculate height and assign value to heightmap index
                 Vector3 childPosition = child.transform.localPosition;
+
                 float y = childPosition.y + child.transform.localScale.y / 2.0f;
                 
                 int index = PointToIndex(childPosition);
@@ -184,7 +185,8 @@ namespace Map
             if (index < 0 || index >= _heightmap.Length) return float.MinValue;
             
             // Otherwise, if valid index, return corresponding heightmap value
-            return _heightmap[index];
+            //return _heightmap[index];
+            return 2;
         }
         
         // Calculates if a given point is inside the map bounds
