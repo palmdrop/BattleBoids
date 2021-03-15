@@ -23,6 +23,7 @@ public class Ranged : Boid {
         Cost = 10;
         health = maxHealth = 100;
         damage = 25;
+        boostedDamage = 50;
         maxSpeed = 4f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
@@ -104,7 +105,7 @@ public class Ranged : Boid {
             GameObject projectile = Instantiate(projectilePrefeb, launchPos, transform.rotation);
             Physics.IgnoreCollision(projectile.GetComponent<Collider>(), GetComponent<Collider>());
             projectile.GetComponent<RangedProjectile>().SetOwner(owner);
-            projectile.GetComponent<RangedProjectile>().SetDamage(damage);
+            projectile.GetComponent<RangedProjectile>().SetDamage(IsBoosted() ? boostedDamage : damage);
             projectile.GetComponent<Rigidbody>().AddForce(launchVector, ForceMode.VelocityChange);
 
             FindObjectOfType<AudioManager>().PlayAtPoint(rangedFireAudio, GetPos(), rangedFireAudioVolume);

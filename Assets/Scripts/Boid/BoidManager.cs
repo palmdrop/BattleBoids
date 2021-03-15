@@ -263,7 +263,7 @@ public class BoidManager : MonoBehaviour
             // Update attack info
             targetIndices[index] = targetBoidIndex;
 
-            morale[index] = CalculateMorale(boid, neighbours, distances);
+            morale[index] = boid.moraleDefault;
             
             neighbours.Dispose();
             distances.Dispose();
@@ -575,35 +575,6 @@ public class BoidManager : MonoBehaviour
             return healIndex;
         }
 
-        private float CalculateMorale(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
-        {
-            int boost = 0;
-            Boid.BoidInfo neighbour;
-
-            for (int i = 0; i < neighbours.Length; i++) {
-                neighbour = boids[neighbours[i]];
-
-                if (neighbour.flockId == boid.flockId           // Same flock
-                 && neighbour.type == Boid.Type.Hero            // Is Hero
-                 && neighbour.abilityDistance > distances[i]) { // and dist < Hero ability dist
-                    boost++;
-                } else if (neighbour.flockId != boid.flockId           // Different flock
-                        && neighbour.type == Boid.Type.Scarecrow       // Is Scarecrow
-                        && neighbour.abilityDistance > distances[i]) { // and dist < Scarecrow ability dist
-                    boost--;
-                }
-            }
-
-            // NOTE
-            // moraleBoostStrength is arbitrary and can be changed for balancing reasons
-            // if no. Heros == no. Scarecrows, the effect is canceled and modifier is 1
-            float moraleModifyStrength = 10f;
-            float modifier = math.pow(moraleModifyStrength, boost);
-            float morale = boid.moraleDefault * modifier;
-
-            // Prevent negative morale
-            return math.max(morale, 0.0f);
-        }
         private float3 ApproachForce(Boid.BoidInfo boid, int targetBoidIndex, float targetDistRange)
         {
             // Calculate attack force

@@ -17,6 +17,7 @@ public class Melee : Boid {
         Cost = 10;
         health = maxHealth = 100;
         damage = 1;
+        boostedDamage = 5;
         maxSpeed = 4f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
@@ -78,7 +79,7 @@ public class Melee : Boid {
     private void Attack() 
     {
         if (HasTarget()) {
-            target.TakeDamage(damage);
+            target.TakeDamage(IsBoosted() ? boostedDamage : damage);
             SetLaser(this.GetPos(), target.GetPos());
             laser.SetActive(true);
 
