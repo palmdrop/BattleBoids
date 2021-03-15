@@ -14,6 +14,7 @@ public class Hero : Boid {
     [SerializeField] private float laserDrawTime;
     [SerializeField] private float damageRadius;
     [SerializeField] private float forcePower;
+    [SerializeField] private float boostTime;
 
     private LineRenderer _lockLaserRenderer;
 
@@ -88,6 +89,10 @@ public class Hero : Boid {
             _aimLockCompleteTime = Time.time + aimLockTime;
             IEnumerator aimAndFire = AimAndFire(aimedTarget, laserDrawTime);
             StartCoroutine(aimAndFire);
+        }
+        List<Boid> allies = FindAlliesInSphere(GetPos(), abilityDistance, LayerMask.GetMask("Units"));
+        foreach (Boid ally in allies) {
+            ally.GiveBoost(boostTime);
         }
     }
 
