@@ -160,8 +160,9 @@ public abstract class Boid : Selectable
 
     public void FixedUpdate()
     {
-        if(!_dead)
-            _rigidbody.AddForce(hoverForce, ForceMode.Acceleration);
+        if(_dead)
+            return;
+        _rigidbody.AddForce(hoverForce, ForceMode.Acceleration);
 
         // Wait until next action is ready
         if ((Time.time - _previousActionTime) >= timeBetweenActions)
