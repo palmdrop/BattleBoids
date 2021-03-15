@@ -100,6 +100,9 @@ public abstract class Boid : Selectable
         public float targetHeight;
         public float hoverKi;
         public float hoverKp;
+
+        // Only used by scarecrow
+        public float fearMultiplier;
     }
 
     // Struct for holding relevant information about the boid

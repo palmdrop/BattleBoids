@@ -481,6 +481,7 @@ public class BoidManager : MonoBehaviour
             // Fear force acting on the boid (a boid fears enemy boids)
             float3 avgFear = float3.zero;
             float avgFearDivider = 0.0f;
+            float fearMultiplier = 1f;
 
             for (int i = 0; i < neighbours.Length; i++)
             {
@@ -488,6 +489,12 @@ public class BoidManager : MonoBehaviour
                 
                 // No fear for friendly boids
                 if (boid.flockId == neighbour.flockId) continue;
+
+                if (neighbour.flockId != boid.flockId           // Different flock
+                        && neighbour.type == Boid.Type.Scarecrow       // Is Scarecrow
+                        && neighbour.abilityDistance > distances[i]) { // and dist < Scarecrow ability dist
+                    fearMultiplier = boid.classInfo.fearMultiplier;
+                }
                 
                 float distance = distances[i];
                 
@@ -513,7 +520,7 @@ public class BoidManager : MonoBehaviour
             // Calculate fear force
             // This force is similar to the separation force, but only acts on enemy boids
             if (avgFearDivider == 0.00) return float3.zero;
-            return (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
+            return (avgFear / avgFearDivider) * boid.classInfo.fearStrength * fearMultiplier;
         }
         private int FindEnemyTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
