@@ -93,7 +93,6 @@ public class BoidManager : MonoBehaviour
         }
         NativeArray<int> targetIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
         NativeArray<int> friendlyTargetIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
-        NativeArray<float> morale = new NativeArray<float>(_boids.Count, Allocator.TempJob);
 
         BoidStructJob boidJob = new BoidStructJob
         {
@@ -103,7 +102,6 @@ public class BoidManager : MonoBehaviour
             forces = forces,
             targetIndices = targetIndices,
             friendlyTargetIndices = friendlyTargetIndices,
-            morale = morale,
             grid = _grid,
             cw = _bpw.PhysicsWorld.CollisionWorld
         };
@@ -124,7 +122,6 @@ public class BoidManager : MonoBehaviour
             _boids[i].UpdateBoid(forces[i]);
             _boids[i].SetTarget(targetIndices[i] != -1 ? _boids[targetIndices[i]] : null);
             _boids[i].SetFriendlyTarget(friendlyTargetIndices[i] != -1 ? _boids[friendlyTargetIndices[i]] : null);
-            _boids[i].SetMorale(morale[i]);
         }
 
         // Dispose of all data
@@ -135,7 +132,6 @@ public class BoidManager : MonoBehaviour
         targetIndices.Dispose();
         friendlyTargetIndices.Dispose();
         _grid.Dispose();
-        morale.Dispose();
     }
 
     // This job calculates information specific for the entire flock, such as 
@@ -197,7 +193,6 @@ public class BoidManager : MonoBehaviour
         [WriteOnly] public NativeArray<float3> forces;
         [WriteOnly] public NativeArray<int> targetIndices;
         [WriteOnly] public NativeArray<int> friendlyTargetIndices;
-        [WriteOnly] public NativeArray<float> morale;
         [ReadOnly] public BoidGrid grid;
         [ReadOnly] public Unity.Physics.CollisionWorld cw;
 
@@ -267,8 +262,6 @@ public class BoidManager : MonoBehaviour
             // Update attack info
             targetIndices[index] = targetBoidIndex;
             friendlyTargetIndices[index] = friendlyTargetBoidIndex;
-
-            morale[index] = boid.moraleDefault;
             
             neighbours.Dispose();
             distances.Dispose();
