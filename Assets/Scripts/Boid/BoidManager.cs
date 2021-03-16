@@ -92,6 +92,7 @@ public class BoidManager : MonoBehaviour
             randomFloats[i] = (float)_random.NextDouble();
         }
         NativeArray<int> targetIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
+        NativeArray<int> friendlyTargetIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
         NativeArray<float> morale = new NativeArray<float>(_boids.Count, Allocator.TempJob);
 
         BoidStructJob boidJob = new BoidStructJob
@@ -101,6 +102,7 @@ public class BoidManager : MonoBehaviour
             boids = boidInfos,
             forces = forces,
             targetIndices = targetIndices,
+            friendlyTargetIndices = friendlyTargetIndices,
             morale = morale,
             grid = _grid,
             cw = _bpw.PhysicsWorld.CollisionWorld
@@ -121,6 +123,7 @@ public class BoidManager : MonoBehaviour
         {
             _boids[i].UpdateBoid(forces[i]);
             _boids[i].SetTarget(targetIndices[i] != -1 ? _boids[targetIndices[i]] : null);
+            _boids[i].SetFriendlyTarget(friendlyTargetIndices[i] != -1 ? _boids[friendlyTargetIndices[i]] : null);
             _boids[i].SetMorale(morale[i]);
         }
 
@@ -130,6 +133,7 @@ public class BoidManager : MonoBehaviour
         forces.Dispose();
         flockInfos.Dispose();
         targetIndices.Dispose();
+        friendlyTargetIndices.Dispose();
         _grid.Dispose();
         morale.Dispose();
     }
@@ -192,6 +196,7 @@ public class BoidManager : MonoBehaviour
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
         [WriteOnly] public NativeArray<float3> forces;
         [WriteOnly] public NativeArray<int> targetIndices;
+        [WriteOnly] public NativeArray<int> friendlyTargetIndices;
         [WriteOnly] public NativeArray<float> morale;
         [ReadOnly] public BoidGrid grid;
         [ReadOnly] public Unity.Physics.CollisionWorld cw;
@@ -209,17 +214,16 @@ public class BoidManager : MonoBehaviour
             NativeArray<float> distances = CalculateDistances(boid, neighbours);
 
             int targetBoidIndex = -1;
+            int friendlyTargetBoidIndex = -1;
             float targetViewDistance = 0.0f;
-            if (boid.type == Boid.Type.Healer) 
+            float friendlyTargetViewDistance = 0.0f;
+            if (boid.type == Boid.Type.Healer || boid.type == Boid.Type.Hero)
             {
-                targetBoidIndex = FindBoidToHealIndex(boid, neighbours, distances);
-                targetViewDistance = boid.classInfo.viewRadius;
+                friendlyTargetBoidIndex = FindFriendlyTargetIndex(boid, neighbours, distances);
+                friendlyTargetViewDistance = boid.classInfo.viewRadius;
             }
-            else
-            { 
-                targetBoidIndex = FindEnemyTargetIndex(boid, neighbours, distances);
-                targetViewDistance = boid.classInfo.attackDistRange;
-            }
+            targetBoidIndex = FindEnemyTargetIndex(boid, neighbours, distances);
+            targetViewDistance = boid.classInfo.attackDistRange;
             
             // Calculate the confidence of the current boid
             float confidence = CalculateConfidence(boid, neighbours);
@@ -262,6 +266,7 @@ public class BoidManager : MonoBehaviour
 
             // Update attack info
             targetIndices[index] = targetBoidIndex;
+            friendlyTargetIndices[index] = friendlyTargetBoidIndex;
 
             morale[index] = boid.moraleDefault;
             
@@ -556,7 +561,7 @@ public class BoidManager : MonoBehaviour
             return targetIndex;
         }
 
-        private int FindBoidToHealIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
+        private int FindFriendlyTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
             int healIndex = -1;
             int lowestAllyHealth = int.MaxValue;
@@ -568,8 +573,14 @@ public class BoidManager : MonoBehaviour
                 // Enemy boids cannot be healed
                 // And do not try to heal boids with max health
                 if (boid.flockId != neighbour.flockId 
-                    || distances[i] > boid.abilityDistance
-                    || neighbour.health == neighbour.maxHealth) continue;
+                    || distances[i] > boid.abilityDistance)
+                    continue;
+                if (boid.type == Boid.Type.Healer &&
+                    neighbour.health == neighbour.maxHealth)
+                    continue;
+                if (boid.type == Boid.Type.Hero &&
+                    neighbour.isBoosted)
+                    continue;
 
                 // Store the neighbour with the lowest health
                 if (neighbour.health < lowestAllyHealth)
