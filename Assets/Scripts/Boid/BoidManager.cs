@@ -348,14 +348,26 @@ public class BoidManager : MonoBehaviour
                 }
             }
 
-            // If there's no enemies, set confidence to same as ally counter
+            // We need to handle the case of there being no neighbouring enemies separately, to avoid
+            // dividing by zero, and because we might want to set the confidence differently in this case,
+            // to avoid stalemate situations.
             if (enemyCounter == 0)
             {
+                // If the boid is alone in its flock, it has nothing to lose and will be confident anyway
+                if(flocks[boid.flockId - 1].boidCount == 1)
+                {
+                    return 1;
+                }
+
+                // Otherwise, set the confidence level to the number of allies around the current boid
+                // This will ensure a confidence level of 0.0 for boids that are alone (and there are allies still
+                // on the field)
                 return allyCounter;
             }
             
             // Otherwise, calculate the confidence...
-            return (float)allyCounter / enemyCounter;
+            // We add one to the ally counter, otherwise the boids will not count themselves
+            return (float)(allyCounter + 1) / enemyCounter;
         }
 
        
