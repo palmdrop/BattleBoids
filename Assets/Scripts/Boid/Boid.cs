@@ -41,6 +41,8 @@ public abstract class Boid : Selectable
     
     protected Boid target;
     private bool _hasTarget = false;
+    protected Boid friendlyTarget;
+    private bool _hasFriendlyTarget = false;
     protected float boostUntil;
     
     protected int health;
@@ -126,6 +128,8 @@ public abstract class Boid : Selectable
         public float collisionAvoidanceDistance;
         public uint collisionMask;
         public uint groundMask;
+
+        public bool isBoosted;
 
         public bool Equals(BoidInfo other)
         {
@@ -222,18 +226,6 @@ public abstract class Boid : Selectable
         return boids;
     }
 
-    public List<Boid> FindAlliesInSphere(Vector3 position, float radius, int layerMask) {
-        List<Boid> boids = new List<Boid>();
-        Collider[] colliders = Physics.OverlapSphere(position, radius, layerMask);
-        foreach (Collider hit in colliders) {
-            Boid boid = hit.GetComponent<Boid>();
-            if (boid != null && boid.GetOwner() == owner) {
-                boids.Add(boid);
-            }
-        }
-        return boids;
-    }
-
     public void SetOwner(Player owner) {
         this.owner = owner;
     }
@@ -247,9 +239,19 @@ public abstract class Boid : Selectable
         _hasTarget = target != null;
     }
 
+    public void SetFriendlyTarget(Boid target) {
+        this.friendlyTarget = target;
+        _hasFriendlyTarget = friendlyTarget != null;
+    }
+
     public bool HasTarget()
     {
         return _hasTarget;
+    }
+
+    public bool HasFriendlyTarget()
+    {
+        return _hasFriendlyTarget;
     }
 
     public void SetMorale(float morale) {
@@ -287,6 +289,7 @@ public abstract class Boid : Selectable
         info.right = transform.right;
         info.collisionMask = (uint)this.collisionMask.value;
         info.groundMask = (uint)this.groundMask.value;
+        info.isBoosted = IsBoosted();
         return info;
     }
 

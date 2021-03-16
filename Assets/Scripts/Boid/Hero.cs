@@ -33,7 +33,7 @@ public class Hero : Boid {
         maxSpeed = 4f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        timeBetweenActions = 5f;
+        timeBetweenActions = 0.1f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 2f;
@@ -90,9 +90,8 @@ public class Hero : Boid {
             IEnumerator aimAndFire = AimAndFire(aimedTarget, laserDrawTime);
             StartCoroutine(aimAndFire);
         }
-        List<Boid> allies = FindAlliesInSphere(GetPos(), abilityDistance, LayerMask.GetMask("Units"));
-        foreach (Boid ally in allies) {
-            ally.GiveBoost(boostTime);
+        if (HasFriendlyTarget()) {
+            friendlyTarget.GiveBoost(boostTime);
         }
     }
 
