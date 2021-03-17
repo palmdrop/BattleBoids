@@ -18,43 +18,14 @@ public class SetupManager : MonoBehaviour
     [SerializeField] private GameObject allowedUnits;
     [SerializeField] private GameObject colorPopup;
 
+    private string _prefix = SceneData.Type.Multiplayer.ToString();
+
     private string _defaultPlayerName = "Player ";
     private int _defaultBoins = 10000;
     private Color[] _defaultColors;
 
-    // Struct for holding multiplayer maps
-    // NOTE This must hold: name == scene name == sprite name
-    // Scene name is the name of the scene in /Assets/Scenes/
-    // Sprite name is the name of the sprite to show in the multiplayer menu
-    // Put the sprite in /Assests/Resources/Sprite/SceneSprites/
-    public struct Map {
-        public string name;
-        public int numberOfPlayers;
-    }
-
-    private List<Map> _maps = new List<Map>();
-
-    // Struct for the settings to start the match with
-    public struct GameSettings {
-        public string mapName;
-        public List<PlayerSettings> playerSettingsList;
-        public Options options;
-    }
-
-    public struct PlayerSettings {
-        public int id;
-        public string nickname;
-        public Color color;
-    }
-
-    public struct Options {
-        public int boins;
-        public Dictionary<string, bool> units;
-    }
-
     void Start() {
         InitColors();
-        AddMaps();
         InitDropdownOptions();
         UpdateHolders();
         InitOptions();
@@ -69,22 +40,12 @@ public class SetupManager : MonoBehaviour
         }
     }
 
-    // Available maps to play in multiplayer menu
-    private void AddMaps() {
-        _maps.Add(
-            new Map {
-                name = "LevelOne",
-                numberOfPlayers = 2
-            }
-        );
-    }
-
     // Init map dropdown with maps
     private void InitDropdownOptions() {
         Dropdown dd = mapDropdown.GetComponent<Dropdown>();
         dd.ClearOptions();
         Dropdown.OptionData option;
-        foreach (Map map in _maps) {
+        foreach (SceneData.Map map in SceneData.multiplayerMaps) {
             option = new Dropdown.OptionData();
             StringBuilder entry = new StringBuilder(map.name);
             entry.Append(" (").Append(map.numberOfPlayers.ToString()).Append(")");
@@ -97,14 +58,14 @@ public class SetupManager : MonoBehaviour
 
     // Init options with default values
     private void InitOptions() {
-        boins.GetComponentInChildren<InputField>().text = PlayerPrefs.GetInt("Boins", _defaultBoins).ToString();
+        boins.GetComponentInChildren<InputField>().text = PlayerPrefs.GetInt(_prefix + "Boins", _defaultBoins).ToString();
         SetUnits();
     }
 
     // Update map holder and player holder
     public void UpdateHolders() {
         // Map holder, set name and sprite
-        Map selected = _maps[mapDropdown.GetComponent<Dropdown>().value];
+        SceneData.Map selected = SceneData.multiplayerMaps[mapDropdown.GetComponent<Dropdown>().value];
         mapName.GetComponent<Text>().text = selected.name;
         mapImage.GetComponent<Image>().sprite = menuManager.GetSceneSprite(selected.name);
 
@@ -126,18 +87,18 @@ public class SetupManager : MonoBehaviour
         string number = (i + 1).ToString();
         player.transform.GetChild(0).gameObject.GetComponent<Text>().text = number;
         player.transform.GetChild(1).gameObject.GetComponent<InputField>().text =
-            PlayerPrefs.GetString(_defaultPlayerName + number, _defaultPlayerName + number);
+            PlayerPrefs.GetString(_prefix + "Player " + number, _defaultPlayerName + number);
         GameObject colorButton = player.transform.GetChild(2).gameObject;
         colorButton.GetComponent<Button>().onClick.AddListener(() => ColorSelector(colorButton));
         string defaultColor = "#" + ColorUtility.ToHtmlStringRGBA(i < _defaultColors.Length ? _defaultColors[i] : Color.white);
         Color selectedColor;
-        ColorUtility.TryParseHtmlString(PlayerPrefs.GetString("Color " + number, defaultColor), out selectedColor);
+        ColorUtility.TryParseHtmlString(PlayerPrefs.GetString(_prefix + "Color " + number, defaultColor), out selectedColor);
         colorButton.GetComponent<Image>().color = selectedColor;
     }
 
     // Get the game settings from the menu
-    private GameSettings GetGameSettings() {
-        return new GameSettings {
+    private SceneData.GameSettings GetGameSettings() {
+        return new SceneData.GameSettings {
             mapName = GetMapName(),
             playerSettingsList = GetPlayerSettingsList(),
             options = GetOptions()
@@ -150,8 +111,8 @@ public class SetupManager : MonoBehaviour
     }
 
     // Get list of player settings from the menu
-    private List<PlayerSettings> GetPlayerSettingsList() {
-        List<PlayerSettings> playerSettings = new List<PlayerSettings>();
+    private List<SceneData.PlayerSettings> GetPlayerSettingsList() {
+        List<SceneData.PlayerSettings> playerSettings = new List<SceneData.PlayerSettings>();
         foreach (Transform child in playerListContent.transform) {
             playerSettings.Add(GetPlayerSettings(child.gameObject));
         }
@@ -159,11 +120,11 @@ public class SetupManager : MonoBehaviour
     }
 
     // Get player settings from a player container
-    private PlayerSettings GetPlayerSettings(GameObject playerContainer) {
+    private SceneData.PlayerSettings GetPlayerSettings(GameObject playerContainer) {
         int id = int.Parse(playerContainer.transform.GetChild(0).gameObject.GetComponent<Text>().text);
         string nickname = playerContainer.transform.GetChild(1).gameObject.GetComponent<InputField>().text;
         Color color = playerContainer.transform.GetChild(2).gameObject.GetComponent<Image>().color;
-        return new PlayerSettings {
+        return new SceneData.PlayerSettings {
             id = id,
             nickname = nickname,
             color = color
@@ -171,8 +132,8 @@ public class SetupManager : MonoBehaviour
     }
 
     // Get options from menu
-    private Options GetOptions() {
-        return new Options {
+    private SceneData.Options GetOptions() {
+        return new SceneData.Options {
             boins = GetBoins(),
             units = GetUnits()
         };
@@ -183,10 +144,11 @@ public class SetupManager : MonoBehaviour
         return int.Parse(boins.GetComponentInChildren<InputField>().text);
     }
 
+    // Set allowed units in menu
     private void SetUnits() {
         foreach (Transform child in allowedUnits.transform) {
             child.gameObject.GetComponent<Toggle>().isOn =
-                Boolean.Parse(PlayerPrefs.GetString(child.gameObject.name, "True"));
+                Boolean.Parse(PlayerPrefs.GetString(_prefix + child.gameObject.name, "True"));
         }
     }
 
@@ -199,31 +161,10 @@ public class SetupManager : MonoBehaviour
         return units;
     }
 
-    // Save game settings to playerprefs
-    private void SaveGameSettings() {
-        GameSettings gameSettings = GetGameSettings();
-
-        // Selected map
-        PlayerPrefs.SetString("Map", gameSettings.mapName);
+    // Save selected game settings to playerprefs
+    private void ApplyMultiplayerSettings(SceneData.GameSettings gameSettings) {
         PlayerPrefs.SetInt("MapIndex", mapDropdown.GetComponent<Dropdown>().value);
-
-        // Player settings
-        foreach (PlayerSettings playerSettings in gameSettings.playerSettingsList) {
-            PlayerPrefs.SetString(
-                _defaultPlayerName + playerSettings.id.ToString(),
-                playerSettings.nickname
-            );
-            PlayerPrefs.SetString(
-                "Color " +  playerSettings.id.ToString(),
-                "#" + ColorUtility.ToHtmlStringRGBA(playerSettings.color)
-            );
-        }
-
-        // Options
-        PlayerPrefs.SetInt("Boins", gameSettings.options.boins);
-        foreach (KeyValuePair<string, bool> entry in gameSettings.options.units) {
-            PlayerPrefs.SetString(entry.Key, entry.Value.ToString());
-        }
+        SceneData.SaveGameSettings(gameSettings, SceneData.Type.Multiplayer);
     }
 
     // Popup window for selecting color
@@ -235,7 +176,7 @@ public class SetupManager : MonoBehaviour
 
     // Start a match with the selected options
     public void Play() {
-        SaveGameSettings();
-        menuManager.Play(PlayerPrefs.GetString("Map"));
+        ApplyMultiplayerSettings(GetGameSettings());
+        menuManager.Play(PlayerPrefs.GetString("Scene"));
     }
 }
