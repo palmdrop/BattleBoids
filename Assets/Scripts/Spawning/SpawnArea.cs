@@ -72,7 +72,12 @@ public class SpawnArea : MonoBehaviour
                 /*
                 if (map.PointInsideBounds(position))
                 {
+<<<<<<< Updated upstream
                     position.y =  1.2f;
+=======
+                    //position.y = map.HeightmapLookup(position) + map.transform.position.y + 1f;
+                    position.y = 2f;
+>>>>>>> Stashed changes
                 }
                 else
                 {

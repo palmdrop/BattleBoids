@@ -196,7 +196,7 @@ namespace Map
             
             // Otherwise, if valid index, return corresponding heightmap value
             //return _heightmap[index];
-            return 10f;
+            return 2;
         }
         
         // Calculates if a given point is inside the map bounds
