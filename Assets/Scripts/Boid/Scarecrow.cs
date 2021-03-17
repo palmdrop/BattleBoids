@@ -16,11 +16,8 @@ public class Scarecrow : Boid {
         health = maxHealth = 100;
         damage = 1;
         maxSpeed = 3f;
-        targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        hoverKi = 2f;
-        hoverKp = 10f;
         timeBetweenActions = 1f;
         morale = moraleDefault = 1f;
         abilityDistance = 2f;
@@ -30,6 +27,8 @@ public class Scarecrow : Boid {
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
+            
+            confidenceThreshold = 0.4f,
             
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
@@ -52,8 +51,16 @@ public class Scarecrow : Boid {
             approachMovementExponent = 0.5f,
             
             aggressionStrength = 10.4f,
+
+            avoidCollisionWeight = 100f,
+
+            searchStrength = 10.4f,
             
             randomMovements = 6.0f,
+
+            hoverKi = 2f,
+            hoverKp = 10f,
+            targetHeight = 2f
         };
 
         SetColor();

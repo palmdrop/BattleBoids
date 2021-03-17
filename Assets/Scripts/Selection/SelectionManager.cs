@@ -6,8 +6,8 @@ using UnityEngine;
 public class SelectionManager : MonoBehaviour
 {
     // The UI component used to get the active player
-    [SerializeField] private GameUI gameUI;
-    [SerializeField] private Camera mainCamera;
+    private GameManager _gameManager;
+    private GameUI _gameUI;
     
     private LayerMask ground;
     
@@ -37,14 +37,15 @@ public class SelectionManager : MonoBehaviour
 private void Start()
 { 
     ground = LayerMask.GetMask("Ground");
-    mainCamera = Camera.main;
-    activePlayer = gameUI.GetActivePlayer();
+    _gameManager = GetComponentInParent<GameManager>();
+    _gameUI = _gameManager.GetGameUI();
+    activePlayer = _gameUI.GetActivePlayer();
 }
 
 private void Update()
 {
     // You can't edit if the game is currently running
-    if (gameUI.AllPlayersReady())
+    if (_gameUI.AllPlayersReady())
     {
         if (selected.Count > 0)
         {
@@ -55,7 +56,7 @@ private void Update()
     }
 
     // Undo every non-confirmed changes when the player change
-    if (!activePlayer.Equals(gameUI.GetActivePlayer()))
+    if (!activePlayer.Equals(_gameUI.GetActivePlayer()))
     {
         UndoChanges();
     }
@@ -64,7 +65,7 @@ private void Update()
     if (selected.Count == 0) return;
     
     // Update mouse position
-    mouseOverGround = Physics.Raycast(mainCamera.ScreenPointToRay(Input.mousePosition), out mousePositionInWorld, 1000f, ground);
+    mouseOverGround = Physics.Raycast(_gameManager.GetMainCamera().ScreenPointToRay(Input.mousePosition), out mousePositionInWorld, 1000f, ground);
     
     // Sell the selected entities
     if (Input.GetKeyDown("k"))
@@ -93,7 +94,7 @@ private void Update()
         canPlaceSelected = true;
         Deselect();
         
-        activePlayer = gameUI.GetActivePlayer();
+        activePlayer = _gameUI.GetActivePlayer();
     }
 
     public void Select(Selectable selectable)
@@ -216,4 +217,14 @@ private void Update()
     }
 
     public static RaycastHit MousePositionInWorld => mousePositionInWorld; 
+
+    public GameUI GetGameUI()
+    {
+        return _gameUI;
+    }
+
+    public Camera GetMainCamera()
+    {
+        return _gameManager.GetMainCamera();
+    }
 }

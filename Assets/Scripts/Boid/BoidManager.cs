@@ -8,8 +8,7 @@ using Random = System.Random;
 
 public class BoidManager : MonoBehaviour
 {
-    [SerializeField] private List<Player> players = new List<Player>();
-    private bool _isBattlePhase;
+    private List<Player> players;
 
     private readonly List<Boid> _boids = new List<Boid>();
     
@@ -19,37 +18,27 @@ public class BoidManager : MonoBehaviour
     // Data structure for efficiently looking up neighbouring boids
     private BoidGrid _grid;
 
+    //Needed for burst rays
+    private static Unity.Physics.Systems.BuildPhysicsWorld _bpw;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        players = GetComponentInParent<GameManager>().GetPlayers();
+        _bpw = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetExistingSystem<Unity.Physics.Systems.BuildPhysicsWorld>();
     }
 
     // Fetches the boids from the respective players and places them in the boids list
-    private void AddPlayerBoids()
+    public void AddPlayerBoids()
     {
-        // Check if there's been an update to the player flocks
-        // TODO improve, player/spawnarea should be able to tell boid manager update occured
-        bool update = false;
-        foreach (Player p in players)
-        {
-            if (p.FlockUpdate)
-            {
-                update = true;
-                break;
-            }
-        }
-
-        // If no update, return
-        if (!update) return;
-        
-        // Otherwise, clear all boids and add them once again to the list
+        // Clear all boids and add them to the list
         _boids.Clear();
-        
+
         foreach (Player p in players)
         {
-            foreach (GameObject b in p.GetFlock()) {
-                _boids.Add(b.GetComponent<Boid>());
+            foreach (Boid b in p.GetFlock()) {
+                b.StartBoid();
+                _boids.Add(b);
             }
             p.FlockUpdate = false;
         }
@@ -64,13 +53,6 @@ public class BoidManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // When game is started, clear boids and fetch all the new boids from the 
-        // corresponding players
-        if (_isBattlePhase)
-        {
-            AddPlayerBoids();
-        }
-
         // Remove all dead boids
         ClearDeadBoids();
 
@@ -120,7 +102,8 @@ public class BoidManager : MonoBehaviour
             forces = forces,
             targetIndices = targetIndices,
             morale = morale,
-            grid = _grid
+            grid = _grid,
+            cw = _bpw.PhysicsWorld.CollisionWorld
         };
 
         // Schedule job
@@ -149,14 +132,6 @@ public class BoidManager : MonoBehaviour
         targetIndices.Dispose();
         _grid.Dispose();
         morale.Dispose();
-    }
-
-    public void BeginBattle() {
-        _isBattlePhase = true;
-    }
-
-    public void StopBattle() {
-        _isBattlePhase = false;
     }
 
     // This job calculates information specific for the entire flock, such as 
@@ -219,6 +194,7 @@ public class BoidManager : MonoBehaviour
         [WriteOnly] public NativeArray<int> targetIndices;
         [WriteOnly] public NativeArray<float> morale;
         [ReadOnly] public BoidGrid grid;
+        [ReadOnly] public Unity.Physics.CollisionWorld cw;
 
         public void Execute(int index)
         {
@@ -245,17 +221,32 @@ public class BoidManager : MonoBehaviour
                 targetViewDistance = boid.classInfo.attackDistRange;
             }
             
+            // Calculate the confidence of the current boid
+            float confidence = CalculateConfidence(boid, neighbours);
+            
             // Sum all the forces
-            float3 desire = 
-                            // Reynolds behaviors
-                              AlignmentForce(boid, neighbours, distances) 
-                            + CohesionForce(boid, neighbours, distances)
-                            + SeparationForce(boid, neighbours, distances)
-                            // Additional behaviors
-                            + AggressionForce(boid)
-                            + FearForce(boid, neighbours, distances)
-                            + ApproachForce(boid, targetBoidIndex, targetViewDistance)
-                            + RandomForce(index, boid.classInfo.randomMovements);
+            float3 desire =
+                // Reynolds behaviors
+                AlignmentForce(boid, neighbours, distances)
+                + CohesionForce(boid, neighbours, distances)
+                + SeparationForce(boid, neighbours, distances)
+                
+                // Additional behaviors
+                + (confidence >= boid.classInfo.confidenceThreshold
+                    // If confidence is high, be aggressive and have normal fear levels
+                    ? AggressionForce(boid) + 1 * FearForce(boid, neighbours, distances) 
+                    // If confidence is low, search for the ally flock and duplicate fear levels
+                    : SearchForce(boid)     + 2 * FearForce(boid, neighbours, distances))
+                
+                // 
+                + ApproachForce(boid, targetBoidIndex, targetViewDistance)
+                + RandomForce(index, boid.classInfo.randomMovements);
+
+            if (HeadedForCollisionWithMapBoundary(boid))
+            {
+                desire += AvoidCollisionDir(boid) * boid.classInfo.avoidCollisionWeight;
+            }
+
 
             float3 force = desire - boid.vel;
 
@@ -264,6 +255,8 @@ public class BoidManager : MonoBehaviour
             {
                 force = math.normalize(force) * boid.classInfo.maxForce;
             }
+
+            force += HoverForce(boid);
 
             forces[index] = force;
 
@@ -275,7 +268,8 @@ public class BoidManager : MonoBehaviour
             neighbours.Dispose();
             distances.Dispose();
         }
-        
+
+
         // Calculates the power of a certain behavior. This is a combination of the weight for that behavior,
         // the distance to the target, and the falloff exponent
         private static float CalculatePower(float weight, float normalizedDist, float exponent)
@@ -333,6 +327,37 @@ public class BoidManager : MonoBehaviour
 
             return distances;
         }
+        
+        private float CalculateConfidence(Boid.BoidInfo boid, NativeArray<int> neighbours)
+        {
+            // Count the number of neighbouring allies and enemies
+            int allyCounter = 0;
+            int enemyCounter = 0;
+
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                int index = neighbours[i];
+                Boid.BoidInfo neighbour = boids[index];
+                if (boid.flockId == neighbour.flockId)
+                {
+                    allyCounter++;
+                }
+                else
+                {
+                    enemyCounter++;
+                }
+            }
+
+            // If there's no enemies, set confidence to same as ally counter
+            if (enemyCounter == 0)
+            {
+                return allyCounter;
+            }
+            
+            // Otherwise, calculate the confidence...
+            return (float)allyCounter / enemyCounter;
+        }
+
        
         private float3 AlignmentForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
@@ -440,6 +465,15 @@ public class BoidManager : MonoBehaviour
             
             if (enemyFlock.boidCount == 0) return float3.zero;
             return math.normalize(enemyFlock.avgPos - boid.pos) * boid.classInfo.aggressionStrength;
+        }
+        
+        private float3 SearchForce(Boid.BoidInfo boid)
+        {
+            Player.FlockInfo flock = flocks[boid.flockId - 1];
+            
+            if (flock.boidCount <= 1) return float3.zero;
+            //TODO do not use aggression strength for search as well?
+            return math.normalize(flock.avgPos - boid.pos) * boid.classInfo.searchStrength;
         }
 
         private float3 FearForce(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
@@ -585,6 +619,102 @@ public class BoidManager : MonoBehaviour
                    CalculatePower(boid.classInfo.approachMovementStrength, 
                        dist / targetDistRange, 
                        boid.classInfo.approachMovementExponent);
+        }
+
+        private bool HeadedForCollisionWithMapBoundary(Boid.BoidInfo boid)
+        {
+            float rayCastTheta = 10f;
+
+            for (int i = 0; i < 3; i++) //Send 3 rays. This is to avoid tangentially going too close to an obstacle.
+            {
+                float angle = ((i + 1) / 2) * rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
+                int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
+
+                float3 dir = math.normalize(RotationMatrix_y(angle * sign, boid.vel));
+
+                Unity.Physics.RaycastInput ray = new Unity.Physics.RaycastInput
+                {
+                    Start = boid.pos,
+                    End = boid.pos + dir * boid.collisionAvoidanceDistance,
+                    Filter = new Unity.Physics.CollisionFilter
+                    {
+                        BelongsTo = boid.collisionMask,
+                        CollidesWith = boid.collisionMask
+                    }
+                };
+
+                if (cw.CastRay(ray))   //Cast rays to nearby boundaries
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private float3 AvoidCollisionDir(Boid.BoidInfo boid)
+        {
+            float rayCastTheta = 10f;
+
+            for (int i = 3; i < 300 / rayCastTheta; i++)
+            {
+                float angle = ((i + 1) / 2) * rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
+                int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
+
+                float3 dir = math.normalize(RotationMatrix_y(angle * sign, boid.vel));
+
+                Unity.Physics.RaycastInput ray = new Unity.Physics.RaycastInput
+                {
+                    Start = boid.pos,
+                    End = boid.pos + dir * boid.collisionAvoidanceDistance,
+                    Filter = new Unity.Physics.CollisionFilter
+                    {
+                        BelongsTo = boid.collisionMask,
+                        CollidesWith = boid.collisionMask
+                    }
+                };
+
+                if (!(cw.CastRay(ray)))   //Cast rays to nearby boundaries
+                {
+                    //Should only affect turn component of velocity. Should not accellerate forwards or backwards.
+                    return sign < 0 ? boid.right : -boid.right;
+                }
+            }
+            return new float3(0, 0, 0);
+        }
+
+        private float3 HoverForce(Boid.BoidInfo boid)
+        {
+
+            Unity.Physics.RaycastInput ray = new Unity.Physics.RaycastInput
+            {
+                Start = boid.pos,
+                End = boid.pos + new float3(0,-1,0),
+                Filter = new Unity.Physics.CollisionFilter
+                {
+                    BelongsTo = boid.groundMask,
+                    CollidesWith = boid.groundMask
+                }
+            };
+            Unity.Physics.RaycastHit hit;
+            if (cw.CastRay(ray, out hit))   //Cast rays to nearby boundaries
+            {
+                float deltaY = boid.classInfo.targetHeight - (math.length(boid.pos - hit.Position));
+                float velY = boid.vel.y;
+
+                //Formula to determine whether to hover or fall, uses a PI-regulator with values Ki and Kp
+                Vector3 yForce = new Vector3(0, (deltaY > 0 ? (boid.classInfo.hoverKp * deltaY - boid.classInfo.hoverKi * velY) : 0), 0);
+                return yForce;
+            }
+
+            return new float3(0,0,0);
+        }
+
+        private float3 RotationMatrix_y(float angle, float3 vector)
+        {
+            float cos = math.cos(angle * math.PI / 180);
+            float sin = math.sin(angle * math.PI / 180);
+
+            return new float3(vector.x * cos - vector.z * sin, 0, vector.x * sin + vector.z * cos);
         }
     }
 }

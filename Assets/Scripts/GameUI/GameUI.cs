@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class GameUI : MonoBehaviour
 {
-    [SerializeField] private List<Player> players;
     [SerializeField] private Text boins;
     [SerializeField] private Dropdown playerSelect;
     [SerializeField] private Player activePlayer;
@@ -16,15 +15,21 @@ public class GameUI : MonoBehaviour
     [SerializeField] private Button ready;
     [SerializeField] private int unitButtonRows;
     [SerializeField] private int unitButtonCols;
-    [SerializeField] private BoidManager boidManager;
     [SerializeField] private bool showHealthBars;
+    [SerializeField] private Text victoryText;
+
+    private GameManager _gameManager;
+    private List<Player> players;
 
     // Start is called before the first frame update
     void Start()
     {
+        _gameManager = GetComponentInParent<GameManager>();
+        players = _gameManager.GetPlayers();
         InitPlayerDropdown();
         InitUnitButtons();
         InitReadyButton();
+        victoryText.enabled = false;
     }
 
     // Update is called once per frame
@@ -46,7 +51,6 @@ public class GameUI : MonoBehaviour
             playerSelect.options.Add(newPlayer);
         }
         activePlayer = SetActivePlayer();
-        activePlayer.GetSpawnArea().Activate();
         playerSelect.captionText.text = activePlayer.GetNickname();
         playerSelect.onValueChanged.AddListener(delegate {
             ManageActivePlayer();
@@ -104,6 +108,16 @@ public class GameUI : MonoBehaviour
             players.ForEach(p => p.Ready());
         } else if (Input.GetKeyDown("y")) {
             showHealthBars = !showHealthBars;
+        } else if (Input.GetKeyDown("m")) {
+            FindObjectOfType<AudioManager>().ToggleMute();
+        } else if (Input.GetKeyDown("i"))
+        {
+            AudioManager audioManager = FindObjectOfType<AudioManager>();
+            audioManager.SetMasterVolume(audioManager.GetMasterVolume() + 0.1f);
+        } else if (Input.GetKeyDown("k"))
+        {
+            AudioManager audioManager = FindObjectOfType<AudioManager>();
+            audioManager.SetMasterVolume(audioManager.GetMasterVolume() - 0.1f);
         }
     }
 
@@ -111,9 +125,7 @@ public class GameUI : MonoBehaviour
         string selectedPlayerName = playerSelect.options[playerSelect.value].text;
         string activePlayerName = activePlayer.GetNickname();
         if (!selectedPlayerName.Equals(activePlayerName)) {
-            activePlayer.GetSpawnArea().Deactivate();
             activePlayer = SetActivePlayer();
-            activePlayer.GetSpawnArea().Activate();
         }
     }
 
@@ -131,7 +143,7 @@ public class GameUI : MonoBehaviour
 
     void UpdateGameState() {
         if (AllPlayersReady()) {
-            boidManager.BeginBattle();
+            _gameManager.BeginBattle();
             ready.gameObject.SetActive(false);
         }
     }
@@ -177,8 +189,13 @@ public class GameUI : MonoBehaviour
         string nickname = playerSelect.options[playerSelect.value].text;
         foreach (Player player in players)
         {
+            player.SetActive(false);
+        }
+        foreach (Player player in players)
+        {
             if (player.GetNickname().Equals(nickname))
             {
+                player.SetActive(true);
                 return player;
             }
         }
@@ -215,5 +232,11 @@ public class GameUI : MonoBehaviour
     public bool ShowHealthBars()
     {
         return showHealthBars;
+    }
+
+    public void ShowVictor(Player victor)
+    {
+        victoryText.text = victor.GetNickname() + " won!";
+        victoryText.enabled = true;
     }
 }

@@ -11,6 +11,10 @@ public class Healer : Boid
     private float _healRadius;
     
     [SerializeField] private GameObject healBeam;
+    [SerializeField] private AudioClip healingAudio;
+    [Range(0f, 1f)] public float healingAudioVolume;
+    public float audioCooldown;
+    private float _previousAudioTime = 0f;
     private LineRenderer _healBeamRenderer;
     
     // Start is called before the first frame update
@@ -22,11 +26,8 @@ public class Healer : Boid
         health = maxHealth = 100;
         damage = 0;
         maxSpeed = 4f;
-        targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        hoverKi = 2f;
-        hoverKp = 10f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 3.0f;
@@ -40,6 +41,8 @@ public class Healer : Boid
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2.0f,
+            
+            confidenceThreshold = 2.0f,
             
             alignmentStrength = 6.0f,
             alignmentExponent = 0.0f, 
@@ -62,8 +65,16 @@ public class Healer : Boid
             approachMovementExponent = 0.5f,
             
             aggressionStrength = 7.4f,
+
+            avoidCollisionWeight = 100f,
+
+            searchStrength = 7.4f,
             
             randomMovements = 4.0f,
+
+            hoverKi = 2f,
+            hoverKp = 10f,
+            targetHeight = 2f
         };
         
         _healBeamRenderer = healBeam.GetComponent<LineRenderer>();
@@ -91,6 +102,11 @@ public class Healer : Boid
         target.ReceiveHealth(_healAmount);
         AnimateHeal(this.GetPos(), target.GetPos());
         healBeam.SetActive(true);
+        if (Time.time - _previousAudioTime >= audioCooldown)
+        {
+            FindObjectOfType<AudioManager>().PlayAtPoint(healingAudio, GetPos(), healingAudioVolume);
+            _previousAudioTime = Time.time;
+        }
     }
 
     private void AnimateHeal(Vector3 fromPos, Vector3 toPos) {

@@ -18,11 +18,8 @@ public class Commander : Boid
         health = maxHealth = 100;
         damage = 1;
         maxSpeed = 4f;
-        targetHeight = 2f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        hoverKi = 2f;
-        hoverKp = 10f;
         timeBetweenActions = 0.01f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
@@ -33,6 +30,8 @@ public class Commander : Boid
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
+            
+            confidenceThreshold = 0.5f,
 
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f,
@@ -55,8 +54,15 @@ public class Commander : Boid
             approachMovementExponent = 0.5f,
 
             aggressionStrength = 10.4f,
+            searchStrength = 10.4f,
+
+            avoidCollisionWeight = 100f,
 
             randomMovements = 6.0f,
+
+            hoverKi = 2f,
+            hoverKp = 10f,
+            targetHeight = 2f
         };
     }
 

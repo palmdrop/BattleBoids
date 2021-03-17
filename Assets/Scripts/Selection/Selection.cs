@@ -3,16 +3,16 @@ using UnityEngine;
 
 public class Selection : MonoBehaviour
 {
-    [SerializeField] private SelectionManager selectionManager;
+    private SelectionManager _selectionManager;
 
     // The camera that is used for the projection from world view to screen view
-    [SerializeField] private Camera selectionCamera;
+    private Camera _selectionCamera;
 
     // This is the selection area displayed on the UI
     [SerializeField] private RectTransform selectionAreaUI;
 
     // The UI component used to get the active player flock
-    [SerializeField] private GameUI gameUI;
+    private GameUI _gameUI;
 
     // This is the selection invisible selection area in the game
     private Rect _selectionArea;
@@ -30,19 +30,23 @@ public class Selection : MonoBehaviour
     
     private void Start()
     {
+        _selectionManager = GetComponentInParent<SelectionManager>();
+        _selectionCamera = _selectionManager.GetMainCamera();
+        _gameUI = _selectionManager.GetGameUI();
         ResetDrawUISelectionArea();
     }
 
     private void Update()
     {
         // You can't select if you are currently purchasing new units
-        if (gameUI.GetActivePlayer().GetSpawnArea().isHolding())
+        
+        if (_gameUI.GetActivePlayer().GetSpawnArea().isHolding())
         {
             return;     
         }
         
         // If you are currently moving entities around, you can't select new ones before they are placed
-        if (!selectionManager.IsPlaceable())
+        if (!_selectionManager.IsPlaceable())
         {
             return;
         }
@@ -50,7 +54,7 @@ public class Selection : MonoBehaviour
         // When you click the left mouse button
         if (Input.GetMouseButtonDown(0))
         {
-            selectionManager.Deselect();
+            _selectionManager.Deselect();
 
 
             // Get the position of the mouse once
@@ -125,18 +129,18 @@ public class Selection : MonoBehaviour
     private void SelectPlayerFlockEntities()
     {
         // The current players flock
-        List<GameObject> activePlayerFlock = gameUI.GetActivePlayer().GetFlock();
+        List<Boid> activePlayerFlock = _gameUI.GetActivePlayer().GetFlock();
         
-        foreach (GameObject entity in activePlayerFlock)
+        foreach (Boid entity in activePlayerFlock)
         {
             Selectable selected = entity.GetComponent<Selectable>();
             
-            entityScreenPosition = selectionCamera.WorldToScreenPoint(selected.transform.position);
+            entityScreenPosition = _selectionCamera.WorldToScreenPoint(selected.transform.position);
             
             if (_selectionArea.Contains(entityScreenPosition))
             {
                 selected.SetSelectionIndicator(true);
-                selectionManager.Select(selected);
+                _selectionManager.Select(selected);
                 
             }
 
