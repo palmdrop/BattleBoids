@@ -15,15 +15,11 @@ public class SetupManager : MenuManager
     [SerializeField] private GameObject playerListContent;
     [SerializeField] private GameObject boins;
     [SerializeField] private GameObject allowedUnits;
+    [SerializeField] private GameObject colorPopup;
 
     private string _defaultPlayerName = "Player ";
     private int _defaultBoins = 10000;
-    private Color[] _defaultColors = {
-        Color.red,
-        Color.blue,
-        Color.green,
-        Color.yellow
-    };
+    private Color[] _defaultColors;
 
     // Struct for holding multiplayer maps
     // NOTE This must hold: name == scene name == sprite name
@@ -56,10 +52,20 @@ public class SetupManager : MenuManager
     }
 
     void Start() {
+        InitColors();
         AddMaps();
         InitDropdownOptions();
         UpdateHolders();
         InitOptions();
+    }
+
+    // Set color array
+    private void InitColors() {
+        int numberOfColors = colorPopup.transform.childCount;
+        _defaultColors = new Color[numberOfColors];
+        for (int i = 0; i < numberOfColors; i++) {
+            _defaultColors[i] = colorPopup.transform.GetChild(i).gameObject.GetComponent<Image>().color;
+        }
     }
 
     // Available maps to play in multiplayer menu
@@ -226,9 +232,11 @@ public class SetupManager : MenuManager
         }
     }
 
-    // TODO popup window for selecting color
+    // Popup window for selecting color
     public void ColorSelector(GameObject button) {
-        Debug.Log(button.GetComponent<Image>().color.ToString());
+        colorPopup.GetComponent<ColorPopup>().SetSourceButton(button);
+        colorPopup.transform.position = button.transform.position;
+        colorPopup.SetActive(true);
     }
 
     // Start a match with the selected options
