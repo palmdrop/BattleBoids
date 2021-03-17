@@ -76,7 +76,8 @@ public class GameUI : MonoBehaviour
             );
 
             button.GetComponent<Image>().sprite = unitSprites[i];
-            if (Boolean.Parse(PlayerPrefs.GetString(unitPrefabs[i].name, "True"))) {
+            string prefix = _gameManager.GetType().ToString();
+            if (Boolean.Parse(PlayerPrefs.GetString(prefix + unitPrefabs[i].name, "true"))) {
                 button.GetComponent<Button>().onClick.AddListener(() => UnitButtonClick(button));
             } else {
                 Color disabled = new Color(1f, 1f, 1f, 0.25f);

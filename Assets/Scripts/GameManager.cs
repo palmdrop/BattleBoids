@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    // Campaign or Multiplayer scene?
+    [SerializeField] private SceneData.Type type;
+
     // The possible boid types
     public enum GameState {
         Placement,
@@ -44,16 +47,17 @@ public class GameManager : MonoBehaviour
 
     // Apply PlayerPrefs data to player if it exists
     private void ApplyPlayerSettings() {
+        string prefix = type.ToString();
         for (int i = 0; i < _players.Count; i++) {
             int number = i + 1;
-            string player = "Player " + number.ToString();
+            string player = prefix + "Player " + number.ToString();
             if (PlayerPrefs.HasKey(player)) {
                 _players[i].SetId(number);
                 _players[i].SetNickname(PlayerPrefs.GetString(player));
                 Color color;
-                ColorUtility.TryParseHtmlString(PlayerPrefs.GetString("Color " + number.ToString()), out color);
+                ColorUtility.TryParseHtmlString(PlayerPrefs.GetString(prefix + "Color " + number.ToString()), out color);
                 _players[i].SetColor(color);
-                _players[i].SetBoins(PlayerPrefs.GetInt("Boins"));
+                _players[i].SetBoins(PlayerPrefs.GetInt(prefix + "Boins"));
             }
         }
     }
@@ -70,6 +74,10 @@ public class GameManager : MonoBehaviour
         foreach (Player p in _players) {
             p.SetActive(false);
         }
+    }
+
+    public SceneData.Type GetType() {
+        return type;
     }
 
     public void SetState(GameState state)
