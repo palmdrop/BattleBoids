@@ -703,9 +703,13 @@ public class BoidManager : MonoBehaviour
 
                 //Formula to determine whether to hover or fall, uses a PI-regulator with values Ki and Kp
                 Vector3 yForce = new Vector3(0, (deltaY > 0 ? (boid.classInfo.hoverKp * deltaY - boid.classInfo.hoverKi * velY) : 0), 0);
+                
+                Debug.Log("INSIDE");
+                
                 return yForce;
             }
 
+            Debug.Log("OUTSIDE");
             return new float3(0,0,0);
         }
 
