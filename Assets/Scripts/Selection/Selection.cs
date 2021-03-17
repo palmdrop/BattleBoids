@@ -32,6 +32,7 @@ public class Selection : MonoBehaviour
     {
         _selectionManager = GetComponentInParent<SelectionManager>();
         _selectionCamera = _selectionManager.GetMainCamera();
+        
         _gameUI = _selectionManager.GetGameUI();
         ResetDrawUISelectionArea();
     }
@@ -39,7 +40,6 @@ public class Selection : MonoBehaviour
     private void Update()
     {
         // You can't select if you are currently purchasing new units
-        
         if (_gameUI.GetActivePlayer().GetSpawnArea().isHolding())
         {
             return;     

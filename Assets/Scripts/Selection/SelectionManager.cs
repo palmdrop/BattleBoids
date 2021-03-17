@@ -33,6 +33,7 @@ public class SelectionManager : MonoBehaviour
     private static RaycastHit mousePositionInWorld;
     // We want to check if the mouse is currently hovering over ground tiles
     private bool mouseOverGround;
+    
 
 private void Start()
 { 
