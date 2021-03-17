@@ -342,6 +342,7 @@ public abstract class Boid : Selectable
         this._dead = true;
         SetTarget(null);
         Destroy(GetComponent<ParticleSystem>());
+        Destroy(GetComponentInChildren<LineRenderer>());
     }
 
     public bool IsDead() {
