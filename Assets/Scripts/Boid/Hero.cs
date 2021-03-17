@@ -96,7 +96,7 @@ public class Hero : Boid {
     }
 
     private IEnumerator AimAndFire(Boid target, float waitTime) {
-        while (true) {
+        while (!IsDead()) {
             Vector3 targetPos = target.GetPos();
             float width = laserDoneWidth
                         - laserDoneWidth
