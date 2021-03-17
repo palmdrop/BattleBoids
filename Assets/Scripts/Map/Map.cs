@@ -43,7 +43,7 @@ namespace Map
             CalculateHeightmap();
             
             // Create wall tiles
-            CreateWallTiles();
+            // CreateWallTiles();
         }
         
         private void CalculateBounds()
@@ -186,7 +186,7 @@ namespace Map
             
             // Otherwise, if valid index, return corresponding heightmap value
             //return _heightmap[index];
-            return 2;
+            return 2f;
         }
         
         // Calculates if a given point is inside the map bounds
