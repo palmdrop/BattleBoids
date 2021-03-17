@@ -10,7 +10,9 @@ public class AudioManager : MonoBehaviour
     // The sounds that can be played from this manager
     public Sound[] sounds;
     private float _masterVolume = 1f;
-    private float _savedVolume = 1f;
+    private float _savedMasterVolume = 1f;
+    private float _effectsVolume = 1f;
+    private float _musicVolume = 1f;
     private bool _isMuted = false;
 
     
@@ -44,7 +46,7 @@ public class AudioManager : MonoBehaviour
 
     public void PlayAtPoint(AudioClip clip, Vector3 point, float volume)
     {
-        AudioSource.PlayClipAtPoint(clip, point, _masterVolume * volume);
+        AudioSource.PlayClipAtPoint(clip, point, _masterVolume * _effectsVolume * volume);
     }
 
 
@@ -56,7 +58,7 @@ public class AudioManager : MonoBehaviour
         // Update the sounds (music) that are playing
         foreach (Sound s in sounds)
         {
-            s.source.volume = s.volume * _masterVolume;
+            s.source.volume = s.volume * _masterVolume * _musicVolume;
         }
 
         _isMuted = false;
@@ -67,6 +69,30 @@ public class AudioManager : MonoBehaviour
         return _masterVolume;
     }
 
+    public void SetEffectsVolume(float volume)
+    {
+        _effectsVolume = Math.Min(Math.Max(0f, volume), 1f);
+    }
+
+    public float GetEffectsVolume()
+    {
+        return _effectsVolume;
+    }
+
+    public void SetMusicVolume(float volume)
+    {
+        _musicVolume = Math.Min(Math.Max(0f, volume), 1f);
+        foreach (Sound s in sounds)
+        {
+            s.source.volume = s.volume * _masterVolume * _musicVolume;
+        }
+    }
+
+    public float GetMusicVolume()
+    {
+        return _musicVolume;
+    }
+
     // Toggles music and sounds to mute
     public void ToggleMute()
     {
@@ -75,12 +101,12 @@ public class AudioManager : MonoBehaviour
         if (!_isMuted)
         {
             // If we just muted, save the current volume to be able to toggle back to it
-            _savedVolume = _masterVolume;
+            _savedMasterVolume = _masterVolume;
             SetMasterVolume(0f);
         } else
         {
             // Toggle back to the saved volume
-            SetMasterVolume(_savedVolume);
+            SetMasterVolume(_savedMasterVolume);
         }
 
         _isMuted = !tempIsMuted;
