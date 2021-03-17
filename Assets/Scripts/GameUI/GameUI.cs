@@ -110,14 +110,36 @@ public class GameUI : MonoBehaviour
             showHealthBars = !showHealthBars;
         } else if (Input.GetKeyDown("m")) {
             FindObjectOfType<AudioManager>().ToggleMute();
-        } else if (Input.GetKeyDown("i"))
+        }
+        else if (Input.GetKeyDown("u"))
         {
             AudioManager audioManager = FindObjectOfType<AudioManager>();
             audioManager.SetMasterVolume(audioManager.GetMasterVolume() + 0.1f);
-        } else if (Input.GetKeyDown("k"))
+        }
+        else if (Input.GetKeyDown("j"))
         {
             AudioManager audioManager = FindObjectOfType<AudioManager>();
             audioManager.SetMasterVolume(audioManager.GetMasterVolume() - 0.1f);
+        }
+        else if (Input.GetKeyDown("i"))
+        {
+            AudioManager audioManager = FindObjectOfType<AudioManager>();
+            audioManager.SetEffectsVolume(audioManager.GetEffectsVolume() + 0.1f);
+        }
+        else if (Input.GetKeyDown("k"))
+        {
+            AudioManager audioManager = FindObjectOfType<AudioManager>();
+            audioManager.SetEffectsVolume(audioManager.GetEffectsVolume() - 0.1f);
+        }
+        else if (Input.GetKeyDown("o"))
+        {
+            AudioManager audioManager = FindObjectOfType<AudioManager>();
+            audioManager.SetMusicVolume(audioManager.GetMusicVolume() + 0.1f);
+        }
+        else if (Input.GetKeyDown("l"))
+        {
+            AudioManager audioManager = FindObjectOfType<AudioManager>();
+            audioManager.SetMusicVolume(audioManager.GetMusicVolume() - 0.1f);
         }
     }
 
