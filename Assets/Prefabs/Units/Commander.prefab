@@ -83,6 +83,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 0
+  collisionAudio: {fileID: 8300000, guid: 8153fe7278567f84aa5325252df224a4, type: 3}
   hoverForce:
     x: 0
     y: 0

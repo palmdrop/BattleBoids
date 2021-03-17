@@ -3,7 +3,10 @@ guid: 409898901d3013e47a66979ad5de660f
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - selectionIndicatorPrefab: {instanceID: 0}
+  - healthBarPrefab: {instanceID: 0}
+  - collisionAudio: {fileID: 8300000, guid: 8153fe7278567f84aa5325252df224a4, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
