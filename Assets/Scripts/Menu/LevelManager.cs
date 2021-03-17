@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class LevelManager : MonoBehaviour
 {
+    [SerializeField] private MenuManager menuManager;
     [SerializeField] private GameObject dropdown;
 
     private Dropdown _dd;
@@ -18,7 +19,7 @@ public class LevelManager : MonoBehaviour
     // NOTE This must hold: name == scene name == sprite name
     // Scene name is the name of the scene in /Assets/Scenes/
     // Sprite name is the name of the sprite to show in the campaign menu
-    // Put the sprite in /Assests/Resources/Sprite/LevelSprites/
+    // Put the sprite in /Assests/Resources/Sprite/SceneSprites/
     public struct Level {
         public string name;
         public string description;
@@ -48,13 +49,6 @@ public class LevelManager : MonoBehaviour
         );
     }
 
-    // Get the sprite that corresponds to the level name
-    private Sprite GetLevelSprite(string levelName) {
-        StringBuilder path = new StringBuilder("Sprites/LevelSprites/");
-        path.Append(levelName);
-        return Resources.Load<Sprite>(path.ToString());
-    }
-
     // Init Dropdown with levels
     private void InitDropdownOptions() {
         _dd.ClearOptions();
@@ -71,12 +65,12 @@ public class LevelManager : MonoBehaviour
     public void UpdateLevelHolder() {
         Level selected = _levels[_dd.value];
         _name.text = selected.name;
-        _image.sprite = GetLevelSprite(selected.name);
+        _image.sprite = menuManager.GetSceneSprite(selected.name);
         _description.text = selected.description;
     }
 
     // Start the selected level
     public void Play() {
-        SceneManager.LoadScene(_levels[_dd.value].name);
+        menuManager.Play(_name.text);
     }
 }
