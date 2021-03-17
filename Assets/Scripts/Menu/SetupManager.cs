@@ -6,8 +6,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class SetupManager : MenuManager
+public class SetupManager : MonoBehaviour
 {
+    [SerializeField] private MenuManager menuManager;
     [SerializeField] private GameObject mapDropdown;
     [SerializeField] private GameObject mapName;
     [SerializeField] private GameObject mapImage;
@@ -25,7 +26,7 @@ public class SetupManager : MenuManager
     // NOTE This must hold: name == scene name == sprite name
     // Scene name is the name of the scene in /Assets/Scenes/
     // Sprite name is the name of the sprite to show in the multiplayer menu
-    // Put the sprite in /Assests/Resources/Sprite/MapSprites/
+    // Put the sprite in /Assests/Resources/Sprite/SceneSprites/
     public struct Map {
         public string name;
         public int numberOfPlayers;
@@ -78,13 +79,6 @@ public class SetupManager : MenuManager
         );
     }
 
-    // Get the sprite that corresponds to the map
-    private Sprite GetMapSprite(string map) {
-        StringBuilder path = new StringBuilder("Sprites/MapSprites/");
-        path.Append(map);
-        return Resources.Load<Sprite>(path.ToString());
-    }
-
     // Init map dropdown with maps
     private void InitDropdownOptions() {
         Dropdown dd = mapDropdown.GetComponent<Dropdown>();
@@ -112,7 +106,7 @@ public class SetupManager : MenuManager
         // Map holder, set name and sprite
         Map selected = _maps[mapDropdown.GetComponent<Dropdown>().value];
         mapName.GetComponent<Text>().text = selected.name;
-        mapImage.GetComponent<Image>().sprite = GetMapSprite(selected.name);
+        mapImage.GetComponent<Image>().sprite = menuManager.GetSceneSprite(selected.name);
 
         // Player holder, set content height and create player containers
         RectTransform pcrt = playerContainerPrefab.transform.GetComponent<RectTransform>();
@@ -242,8 +236,6 @@ public class SetupManager : MenuManager
     // Start a match with the selected options
     public void Play() {
         SaveGameSettings();
-        LoadingScreen();
-        IEnumerator loadSceneAsync = LoadSceneAsync(PlayerPrefs.GetString("Map"));
-        StartCoroutine(loadSceneAsync);
+        menuManager.Play(PlayerPrefs.GetString("Map"));
     }
 }
