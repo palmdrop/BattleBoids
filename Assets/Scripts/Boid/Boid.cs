@@ -25,6 +25,7 @@ public abstract class Boid : Selectable
     private bool _hasMaterial = false;
     // Cache shader property to avoid expensive shader uniform lookups
     private static readonly int Color = Shader.PropertyToID("_Color");
+    [SerializeField] private AudioClip collisionAudio;
     
     private Map.Map _map;
     private bool _hasMap = false;
@@ -210,7 +211,7 @@ public abstract class Boid : Selectable
         if (/*collision.collider.gameObject.layer == LayerMask.NameToLayer("Wall")
             || */collision.collider.gameObject.layer == LayerMask.NameToLayer("Obstacle"))
         {
-            FindObjectOfType<AudioManager>().Play("Collision");
+            FindObjectOfType<AudioManager>().PlayAtPoint(collisionAudio, GetPos(), 0.5f);
         }
     }
 

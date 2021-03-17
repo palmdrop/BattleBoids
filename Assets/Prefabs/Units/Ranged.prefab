@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: -4793918559614142682}
   - component: {fileID: 6287965654600401138}
   - component: {fileID: 664865815484081745}
+  - component: {fileID: -6181522758910804146}
   m_Layer: 8
   m_Name: Ranged
   m_TagString: Boid
@@ -83,6 +84,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 0
+  collisionAudio: {fileID: 8300000, guid: 8153fe7278567f84aa5325252df224a4, type: 3}
   hoverForce:
     x: 0
     y: 0
