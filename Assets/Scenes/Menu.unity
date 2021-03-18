@@ -11574,6 +11574,50 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5809308604143893669, guid: 3aca557830f4d5a44ba646b37aa494c3, type: 3}
+      propertyPath: musicTracks.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5809308604143893669, guid: 3aca557830f4d5a44ba646b37aa494c3, type: 3}
+      propertyPath: musicTracks.Array.data[0].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: f97d3f2cb3ddf5343844d97eb0b929dd, type: 3}
+    - target: {fileID: 5809308604143893669, guid: 3aca557830f4d5a44ba646b37aa494c3, type: 3}
+      propertyPath: musicTracks.Array.data[0].loop
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5809308604143893669, guid: 3aca557830f4d5a44ba646b37aa494c3, type: 3}
+      propertyPath: musicTracks.Array.data[0].name
+      value: MenuMusic
+      objectReference: {fileID: 0}
+    - target: {fileID: 5809308604143893669, guid: 3aca557830f4d5a44ba646b37aa494c3, type: 3}
+      propertyPath: musicTracks.Array.data[1].clip
+      value: 
+      objectReference: {fileID: 8300000, guid: dae412bed02684f48b591aef41db69da, type: 3}
+    - target: {fileID: 5809308604143893669, guid: 3aca557830f4d5a44ba646b37aa494c3, type: 3}
+      propertyPath: musicTracks.Array.data[1].loop
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5809308604143893669, guid: 3aca557830f4d5a44ba646b37aa494c3, type: 3}
+      propertyPath: musicTracks.Array.data[1].name
+      value: BattleMusic
+      objectReference: {fileID: 0}
+    - target: {fileID: 5809308604143893669, guid: 3aca557830f4d5a44ba646b37aa494c3, type: 3}
+      propertyPath: musicTracks.Array.data[0].pitch
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5809308604143893669, guid: 3aca557830f4d5a44ba646b37aa494c3, type: 3}
+      propertyPath: musicTracks.Array.data[1].pitch
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5809308604143893669, guid: 3aca557830f4d5a44ba646b37aa494c3, type: 3}
+      propertyPath: musicTracks.Array.data[0].volume
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5809308604143893669, guid: 3aca557830f4d5a44ba646b37aa494c3, type: 3}
+      propertyPath: musicTracks.Array.data[1].volume
+      value: 0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 5809308604143893670, guid: 3aca557830f4d5a44ba646b37aa494c3, type: 3}
       propertyPath: m_Name
       value: AudioManager
