@@ -7,7 +7,7 @@ using UnityEngine.Audio;
 // A class for managing playing sounds
 public class AudioManager : MonoBehaviour
 {
-    // The sounds that can be played from this manager
+    // The music tracks that can be played from this manager
     public Sound[] musicTracks;
     private float _masterVolume = 1f;
     private float _savedMasterVolume = 1f;
@@ -28,28 +28,29 @@ public class AudioManager : MonoBehaviour
         }
     }
 
-    // Plays a sound from a given name. Name must be in a Sound object of the sounds array
-    // Call this method from an event when you want to play a sound
+    // Plays a music track from a given name. Name must be in a Sound object of the musicTracks array
     public void PlayMusic(string name)
     {
         Sound s = Array.Find(musicTracks, sound => sound.name == name);
         s.source.Play();
     }
 
-
+    // Stops the music with the given name. Name must be in a Sound object of the musicTracks array
     public void StopMusic(string name)
     {
         Sound s = Array.Find(musicTracks, sound => sound.name == name);
         s.source.Stop();
     }
 
-
+    // Plays a sound effect in 3D space. Volume is affected by master volume and sound effects volume.
+    // Sound effects cannot change their volume while playing. The volume is determined
+    // by the volume values when this method is called
     public void PlaySoundEffectAtPoint(AudioClip clip, Vector3 point, float volume)
     {
         AudioSource.PlayClipAtPoint(clip, point, _masterVolume * _effectsVolume * volume);
     }
 
-
+    // Sets the master volume of the game. Affects music and sound effects
     public void SetMasterVolume(float volume)
     {
         // Make sure the volume is between 0 and 1
@@ -69,6 +70,9 @@ public class AudioManager : MonoBehaviour
         return _masterVolume;
     }
 
+    // Sets the volume of sound effects. Does not affect music volume.
+    // Does not affect sound effects that are already playing, only ones
+    // that will be played
     public void SetSoundEffectsVolume(float volume)
     {
         _effectsVolume = Math.Min(Math.Max(0f, volume), 1f);
@@ -79,6 +83,7 @@ public class AudioManager : MonoBehaviour
         return _effectsVolume;
     }
 
+    // Sets the volume of music. Does not affect sound effect volume
     public void SetMusicVolume(float volume)
     {
         _musicVolume = Math.Min(Math.Max(0f, volume), 1f);
