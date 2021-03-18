@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 9040877289624857863}
   - component: {fileID: 7692225977327353103}
   - component: {fileID: 4532181408625897406}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Commander
-  m_TagString: Untagged
+  m_TagString: Boid
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -79,7 +79,7 @@ MonoBehaviour:
   healthBarPrefab: {fileID: 7905063384867870836, guid: ebcc6bc324f8b80879127b201ed2e8f5, type: 3}
   collisionMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1536
   groundMask:
     serializedVersion: 2
     m_Bits: 0
@@ -100,7 +100,7 @@ GameObject:
   - component: {fileID: 8092031429805279110}
   - component: {fileID: 6118706919720991799}
   - component: {fileID: 7964874629160018554}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -179,7 +179,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3985949437073361251}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: boid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
