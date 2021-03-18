@@ -69,6 +69,7 @@ public class Melee : Boid {
 
         _laserRenderer = laser.GetComponent<LineRenderer>();
         laser.SetActive(false);
+        SetLaserColor();
     }
 
     protected override void Act()
@@ -93,8 +94,13 @@ public class Melee : Boid {
         }
     }
 
+    private void SetLaserColor() {
+        Color start = new Color(owner.color.r, owner.color.g, owner.color.b, 0.5f);
+        Color end = new Color(owner.color.r, owner.color.g, owner.color.b, 0f);
+        _laserRenderer.SetColors(start, end);
+    }
+
     private void SetLaser(Vector3 fromPos, Vector3 toPos) {
-        _laserRenderer.startColor = owner.color;
         Vector3[] positions = new Vector3[] {fromPos, toPos};
         _laserRenderer.SetPositions(positions);
     }
