@@ -52,12 +52,9 @@ public class RangedProjectile : MonoBehaviour
             particleObject.GetComponent<ParticleSystem>().startColor = _owner.color;
         }
         TrailRenderer tr = gameObject.GetComponent<TrailRenderer>();
-        tr.startColor = new Color(
-            _owner.color.r,
-            _owner.color.g,
-            _owner.color.b,
-            0.1f
-        );
+        Color trColor = new Color(_owner.color.r, _owner.color.g, _owner.color.b, 0.1f);
+        tr.startColor = trColor;
+        tr.endColor = trColor;
     }
 
     public void SetOwner(Player owner) {

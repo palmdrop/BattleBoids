@@ -202,7 +202,7 @@ MonoBehaviour:
     y: 0
     z: 0
   lockLaser: {fileID: 4879893858670308561}
-  laserDoneWidth: 0.05
+  laserDoneWidth: 0.02
   hitAnimationPrefab: {fileID: 4196262253894622696, guid: 27b0d01362b09801e9a78f89bab7cb75, type: 3}
   aimLockTime: 3
   laserDrawTime: 0.01

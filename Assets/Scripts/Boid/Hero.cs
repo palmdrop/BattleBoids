@@ -80,6 +80,7 @@ public class Hero : Boid {
 
         _lockLaserRenderer = lockLaser.GetComponent<LineRenderer>();
         lockLaser.SetActive(false);
+        SetLaserColor();
     }
 
     protected override void Act() {
@@ -139,10 +140,15 @@ public class Hero : Boid {
         }
     }
 
+    private void SetLaserColor() {
+        Color start = new Color(owner.color.r, owner.color.g, owner.color.b, 0.25f);
+        Color end = new Color(owner.color.r, owner.color.g, owner.color.b, 0f);
+        _lockLaserRenderer.SetColors(start, end);
+    }
+
     private void SetLaser(Vector3 fromPos, Vector3 toPos, float width) {
         Vector3[] positions = new Vector3[] {fromPos, toPos};
         _lockLaserRenderer.SetPositions(positions);
-        _lockLaserRenderer.startColor = owner.color;
         _lockLaserRenderer.startWidth = width;
         _lockLaserRenderer.endWidth = width;
     }
