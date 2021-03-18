@@ -14,6 +14,7 @@ public class Hero : Boid {
     [SerializeField] private float laserDrawTime;
     [SerializeField] private float damageRadius;
     [SerializeField] private float forcePower;
+    [SerializeField] private float boostTime;
 
     private LineRenderer _lockLaserRenderer;
 
@@ -32,7 +33,7 @@ public class Hero : Boid {
         maxSpeed = 4f;
         collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        timeBetweenActions = 5f;
+        timeBetweenActions = 0.1f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 2f;
@@ -89,10 +90,13 @@ public class Hero : Boid {
             IEnumerator aimAndFire = AimAndFire(aimedTarget, laserDrawTime);
             StartCoroutine(aimAndFire);
         }
+        if (HasFriendlyTarget()) {
+            friendlyTarget.GiveBoost(boostTime);
+        }
     }
 
     private IEnumerator AimAndFire(Boid target, float waitTime) {
-        while (true) {
+        while (!IsDead()) {
             Vector3 targetPos = target.GetPos();
             float width = laserDoneWidth
                         - laserDoneWidth

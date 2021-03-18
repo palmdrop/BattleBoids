@@ -41,10 +41,14 @@ public abstract class Boid : Selectable
     
     protected Boid target;
     private bool _hasTarget = false;
+    protected Boid friendlyTarget;
+    private bool _hasFriendlyTarget = false;
+    protected float boostUntil;
     
     protected int health;
     protected int maxHealth;
     protected int damage;
+    protected int boostedDamage;
     protected float maxSpeed;
     protected float collisionAvoidanceDistance;
     protected float avoidCollisionWeight;
@@ -98,6 +102,9 @@ public abstract class Boid : Selectable
         public float targetHeight;
         public float hoverKi;
         public float hoverKp;
+
+        // Only used by scarecrow
+        public float fearMultiplier;
     }
 
     // Struct for holding relevant information about the boid
@@ -121,6 +128,8 @@ public abstract class Boid : Selectable
         public float collisionAvoidanceDistance;
         public uint collisionMask;
         public uint groundMask;
+
+        public bool isBoosted;
 
         public bool Equals(BoidInfo other)
         {
@@ -160,8 +169,9 @@ public abstract class Boid : Selectable
 
     public void FixedUpdate()
     {
-        if(!_dead)
-            _rigidbody.AddForce(hoverForce, ForceMode.Acceleration);
+        if(_dead)
+            return;
+        _rigidbody.AddForce(hoverForce, ForceMode.Acceleration);
 
         // Wait until next action is ready
         if ((Time.time - _previousActionTime) >= timeBetweenActions)
@@ -229,9 +239,19 @@ public abstract class Boid : Selectable
         _hasTarget = target != null;
     }
 
+    public void SetFriendlyTarget(Boid target) {
+        this.friendlyTarget = target;
+        _hasFriendlyTarget = friendlyTarget != null;
+    }
+
     public bool HasTarget()
     {
         return _hasTarget;
+    }
+
+    public bool HasFriendlyTarget()
+    {
+        return _hasFriendlyTarget;
     }
 
     public void SetMorale(float morale) {
@@ -269,6 +289,7 @@ public abstract class Boid : Selectable
         info.right = transform.right;
         info.collisionMask = (uint)this.collisionMask.value;
         info.groundMask = (uint)this.groundMask.value;
+        info.isBoosted = IsBoosted();
         return info;
     }
 
@@ -306,11 +327,22 @@ public abstract class Boid : Selectable
         health = math.min(health + healthReceived, maxHealth);
     }
 
+    public void GiveBoost(float time)
+    {
+        boostUntil =  Time.time + time;
+    }
+
+    public bool IsBoosted()
+    {
+        return boostUntil > Time.time;
+    }
+
     public void Die()
     {
         this._dead = true;
         SetTarget(null);
         Destroy(GetComponent<ParticleSystem>());
+        Destroy(GetComponentInChildren<LineRenderer>());
     }
 
     public bool IsDead() {

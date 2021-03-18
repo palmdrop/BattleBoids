@@ -60,19 +60,15 @@ public class Scarecrow : Boid {
 
             hoverKi = 2f,
             hoverKp = 10f,
-            targetHeight = 2f
+            targetHeight = 2f,
+
+            fearMultiplier = 10f
         };
 
         SetColor();
     }
 
     protected override void Act() {
-        if (HasTarget()) {
-            List<Boid> enemies = FindEnemiesInSphere(GetPos(), classInfo.attackDistRange, LayerMask.GetMask("Units"));
-            foreach (Boid enemy in enemies) {
-                enemy.TakeDamage(damage);
-            }
-        }
     }
 
     private void SetColor() {

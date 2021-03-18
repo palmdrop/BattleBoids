@@ -92,7 +92,7 @@ public class BoidManager : MonoBehaviour
             randomFloats[i] = (float)_random.NextDouble();
         }
         NativeArray<int> targetIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
-        NativeArray<float> morale = new NativeArray<float>(_boids.Count, Allocator.TempJob);
+        NativeArray<int> friendlyTargetIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
 
         BoidStructJob boidJob = new BoidStructJob
         {
@@ -101,7 +101,7 @@ public class BoidManager : MonoBehaviour
             boids = boidInfos,
             forces = forces,
             targetIndices = targetIndices,
-            morale = morale,
+            friendlyTargetIndices = friendlyTargetIndices,
             grid = _grid,
             cw = _bpw.PhysicsWorld.CollisionWorld
         };
@@ -121,7 +121,7 @@ public class BoidManager : MonoBehaviour
         {
             _boids[i].UpdateBoid(forces[i]);
             _boids[i].SetTarget(targetIndices[i] != -1 ? _boids[targetIndices[i]] : null);
-            _boids[i].SetMorale(morale[i]);
+            _boids[i].SetFriendlyTarget(friendlyTargetIndices[i] != -1 ? _boids[friendlyTargetIndices[i]] : null);
         }
 
         // Dispose of all data
@@ -130,8 +130,8 @@ public class BoidManager : MonoBehaviour
         forces.Dispose();
         flockInfos.Dispose();
         targetIndices.Dispose();
+        friendlyTargetIndices.Dispose();
         _grid.Dispose();
-        morale.Dispose();
     }
 
     // This job calculates information specific for the entire flock, such as 
@@ -192,7 +192,7 @@ public class BoidManager : MonoBehaviour
         [ReadOnly] public NativeArray<Boid.BoidInfo> boids;
         [WriteOnly] public NativeArray<float3> forces;
         [WriteOnly] public NativeArray<int> targetIndices;
-        [WriteOnly] public NativeArray<float> morale;
+        [WriteOnly] public NativeArray<int> friendlyTargetIndices;
         [ReadOnly] public BoidGrid grid;
         [ReadOnly] public Unity.Physics.CollisionWorld cw;
 
@@ -209,17 +209,16 @@ public class BoidManager : MonoBehaviour
             NativeArray<float> distances = CalculateDistances(boid, neighbours);
 
             int targetBoidIndex = -1;
+            int friendlyTargetBoidIndex = -1;
             float targetViewDistance = 0.0f;
-            if (boid.type == Boid.Type.Healer) 
+            float friendlyTargetViewDistance = 0.0f;
+            if (boid.type == Boid.Type.Healer || boid.type == Boid.Type.Hero)
             {
-                targetBoidIndex = FindBoidToHealIndex(boid, neighbours, distances);
-                targetViewDistance = boid.classInfo.viewRadius;
+                friendlyTargetBoidIndex = FindFriendlyTargetIndex(boid, neighbours, distances);
+                friendlyTargetViewDistance = boid.classInfo.viewRadius;
             }
-            else
-            { 
-                targetBoidIndex = FindEnemyTargetIndex(boid, neighbours, distances);
-                targetViewDistance = boid.classInfo.attackDistRange;
-            }
+            targetBoidIndex = FindEnemyTargetIndex(boid, neighbours, distances);
+            targetViewDistance = boid.classInfo.attackDistRange;
             
             // Calculate the confidence of the current boid
             float confidence = CalculateConfidence(boid, neighbours);
@@ -262,8 +261,7 @@ public class BoidManager : MonoBehaviour
 
             // Update attack info
             targetIndices[index] = targetBoidIndex;
-
-            morale[index] = CalculateMorale(boid, neighbours, distances);
+            friendlyTargetIndices[index] = friendlyTargetBoidIndex;
             
             neighbours.Dispose();
             distances.Dispose();
@@ -348,14 +346,26 @@ public class BoidManager : MonoBehaviour
                 }
             }
 
-            // If there's no enemies, set confidence to same as ally counter
+            // We need to handle the case of there being no neighbouring enemies separately, to avoid
+            // dividing by zero, and because we might want to set the confidence differently in this case,
+            // to avoid stalemate situations.
             if (enemyCounter == 0)
             {
+                // If the boid is alone in its flock, it has nothing to lose and will be confident anyway
+                if(flocks[boid.flockId - 1].boidCount == 1)
+                {
+                    return 1;
+                }
+
+                // Otherwise, set the confidence level to the number of allies around the current boid
+                // This will ensure a confidence level of 0.0 for boids that are alone (and there are allies still
+                // on the field)
                 return allyCounter;
             }
             
             // Otherwise, calculate the confidence...
-            return (float)allyCounter / enemyCounter;
+            // We add one to the ally counter, otherwise the boids will not count themselves
+            return (float)(allyCounter + 1) / enemyCounter;
         }
 
        
@@ -481,6 +491,7 @@ public class BoidManager : MonoBehaviour
             // Fear force acting on the boid (a boid fears enemy boids)
             float3 avgFear = float3.zero;
             float avgFearDivider = 0.0f;
+            float fearMultiplier = 1f;
 
             for (int i = 0; i < neighbours.Length; i++)
             {
@@ -488,6 +499,12 @@ public class BoidManager : MonoBehaviour
                 
                 // No fear for friendly boids
                 if (boid.flockId == neighbour.flockId) continue;
+
+                if (neighbour.flockId != boid.flockId           // Different flock
+                        && neighbour.type == Boid.Type.Scarecrow       // Is Scarecrow
+                        && neighbour.abilityDistance > distances[i]) { // and dist < Scarecrow ability dist
+                    fearMultiplier = boid.classInfo.fearMultiplier;
+                }
                 
                 float distance = distances[i];
                 
@@ -513,7 +530,7 @@ public class BoidManager : MonoBehaviour
             // Calculate fear force
             // This force is similar to the separation force, but only acts on enemy boids
             if (avgFearDivider == 0.00) return float3.zero;
-            return (avgFear / avgFearDivider) * boid.classInfo.fearStrength;
+            return (avgFear / avgFearDivider) * boid.classInfo.fearStrength * fearMultiplier;
         }
         private int FindEnemyTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
@@ -549,7 +566,7 @@ public class BoidManager : MonoBehaviour
             return targetIndex;
         }
 
-        private int FindBoidToHealIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
+        private int FindFriendlyTargetIndex(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
         {
             int healIndex = -1;
             int lowestAllyHealth = int.MaxValue;
@@ -561,8 +578,14 @@ public class BoidManager : MonoBehaviour
                 // Enemy boids cannot be healed
                 // And do not try to heal boids with max health
                 if (boid.flockId != neighbour.flockId 
-                    || distances[i] > boid.abilityDistance
-                    || neighbour.health == neighbour.maxHealth) continue;
+                    || distances[i] > boid.abilityDistance)
+                    continue;
+                if (boid.type == Boid.Type.Healer &&
+                    neighbour.health == neighbour.maxHealth)
+                    continue;
+                if (boid.type == Boid.Type.Hero &&
+                    neighbour.isBoosted)
+                    continue;
 
                 // Store the neighbour with the lowest health
                 if (neighbour.health < lowestAllyHealth)
@@ -575,35 +598,6 @@ public class BoidManager : MonoBehaviour
             return healIndex;
         }
 
-        private float CalculateMorale(Boid.BoidInfo boid, NativeArray<int> neighbours, NativeArray<float> distances)
-        {
-            int boost = 0;
-            Boid.BoidInfo neighbour;
-
-            for (int i = 0; i < neighbours.Length; i++) {
-                neighbour = boids[neighbours[i]];
-
-                if (neighbour.flockId == boid.flockId           // Same flock
-                 && neighbour.type == Boid.Type.Hero            // Is Hero
-                 && neighbour.abilityDistance > distances[i]) { // and dist < Hero ability dist
-                    boost++;
-                } else if (neighbour.flockId != boid.flockId           // Different flock
-                        && neighbour.type == Boid.Type.Scarecrow       // Is Scarecrow
-                        && neighbour.abilityDistance > distances[i]) { // and dist < Scarecrow ability dist
-                    boost--;
-                }
-            }
-
-            // NOTE
-            // moraleBoostStrength is arbitrary and can be changed for balancing reasons
-            // if no. Heros == no. Scarecrows, the effect is canceled and modifier is 1
-            float moraleModifyStrength = 10f;
-            float modifier = math.pow(moraleModifyStrength, boost);
-            float morale = boid.moraleDefault * modifier;
-
-            // Prevent negative morale
-            return math.max(morale, 0.0f);
-        }
         private float3 ApproachForce(Boid.BoidInfo boid, int targetBoidIndex, float targetDistRange)
         {
             // Calculate attack force

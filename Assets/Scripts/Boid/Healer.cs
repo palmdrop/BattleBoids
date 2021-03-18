@@ -90,17 +90,17 @@ public class Healer : Boid
     {
         // Do not heal if there is no target or if the target has max health
         // Do not heal if target is out of range
-        if (!HasTarget()
-            || target.GetHealth() == target.GetMaxHealth()
-            || math.distancesq(this.GetPos(), target.GetPos()) > _healRadius * _healRadius
+        if (!HasFriendlyTarget()
+            || friendlyTarget.GetHealth() == friendlyTarget.GetMaxHealth()
+            || math.distancesq(this.GetPos(), friendlyTarget.GetPos()) > _healRadius * _healRadius
             )
         {
             healBeam.SetActive(false);
             return;
         }
         
-        target.ReceiveHealth(_healAmount);
-        AnimateHeal(this.GetPos(), target.GetPos());
+        friendlyTarget.ReceiveHealth(_healAmount);
+        AnimateHeal(this.GetPos(), friendlyTarget.GetPos());
         healBeam.SetActive(true);
         if (Time.time - _previousAudioTime >= audioCooldown)
         {
