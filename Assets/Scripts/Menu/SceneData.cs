@@ -81,7 +81,7 @@ public class SceneData : MonoBehaviour
             new Level() { // NOTE Placeholder level TODO replace when real campaign level exists
                 description = "There are no campaign levels yet. This is just a placeholder.",
                 gameSettings = new GameSettings() {
-                    mapName = "LevelOne",
+                    mapName = "Dusk",
                     playerSettingsList = new List<PlayerSettings>(
                         new PlayerSettings[] {
                             new PlayerSettings() {
@@ -116,7 +116,7 @@ public class SceneData : MonoBehaviour
     public static readonly IList<Map> multiplayerMaps = new ReadOnlyCollection<Map>(
         new Map[] {
             new Map() {
-                name = "LevelOne",
+                name = "Dusk",
                 numberOfPlayers = 2
             }
         }

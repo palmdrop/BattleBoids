@@ -23,7 +23,7 @@ public class MenuManager : MonoBehaviour
         _optionsMenu = menus[3];
         _creditsMenu = menus[4];
 
-        FindObjectOfType<AudioManager>().Play("MenuMusic");
+        FindObjectOfType<AudioManager>().PlayMusic("MenuMusic");
     }
 
     public void MainMenu() {
