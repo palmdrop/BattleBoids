@@ -104,7 +104,7 @@ public class Healer : Boid
         healBeam.SetActive(true);
         if (Time.time - _previousAudioTime >= audioCooldown)
         {
-            FindObjectOfType<AudioManager>().PlayAtPoint(healingAudio, GetPos(), healingAudioVolume);
+            FindObjectOfType<AudioManager>().PlaySoundEffectAtPoint(healingAudio, GetPos(), healingAudioVolume);
             _previousAudioTime = Time.time;
         }
     }

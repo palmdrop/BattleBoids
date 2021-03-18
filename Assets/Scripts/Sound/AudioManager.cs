@@ -8,7 +8,7 @@ using UnityEngine.Audio;
 public class AudioManager : MonoBehaviour
 {
     // The sounds that can be played from this manager
-    public Sound[] sounds;
+    public Sound[] musicTracks;
     private float _masterVolume = 1f;
     private float _savedMasterVolume = 1f;
     private float _effectsVolume = 1f;
@@ -18,7 +18,7 @@ public class AudioManager : MonoBehaviour
     
     void Awake()
     {
-        foreach (Sound s in sounds)
+        foreach (Sound s in musicTracks)
         {
             s.source = gameObject.AddComponent<AudioSource>();
             s.source.clip = s.clip;
@@ -30,21 +30,21 @@ public class AudioManager : MonoBehaviour
 
     // Plays a sound from a given name. Name must be in a Sound object of the sounds array
     // Call this method from an event when you want to play a sound
-    public void Play(string name)
+    public void PlayMusic(string name)
     {
-        Sound s = Array.Find(sounds, sound => sound.name == name);
+        Sound s = Array.Find(musicTracks, sound => sound.name == name);
         s.source.Play();
     }
 
 
-    public void Stop(string name)
+    public void StopMusic(string name)
     {
-        Sound s = Array.Find(sounds, sound => sound.name == name);
+        Sound s = Array.Find(musicTracks, sound => sound.name == name);
         s.source.Stop();
     }
 
 
-    public void PlayAtPoint(AudioClip clip, Vector3 point, float volume)
+    public void PlaySoundEffectAtPoint(AudioClip clip, Vector3 point, float volume)
     {
         AudioSource.PlayClipAtPoint(clip, point, _masterVolume * _effectsVolume * volume);
     }
@@ -56,7 +56,7 @@ public class AudioManager : MonoBehaviour
         _masterVolume = Math.Min(Math.Max(0f, volume), 1f);
         
         // Update the sounds (music) that are playing
-        foreach (Sound s in sounds)
+        foreach (Sound s in musicTracks)
         {
             s.source.volume = s.volume * _masterVolume * _musicVolume;
         }
@@ -69,12 +69,12 @@ public class AudioManager : MonoBehaviour
         return _masterVolume;
     }
 
-    public void SetEffectsVolume(float volume)
+    public void SetSoundEffectsVolume(float volume)
     {
         _effectsVolume = Math.Min(Math.Max(0f, volume), 1f);
     }
 
-    public float GetEffectsVolume()
+    public float GetSoundEffectsVolume()
     {
         return _effectsVolume;
     }
@@ -82,7 +82,7 @@ public class AudioManager : MonoBehaviour
     public void SetMusicVolume(float volume)
     {
         _musicVolume = Math.Min(Math.Max(0f, volume), 1f);
-        foreach (Sound s in sounds)
+        foreach (Sound s in musicTracks)
         {
             s.source.volume = s.volume * _masterVolume * _musicVolume;
         }

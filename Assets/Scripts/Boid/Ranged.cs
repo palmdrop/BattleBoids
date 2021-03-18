@@ -108,7 +108,7 @@ public class Ranged : Boid {
             projectile.GetComponent<RangedProjectile>().SetDamage(IsBoosted() ? boostedDamage : damage);
             projectile.GetComponent<Rigidbody>().AddForce(launchVector, ForceMode.VelocityChange);
 
-            FindObjectOfType<AudioManager>().PlayAtPoint(rangedFireAudio, GetPos(), rangedFireAudioVolume);
+            FindObjectOfType<AudioManager>().PlaySoundEffectAtPoint(rangedFireAudio, GetPos(), rangedFireAudioVolume);
         }
     }
 

@@ -124,12 +124,12 @@ public class GameUI : MonoBehaviour
         else if (Input.GetKeyDown("i"))
         {
             AudioManager audioManager = FindObjectOfType<AudioManager>();
-            audioManager.SetEffectsVolume(audioManager.GetEffectsVolume() + 0.1f);
+            audioManager.SetSoundEffectsVolume(audioManager.GetSoundEffectsVolume() + 0.1f);
         }
         else if (Input.GetKeyDown("k"))
         {
             AudioManager audioManager = FindObjectOfType<AudioManager>();
-            audioManager.SetEffectsVolume(audioManager.GetEffectsVolume() - 0.1f);
+            audioManager.SetSoundEffectsVolume(audioManager.GetSoundEffectsVolume() - 0.1f);
         }
         else if (Input.GetKeyDown("o"))
         {

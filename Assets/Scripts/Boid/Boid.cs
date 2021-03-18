@@ -211,7 +211,7 @@ public abstract class Boid : Selectable
         if (/*collision.collider.gameObject.layer == LayerMask.NameToLayer("Wall")
             || */collision.collider.gameObject.layer == LayerMask.NameToLayer("Obstacle"))
         {
-            FindObjectOfType<AudioManager>().PlayAtPoint(collisionAudio, GetPos(), 0.5f);
+            FindObjectOfType<AudioManager>().PlaySoundEffectAtPoint(collisionAudio, GetPos(), 0.5f);
         }
     }
 
