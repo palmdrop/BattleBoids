@@ -67,16 +67,23 @@ public class SpawnArea : MonoBehaviour
                 int i = x * gridWidth + z;
                 GameObject currentEntity = holding[i];
                 // Find ground height
-                Vector3 position = new Vector3(gridCenter.x + x * unitWidth - width / 2, 1000f, gridCenter.z + z * unitWidth - width / 2);
+                Vector3 position = new Vector3(gridCenter.x + x * unitWidth - width / 2, SelectionManager.MousePositionInWorld.point.y + 3f, gridCenter.z + z * unitWidth - width / 2);
                 
+                /*
                 if (map.PointInsideBounds(position))
                 {
-                    position.y = map.HeightmapLookup(position) + map.transform.position.y + 1f;
+<<<<<<< Updated upstream
+                    position.y =  1.2f;
+=======
+                    //position.y = map.HeightmapLookup(position) + map.transform.position.y + 1f;
+                    position.y = 2f;
+>>>>>>> Stashed changes
                 }
                 else
                 {
                     position.y = 0;
                 }
+                */
                 
                 currentEntity.transform.position = position;
                 // Check if within spawn area

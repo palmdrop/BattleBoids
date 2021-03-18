@@ -3,8 +3,8 @@ using UnityEngine;
 public class CameraParent : MonoBehaviour
 {
     // Used for zooming in and out
-    private const float MINHeight = 5f;
-    private const float MAXHeight = 40f;
+    [SerializeField] private float MINHeight = 30;
+    private const float MAXHeight = 70f;
 
     // Used to limit where the camera can move
     private Rect _mapBounds;
@@ -61,6 +61,7 @@ public class CameraParent : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
+        
         _mapBounds = map.GetBounds();
 
         // If left mouse click is pressed

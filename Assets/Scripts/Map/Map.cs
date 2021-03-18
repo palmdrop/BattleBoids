@@ -43,7 +43,7 @@ namespace Map
             CalculateHeightmap();
             
             // Create wall tiles
-            //CreateWallTiles();
+            // CreateWallTiles();
         }
         
         public void CalculateBounds()
@@ -58,17 +58,18 @@ namespace Map
             // Iterate over all children and calculate max and min xz values
             for(int i = 0; i < _ground.Count; i++)
             {
-                // Get child position
-                GameObject child = _ground[i];
-                Vector3 position = child.transform.localPosition;
-                
+                // Get rendered positions of each child
+                GameObject child = _ground[i].gameObject;
+                Bounds objectBound = child.GetComponent<Renderer>().bounds;
+
+
                 // Find max and min x value
-                minX = Math.Min(minX, position.x);
-                maxX = Math.Max(maxX, position.x);
+                minX = Math.Min(minX, objectBound.min.x);
+                maxX = Math.Max(maxX, objectBound.max.x);
                 
                 // Find max and min z value
-                minZ = Math.Min(minZ, position.z);
-                maxZ = Math.Max(maxZ, position.z);
+                minZ = Math.Min(minZ, objectBound.min.z);
+                maxZ = Math.Max(maxZ, objectBound.max.z);
             }
 
             // The minimum x and y coordinates represents the upper left corner of the bounds
@@ -112,6 +113,7 @@ namespace Map
                 
                 // Calculate height and assign value to heightmap index
                 Vector3 childPosition = child.transform.localPosition;
+
                 float y = childPosition.y + child.transform.localScale.y / 2.0f;
                 
                 int index = PointToIndex(childPosition);
@@ -193,7 +195,8 @@ namespace Map
             if (index < 0 || index >= _heightmap.Length) return float.MinValue;
             
             // Otherwise, if valid index, return corresponding heightmap value
-            return _heightmap[index];
+            //return _heightmap[index];
+            return 2;
         }
         
         // Calculates if a given point is inside the map bounds

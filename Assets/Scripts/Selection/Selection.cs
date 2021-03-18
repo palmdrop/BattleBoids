@@ -32,6 +32,7 @@ public class Selection : MonoBehaviour
     {
         _selectionManager = GetComponentInParent<SelectionManager>();
         _selectionCamera = _selectionManager.GetMainCamera();
+        
         _gameUI = _selectionManager.GetGameUI();
         ResetDrawUISelectionArea();
     }

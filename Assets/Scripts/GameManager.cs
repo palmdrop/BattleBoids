@@ -18,6 +18,8 @@ public class GameManager : MonoBehaviour
     private GameState _state;
     private List<Player> _players;
 
+    [SerializeField] private Camera mainCamera;
+
 
     // Start is called before the first frame update
     void Start()
@@ -75,7 +77,7 @@ public class GameManager : MonoBehaviour
 
     public Camera GetMainCamera()
     {
-        return Camera.main;
+        return mainCamera;
     }
 
 }
