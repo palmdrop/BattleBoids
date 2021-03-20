@@ -86,7 +86,7 @@ public class Melee : Boid {
 
             if (Time.time - _previousAudioTime >= audioCooldown)
             {
-                FindObjectOfType<AudioManager>().PlaySoundEffectAtPoint(laserAudio, GetPos(), laserAudioVolume);
+                AudioManager.instance.PlaySoundEffectAtPoint(laserAudio, GetPos(), laserAudioVolume);
                 _previousAudioTime = Time.time;
             }
         } else {

@@ -11,6 +11,6 @@ public class PlayOnce : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        FindObjectOfType<AudioManager>().PlaySoundEffectAtPoint(clip, GetComponentInParent<Transform>().position, volume);
+        AudioManager.instance.PlaySoundEffectAtPoint(clip, GetComponentInParent<Transform>().position, volume);
     }
 }

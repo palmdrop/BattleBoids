@@ -31,7 +31,7 @@ public class GameManager : MonoBehaviour
         _gameUI = GetComponentInChildren<GameUI>();
         _boidManager = GetComponentInChildren<BoidManager>();
         _players = new List<Player>(GetComponentsInChildren<Player>());
-        FindObjectOfType<AudioManager>().PlayMusic("MenuMusic");
+        AudioManager.instance.PlayMusic("MenuMusic");
         ApplyPlayerSettings();
     }
 
@@ -66,8 +66,8 @@ public class GameManager : MonoBehaviour
         // Have to check this because it is called every frame when the battle is running
         if (_state != GameState.Running)
         {
-            FindObjectOfType<AudioManager>().StopMusic("MenuMusic");
-            FindObjectOfType<AudioManager>().PlayMusic("BattleMusic");
+            AudioManager.instance.StopMusic("MenuMusic");
+            AudioManager.instance.PlayMusic("BattleMusic");
         }
         _state = GameState.Running;
         _boidManager.AddPlayerBoids();
