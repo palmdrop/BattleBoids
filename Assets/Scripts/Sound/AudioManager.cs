@@ -7,6 +7,8 @@ using UnityEngine.Audio;
 // A class for managing playing sounds
 public class AudioManager : MonoBehaviour
 {
+    public static AudioManager instance;
+
     // The music tracks that can be played from this manager
     public Sound[] musicTracks;
     private float _masterVolume = 1f;
@@ -18,6 +20,8 @@ public class AudioManager : MonoBehaviour
     
     void Awake()
     {
+        instance = this;
+
         foreach (Sound s in musicTracks)
         {
             s.source = gameObject.AddComponent<AudioSource>();

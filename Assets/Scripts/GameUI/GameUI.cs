@@ -117,37 +117,31 @@ public class GameUI : MonoBehaviour
         } else if (Input.GetKeyDown("y")) {
             showHealthBars = !showHealthBars;
         } else if (Input.GetKeyDown("m")) {
-            FindObjectOfType<AudioManager>().ToggleMute();
+            AudioManager.instance.ToggleMute();
         }
         else if (Input.GetKeyDown("u"))
         {
-            AudioManager audioManager = FindObjectOfType<AudioManager>();
-            audioManager.SetMasterVolume(audioManager.GetMasterVolume() + 0.1f);
+            AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() + 0.1f);
         }
         else if (Input.GetKeyDown("j"))
         {
-            AudioManager audioManager = FindObjectOfType<AudioManager>();
-            audioManager.SetMasterVolume(audioManager.GetMasterVolume() - 0.1f);
+            AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() - 0.1f);
         }
         else if (Input.GetKeyDown("i"))
         {
-            AudioManager audioManager = FindObjectOfType<AudioManager>();
-            audioManager.SetSoundEffectsVolume(audioManager.GetSoundEffectsVolume() + 0.1f);
+            AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() + 0.1f);
         }
         else if (Input.GetKeyDown("k"))
         {
-            AudioManager audioManager = FindObjectOfType<AudioManager>();
-            audioManager.SetSoundEffectsVolume(audioManager.GetSoundEffectsVolume() - 0.1f);
+            AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() - 0.1f);
         }
         else if (Input.GetKeyDown("o"))
         {
-            AudioManager audioManager = FindObjectOfType<AudioManager>();
-            audioManager.SetMusicVolume(audioManager.GetMusicVolume() + 0.1f);
+            AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() + 0.1f);
         }
         else if (Input.GetKeyDown("l"))
         {
-            AudioManager audioManager = FindObjectOfType<AudioManager>();
-            audioManager.SetMusicVolume(audioManager.GetMusicVolume() - 0.1f);
+            AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() - 0.1f);
         }
     }
 
