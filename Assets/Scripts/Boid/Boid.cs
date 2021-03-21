@@ -13,11 +13,14 @@ public abstract class Boid : Selectable
         Healer,
         Commander
     }
-    
+
     [SerializeField] private GameObject healthBarPrefab;
     [SerializeField] protected LayerMask collisionMask;
     [SerializeField] protected LayerMask groundMask;
-    
+    [SerializeField] protected Material baseMaterial;
+
+    public static List<Material> materials = new List<Material>();
+
     private Rigidbody _rigidbody;
     private Collider _collider;
     private Material _material;
@@ -63,6 +66,7 @@ public abstract class Boid : Selectable
     public float3 hoverForce;
 
     public struct ClassInfo {
+        public Type type;
         // The field of view of the boid
         public float viewRadius;
         public float separationRadius;
@@ -80,6 +84,12 @@ public abstract class Boid : Selectable
         public float cohesionStrength, cohesionExponent;
         public float separationStrength, separationExponent;
         public float avoidCollisionWeight;
+
+        public float collisionAvoidanceDistance;
+        public uint collisionMask;
+        public uint groundMask;
+        public float abilityDistance;
+        public float maxHealth;
 
         // How much this unit affects friendly units
         public float gravity;
@@ -117,18 +127,12 @@ public abstract class Boid : Selectable
         public float3 pos;
         public float3 forward;
         public float3 right;
-        public float3 localScale;
-        public int health, maxHealth;
+        public int health;
         
-        public ClassInfo classInfo;
         public int flockId;
         public float emotionalState;
         public float morale;
         public float moraleDefault;
-        public float abilityDistance;
-        public float collisionAvoidanceDistance;
-        public uint collisionMask;
-        public uint groundMask;
 
         public bool isBoosted;
 
@@ -278,18 +282,11 @@ public abstract class Boid : Selectable
         info.forward = transform.forward;
         info.vel = GetVel();
         info.health = health;
-        info.maxHealth = maxHealth;
-        info.classInfo = classInfo;
         info.flockId = owner.id;
         info.emotionalState = emotionalState;
         info.morale = morale;
         info.moraleDefault = moraleDefault;
-        info.abilityDistance = abilityDistance;
-        info.collisionAvoidanceDistance = collisionAvoidanceDistance;
-        info.localScale = _localScale;
         info.right = transform.right;
-        info.collisionMask = (uint)this.collisionMask.value;
-        info.groundMask = (uint)this.groundMask.value;
         info.isBoosted = IsBoosted();
         return info;
     }
@@ -312,6 +309,11 @@ public abstract class Boid : Selectable
     public int GetDamage()
     {
         return damage;
+    }
+
+    public Type GetType()
+    {
+        return type;
     }
 
     public void TakeDamage(int damageTaken)
@@ -357,7 +359,6 @@ public abstract class Boid : Selectable
 
     public void SetColor(Color color)
     {
-        // Cache material in order to avoid having to do multiple expensive lookups
         if(!_hasMaterial) {
             _material = transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material;
             _hasMaterial = true;
