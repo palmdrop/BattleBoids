@@ -27,7 +27,7 @@ public abstract class Boid : Selectable
     private Vector3 _localScale;
     private bool _hasMaterial = false;
     // Cache shader property to avoid expensive shader uniform lookups
-    private static readonly int Color = Shader.PropertyToID("_Color");
+    //private static readonly int Color = Shader.PropertyToID("_Color");
     [SerializeField] private AudioClip collisionAudio;
     
     private Map.Map _map;
@@ -163,7 +163,7 @@ public abstract class Boid : Selectable
             this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
         _localScale = transform.GetChild(0).transform.localScale;
-        _healthBar = Instantiate(healthBarPrefab, transform);
+        //_healthBar = Instantiate(healthBarPrefab, transform);
     }
 
     public void StartBoid()
@@ -359,12 +359,20 @@ public abstract class Boid : Selectable
 
     public void SetColor(Color color)
     {
-        if(!_hasMaterial) {
-            _material = transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material;
-            _hasMaterial = true;
+        foreach (Material material in materials)
+        {
+            if (color.Equals(material.color))
+            {
+                transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material = material;
+                return;
+            }
         }
-        _material.SetColor(Color, color);
+        Material tmp = new Material(baseMaterial);
+        tmp.color = color;
+        materials.Add(tmp);
+        transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material = tmp;
     }
+
 
     public Rigidbody GetRigidbody()
     {
