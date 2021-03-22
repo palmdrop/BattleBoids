@@ -164,7 +164,7 @@ public class Hero : Boid {
         float dist = vector.magnitude;
         float angle = math.acos(math.dot(vector, transform.forward) / dist);
 
-        if (dist > classInfo.attackDistRange || angle > classInfo.attackAngleRange) {
+        if (dist > ClassInfos.infos[(int) type].attackDistRange || angle > ClassInfos.infos[(int) type].attackAngleRange) {
             return true;
         }
         return false;
