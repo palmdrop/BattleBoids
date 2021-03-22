@@ -66,7 +66,7 @@ public class Hero : Boid {
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
 
-            aggressionStrength = 10.4f,
+            aggressionStrength = 4.4f,
             searchStrength = 10.4f,
 
             avoidCollisionWeight = 100f,

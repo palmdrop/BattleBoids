@@ -54,7 +54,7 @@ public class Melee : Boid {
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
             
-            aggressionStrength = 10.4f,
+            aggressionStrength = 3.4f,
 
             avoidCollisionWeight = 100f,
 

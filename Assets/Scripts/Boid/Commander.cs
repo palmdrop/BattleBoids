@@ -53,7 +53,7 @@ public class Commander : Boid
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
 
-            aggressionStrength = 10.4f,
+            aggressionStrength = 5.4f,
             searchStrength = 10.4f,
 
             avoidCollisionWeight = 100f,
