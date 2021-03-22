@@ -43,8 +43,7 @@ public class SpawnArea : MonoBehaviour
     {
         while (holding.Count < gridWidth * gridWidth) {
             GameObject currentEntity;
-            currentEntity = Instantiate(entityToSpawn, new Vector3(0, 0, 0), Quaternion.identity);
-            currentEntity.GetComponent<Boid>().SetOwner(_owner);
+            currentEntity = Instantiate(entityToSpawn, new Vector3(0, 0, 0), Quaternion.identity, _owner.gameObject.transform);
             currentEntity.name = "Player_" + _owner.id + "_Unit_" + instanceNumber++;
             holding.Add(currentEntity);
         }
