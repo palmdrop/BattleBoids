@@ -270,7 +270,10 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: 'TODO
 
-    Credit everyone who have contributed to the game'
+    Credit everyone who have contributed to the game
+
+    Music:
+    bensound.com'
 --- !u!222 &13469985
 CanvasRenderer:
   m_ObjectHideFlags: 0
