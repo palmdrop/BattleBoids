@@ -15,6 +15,7 @@ public abstract class Boid : Selectable
     }
 
     [SerializeField] private GameObject healthBarPrefab;
+    [SerializeField] private GameObject deathAnimationPrefab;
     [SerializeField] protected LayerMask collisionMask;
     [SerializeField] protected LayerMask groundMask;
     [SerializeField] protected Material baseMaterial;
@@ -345,6 +346,16 @@ public abstract class Boid : Selectable
         SetTarget(null);
         Destroy(GetComponent<ParticleSystem>());
         Destroy(GetComponentInChildren<LineRenderer>());
+        AnimateDeath();
+    }
+
+    private void AnimateDeath() {
+        GameObject death = Instantiate(deathAnimationPrefab, transform.position, transform.rotation);
+        ParticleSystem.MainModule psMain = death.GetComponent<ParticleSystem>().main;
+        psMain.startColor = owner.color;
+        death.GetComponent<Rigidbody>().velocity = gameObject.GetComponent<Rigidbody>().velocity;
+        Destroy(death, psMain.duration);
+        Destroy(gameObject);
     }
 
     public bool IsDead() {

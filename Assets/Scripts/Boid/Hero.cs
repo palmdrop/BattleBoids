@@ -104,7 +104,14 @@ public class Hero : Boid {
 
     private IEnumerator AimAndFire(Boid target, float waitTime) {
         while (!IsDead()) {
-            Vector3 targetPos = target.GetPos();
+            Vector3 targetPos;
+            if (target != null) { // Target has not been destroyed
+                targetPos = target.GetPos();
+            } else {
+                _aiming = false;
+                lockLaser.SetActive(false);
+                yield break;
+            }
             float width = laserDoneWidth
                         - laserDoneWidth
                         * (_aimLockCompleteTime - Time.time) / aimLockTime;
@@ -116,7 +123,7 @@ public class Hero : Boid {
                 lockLaser.SetActive(false);
                 Fire(targetPos);
                 yield break;
-            } else if (NotReachable(target.GetPos())) { // Target moved away, reset
+            } else if (NotReachable(targetPos)) { // Target moved away, reset
                 _aiming = false;
                 lockLaser.SetActive(false);
                 yield break;
