@@ -111,6 +111,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selectionIndicatorPrefab: {fileID: 1473401980719432369, guid: d1755760120f61e43879ab4b335b27b3, type: 3}
   healthBarPrefab: {fileID: 7905063384867870836, guid: ebcc6bc324f8b80879127b201ed2e8f5, type: 3}
+  deathAnimationPrefab: {fileID: 4367637297873276509, guid: 3ff6da34a54d691279152546b99c8c16, type: 3}
   collisionMask:
     serializedVersion: 2
     m_Bits: 1536
@@ -404,13 +405,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 26704f9013085f00fb2f4f5900315e6b, type: 3}
---- !u!1 &7626209971328156369 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7028388131045224104, guid: 26704f9013085f00fb2f4f5900315e6b, type: 3}
-  m_PrefabInstance: {fileID: 602466762722323577}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &7082012365090914427 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7643797060010912770, guid: 26704f9013085f00fb2f4f5900315e6b, type: 3}
+  m_PrefabInstance: {fileID: 602466762722323577}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7626209971328156369 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7028388131045224104, guid: 26704f9013085f00fb2f4f5900315e6b, type: 3}
   m_PrefabInstance: {fileID: 602466762722323577}
   m_PrefabAsset: {fileID: 0}
