@@ -26,22 +26,28 @@ public class Healer : Boid
         health = maxHealth = 100;
         damage = 0;
         maxSpeed = 4f;
-        collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 3.0f;
-        
+
         timeBetweenActions = 0.03f;
         _healAmount = 1;
         _healRadius = 1.0f;
-        
-        classInfo = new ClassInfo {
+
+        ClassInfos.infos[(int)type] = new ClassInfo {
+            type = this.type,
             viewRadius = 3f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2.0f,
-            
+
+            maxHealth = this.maxHealth,
+            collisionAvoidanceDistance = 3f,
+            collisionMask = (uint)this.collisionMask.value,
+            groundMask = (uint)this.groundMask.value,
+            abilityDistance = this.abilityDistance,
+
             confidenceThreshold = 2.0f,
             
             alignmentStrength = 6.0f,

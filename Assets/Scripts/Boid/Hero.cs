@@ -31,19 +31,25 @@ public class Hero : Boid {
         health = maxHealth = 200;
         damage = 100;
         maxSpeed = 4f;
-        collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
         timeBetweenActions = 0.1f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 2f;
 
-        classInfo = new ClassInfo {
+        ClassInfos.infos[(int)type] = new ClassInfo {
+            type = this.type,
             viewRadius = 3f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
-            
+
+            maxHealth = this.maxHealth,
+            collisionAvoidanceDistance = 3f,
+            collisionMask = (uint)this.collisionMask.value,
+            groundMask = (uint)this.groundMask.value,
+            abilityDistance = this.abilityDistance,
+
             confidenceThreshold = 0.5f,
 
             alignmentStrength = 5.6f,

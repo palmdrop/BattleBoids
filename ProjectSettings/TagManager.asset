@@ -9,6 +9,8 @@ TagManager:
   - GroundTile
   - Map
   - Wall
+  - HealthUI
+  - BoidModel
   layers:
   - Default
   - TransparentFX

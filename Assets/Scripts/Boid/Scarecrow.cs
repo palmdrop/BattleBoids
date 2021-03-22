@@ -16,18 +16,24 @@ public class Scarecrow : Boid {
         health = maxHealth = 100;
         damage = 1;
         maxSpeed = 3f;
-        collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
         timeBetweenActions = 1f;
         morale = moraleDefault = 1f;
         abilityDistance = 2f;
 
-        classInfo = new ClassInfo {
+        ClassInfos.infos[(int)type] = new ClassInfo {
+            type = this.type,
             viewRadius = 3f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
-            
+
+            maxHealth = this.maxHealth,
+            collisionAvoidanceDistance = 3f,
+            collisionMask = (uint)this.collisionMask.value,
+            groundMask = (uint)this.groundMask.value,
+            abilityDistance = this.abilityDistance,
+
             confidenceThreshold = 0.4f,
             
             alignmentStrength = 5.6f,

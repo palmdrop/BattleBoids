@@ -19,19 +19,25 @@ public class Melee : Boid {
         damage = 1;
         boostedDamage = 5;
         maxSpeed = 4f;
-        collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
         timeBetweenActions = 0.01f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 0;
 
-        classInfo = new ClassInfo {
+        ClassInfos.infos[(int) type] = new ClassInfo {
+            type = this.type,
             viewRadius = 3f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
-            
+
+            maxHealth = this.maxHealth,
+            collisionAvoidanceDistance = 3f,
+            collisionMask = (uint)this.collisionMask.value,
+            groundMask = (uint)this.groundMask.value,
+            abilityDistance = this.abilityDistance,
+
             confidenceThreshold = 1.0f,
             
             alignmentStrength = 5.6f,
