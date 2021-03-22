@@ -145,6 +145,8 @@ public abstract class Boid : Selectable
     // Start is called before the first frame update
     protected void Start()
     {
+        owner = GetComponentInParent<Player>();
+
         // To start off, we don't want to show that the boid is selected 
         SetSelectionIndicator(false);
         

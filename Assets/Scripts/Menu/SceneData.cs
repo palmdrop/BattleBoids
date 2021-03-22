@@ -78,10 +78,10 @@ public class SceneData : MonoBehaviour
     // List with campaign levels
     public static readonly IList<Level> campaignLevels = new ReadOnlyCollection<Level>(
         new Level[] {
-            new Level() { // NOTE Placeholder level TODO replace when real campaign level exists
-                description = "There are no campaign levels yet. This is just a placeholder.",
+            new Level() {
+                description = "Level One. Start your journey here!",
                 gameSettings = new GameSettings() {
-                    mapName = "Dusk",
+                    mapName = "Dusk1",
                     playerSettingsList = new List<PlayerSettings>(
                         new PlayerSettings[] {
                             new PlayerSettings() {
@@ -102,6 +102,37 @@ public class SceneData : MonoBehaviour
                             {"Commander", false},
                             {"Healer", false},
                             {"Hero", false},
+                            {"Melee", true},
+                            {"Ranged", true},
+                            {"Scarecrow", false}
+                        }
+                    }
+                }
+            },
+            new Level() {
+                description = "Level Two. Time to start thinking!",
+                gameSettings = new GameSettings() {
+                    mapName = "Dusk2",
+                    playerSettingsList = new List<PlayerSettings>(
+                        new PlayerSettings[] {
+                            new PlayerSettings() {
+                                id = 1,
+                                nickname = "You",
+                                color = Color.blue
+                            },
+                            new PlayerSettings() {
+                                id = 2,
+                                nickname = "The enemy",
+                                color = Color.red
+                            }
+                        }
+                    ),
+                    options = new Options {
+                        boins = 1000,
+                        units = new Dictionary<string, bool>() {
+                            {"Commander", false},
+                            {"Healer", false},
+                            {"Hero", true},
                             {"Melee", true},
                             {"Ranged", true},
                             {"Scarecrow", false}
