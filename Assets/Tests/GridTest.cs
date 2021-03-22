@@ -46,7 +46,7 @@ public class GridTest
                 if (i == j) continue;
 
                 float3 horizontalDistance = boids[i].GetInfo().pos - boids[j].GetInfo().pos;
-                if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z * horizontalDistance.z < boids[i].GetInfo().classInfo.viewRadius * boids[i].GetInfo().classInfo.viewRadius)
+                if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z * horizontalDistance.z < ClassInfos.infos[(int)boids[i].GetType()].viewRadius * ClassInfos.infos[(int)boids[i].GetType()].viewRadius)
                 {
                     realNeighbours.Add(boids[j].GetInfo());
                 }

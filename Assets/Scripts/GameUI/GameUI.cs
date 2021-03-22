@@ -20,6 +20,7 @@ public class GameUI : MonoBehaviour
     [SerializeField] private Text victoryText;
 
     private GameManager _gameManager;
+    private bool hasStarted = false;
     private List<Player> players;
 
     // Start is called before the first frame update
@@ -166,9 +167,10 @@ public class GameUI : MonoBehaviour
     }
 
     void UpdateGameState() {
-        if (AllPlayersReady()) {
+        if (AllPlayersReady() && !hasStarted) {
             _gameManager.BeginBattle();
             ready.gameObject.SetActive(false);
+            hasStarted = true;
         }
     }
 
