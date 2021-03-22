@@ -40,7 +40,6 @@ public abstract class Boid : Selectable
     private bool _dead;
 
     protected Type type;
-    protected ClassInfo classInfo;
     protected Player owner;
     
     protected Boid target;
