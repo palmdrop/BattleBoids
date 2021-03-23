@@ -6,7 +6,6 @@ using UnityEngine;
 public class SceneData : MonoBehaviour
 {
     // Struct for holding campaign levels
-    // NOTE This must hold: name == scene name == sprite name
     // Scene name is the name of the scene in /Assets/Scenes/
     // Sprite name is the name of the sprite to show in the campaign menu
     // Put the sprite in /Assests/Resources/Sprite/SceneSprites/
@@ -16,7 +15,6 @@ public class SceneData : MonoBehaviour
     }
 
     // Struct for holding multiplayer maps
-    // NOTE This must hold: name == scene name == sprite name
     // Scene name is the name of the scene in /Assets/Scenes/
     // Sprite name is the name of the sprite to show in the multiplayer menu
     // Put the sprite in /Assests/Resources/Sprite/SceneSprites/
@@ -28,6 +26,7 @@ public class SceneData : MonoBehaviour
     // Struct for the settings to start the match with
     public struct GameSettings {
         public string mapName;
+        public string spriteName;
         public List<PlayerSettings> playerSettingsList;
         public Options options;
     }
@@ -82,6 +81,7 @@ public class SceneData : MonoBehaviour
                 description = "Level One. Start your journey here!",
                 gameSettings = new GameSettings() {
                     mapName = "Dusk1",
+                    spriteName = "Dusk",
                     playerSettingsList = new List<PlayerSettings>(
                         new PlayerSettings[] {
                             new PlayerSettings() {
@@ -113,6 +113,7 @@ public class SceneData : MonoBehaviour
                 description = "Level Two. Time to start thinking!",
                 gameSettings = new GameSettings() {
                     mapName = "Dusk2",
+                    spriteName = "Dusk",
                     playerSettingsList = new List<PlayerSettings>(
                         new PlayerSettings[] {
                             new PlayerSettings() {
