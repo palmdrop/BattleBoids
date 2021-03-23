@@ -23,21 +23,21 @@ public class Healer : Boid
 
         Cost = 20;
         type = Type.Healer;
-        health = maxHealth = 100;
+        health = maxHealth = 50;
         damage = 0;
         maxSpeed = 4f;
         avoidCollisionWeight = 5f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
-        abilityDistance = 3.0f;
+        abilityDistance = 2.0f;
 
-        timeBetweenActions = 0.03f;
-        _healAmount = 1;
+        timeBetweenActions = 0.1f;
+        _healAmount = 2;
         _healRadius = 1.0f;
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
-            viewRadius = 3f,
+            viewRadius = 1f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2.0f,
@@ -61,7 +61,7 @@ public class Healer : Boid
 
             gravity = 1f,
             
-            fearStrength = 250.0f,
+            fearStrength = 200.0f,
             fearExponent = 1.4f,
             
             attackDistRange = 0f,
