@@ -26,7 +26,7 @@ public class Commander : Boid
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
-            viewRadius = 3f,
+            viewRadius = 1f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
@@ -59,7 +59,7 @@ public class Commander : Boid
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
 
-            aggressionStrength = 5.4f,
+            aggressionStrength = 7.4f,
             searchStrength = 10.4f,
 
             avoidCollisionWeight = 100f,

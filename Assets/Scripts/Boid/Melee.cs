@@ -27,7 +27,7 @@ public class Melee : Boid {
 
         ClassInfos.infos[(int) type] = new ClassInfo {
             type = this.type,
-            viewRadius = 3f,
+            viewRadius = 1f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
@@ -60,7 +60,7 @@ public class Melee : Boid {
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
             
-            aggressionStrength = 3.4f,
+            aggressionStrength = 5.4f,
 
             avoidCollisionWeight = 100f,
 
