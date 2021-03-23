@@ -100,6 +100,7 @@ public class SetupManager : MonoBehaviour
     private SceneData.GameSettings GetGameSettings() {
         return new SceneData.GameSettings {
             mapName = GetMapName(),
+            spriteName = GetMapName(),
             playerSettingsList = GetPlayerSettingsList(),
             options = GetOptions()
         };
@@ -176,7 +177,8 @@ public class SetupManager : MonoBehaviour
 
     // Start a match with the selected options
     public void Play() {
-        ApplyMultiplayerSettings(GetGameSettings());
-        menuManager.Play(PlayerPrefs.GetString("Scene"));
+        var gameSettings = GetGameSettings();
+        ApplyMultiplayerSettings(gameSettings);
+        menuManager.Play(gameSettings);
     }
 }

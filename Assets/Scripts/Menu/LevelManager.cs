@@ -48,13 +48,13 @@ public class LevelManager : MonoBehaviour
     public void UpdateLevelHolder() {
         SceneData.Level selected = SceneData.campaignLevels[_dd.value];
         _name.text = selected.gameSettings.mapName;
-        _image.sprite = menuManager.GetSceneSprite(selected.gameSettings.mapName);
+        _image.sprite = menuManager.GetSceneSprite(selected.gameSettings.spriteName);
         _description.text = selected.description;
     }
 
     // Start the selected level
     public void Play() {
         ApplyCampaignSettings(SceneData.campaignLevels[_dd.value].gameSettings);
-        menuManager.Play(_name.text);
+        menuManager.Play(SceneData.campaignLevels[_dd.value].gameSettings);
     }
 }
