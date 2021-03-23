@@ -62,6 +62,8 @@ public class Scarecrow : Boid {
 
             searchStrength = 10.4f,
             
+            avoidanceStrength = 5.0f,
+            
             randomMovements = 6.0f,
 
             hoverKi = 2f,

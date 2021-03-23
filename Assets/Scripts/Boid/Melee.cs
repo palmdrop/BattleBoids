@@ -66,6 +66,8 @@ public class Melee : Boid {
 
             searchStrength = 10.4f,
             
+            avoidanceStrength = 20.0f,
+            
             randomMovements = 6.0f,
 
             hoverKi = 2f,

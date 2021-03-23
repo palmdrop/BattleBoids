@@ -653,7 +653,6 @@ public class BoidManager : MonoBehaviour
             NativeArray<float> distances)
         {
             float3 force = float3.zero;
-            float strength = 10;
             
             for (int i = 0; i < neighbours.Length; i++)
             {
@@ -665,7 +664,7 @@ public class BoidManager : MonoBehaviour
                 float distance = distances[i];
                 float3 forward = neighbour.forward;
                 float attackDistRange = classInfo.attackDistRange;
-                float attackAngleRange = 30;
+                float attackAngleRange = classInfo.attackAngleRange;
 
                 bool inRange = BoidIndexInAttackRange(vector, distance, forward, attackDistRange, attackAngleRange);
 
@@ -678,7 +677,7 @@ public class BoidManager : MonoBehaviour
                         return float3.zero;
                     }
 
-                    force += math.normalize(turnDir) * strength;
+                    force += math.normalize(turnDir) * classInfo.avoidanceStrength;
                 }
             }
 

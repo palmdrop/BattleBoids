@@ -61,6 +61,8 @@ public class Commander : Boid
 
             aggressionStrength = 7.4f,
             searchStrength = 10.4f,
+            
+            avoidanceStrength = 23f,
 
             avoidCollisionWeight = 100f,
 

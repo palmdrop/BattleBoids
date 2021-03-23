@@ -75,8 +75,10 @@ public class Hero : Boid {
             aggressionStrength = 6.4f,
             searchStrength = 10.4f,
 
+            avoidanceStrength = 25f,
+            
             avoidCollisionWeight = 100f,
-
+            
             randomMovements = 6.0f,
 
             hoverKi = 2f,
