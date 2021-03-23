@@ -20,6 +20,7 @@ public class GameUI : MonoBehaviour
     [SerializeField] private Text victoryText;
 
     private GameManager _gameManager;
+    private string _prefix;
     private bool hasStarted = false;
     private List<Player> players;
 
@@ -27,6 +28,7 @@ public class GameUI : MonoBehaviour
     void Start()
     {
         _gameManager = GetComponentInParent<GameManager>();
+        _prefix = _gameManager.GetType().ToString();
         players = _gameManager.GetPlayers();
         InitPlayerDropdown();
         InitUnitButtons();
@@ -40,6 +42,7 @@ public class GameUI : MonoBehaviour
         ManageKeyInput();
         UpdateBoins();
         UpdateReady();
+        UpdateButtonColors(activePlayer.color);
         UpdateGameState();
     }
 
@@ -76,15 +79,16 @@ public class GameUI : MonoBehaviour
                 0
             );
 
-            button.GetComponent<Image>().sprite = unitSprites[i];
-            string prefix = _gameManager.GetType().ToString();
-            if (Boolean.Parse(PlayerPrefs.GetString(prefix + unitPrefabs[i].name, "true"))) {
+            Image image = button.GetComponent<Image>();
+            image.sprite = unitSprites[i];
+            Color color = activePlayer.color;
+            if (Boolean.Parse(PlayerPrefs.GetString(_prefix + unitPrefabs[i].name, "true"))) {
                 button.GetComponent<Button>().onClick.AddListener(() => UnitButtonClick(button));
             } else {
-                Color disabled = new Color(1f, 1f, 1f, 0.25f);
-                button.GetComponent<Image>().color = disabled;
+                color = GetDisableColor(color);
                 Destroy(button.GetComponent<Button>());
             }
+            image.color = color;
         }
     }
 
@@ -172,6 +176,23 @@ public class GameUI : MonoBehaviour
             ready.gameObject.SetActive(false);
             hasStarted = true;
         }
+    }
+
+    void UpdateButtonColors(Color color) {
+        foreach (Transform child in buttons.transform) {
+            UpdateButtonColor(child.gameObject, color);
+        }
+    }
+
+    void UpdateButtonColor(GameObject unitButton, Color color) {
+        if (!Boolean.Parse(PlayerPrefs.GetString(_prefix + unitButton.name, "true"))) {
+            color = GetDisableColor(color);
+        }
+        unitButton.GetComponent<Image>().color = color;
+    }
+
+    Color GetDisableColor(Color color) {
+        return new Color(color.r, color.g, color.b, 0.25f);
     }
 
     void ToggleReady()
