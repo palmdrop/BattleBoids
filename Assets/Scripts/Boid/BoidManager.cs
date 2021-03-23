@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.Jobs;
@@ -250,16 +251,17 @@ public class BoidManager : MonoBehaviour
                 AlignmentForce(boid, classInfo, neighbours, distances)
                 + CohesionForce(boid, classInfo, neighbours, distances)
                 + SeparationForce(boid, classInfo, neighbours, distances)
-                
+
                 // Additional behaviors
                 + (confidence >= classInfo.confidenceThreshold
                     // If confidence is high, be aggressive and have normal fear levels
-                    ? AggressionForce(boid, classInfo) + 1 * FearForce(boid, classInfo, neighbours, distances) 
+                    ? AggressionForce(boid, classInfo) + 1 * FearForce(boid, classInfo, neighbours, distances)
                     // If confidence is low, search for the ally flock and duplicate fear levels
-                    : SearchForce(boid, classInfo)     + 2 * FearForce(boid, classInfo, neighbours, distances))
-                
+                    : SearchForce(boid, classInfo) + 2 * FearForce(boid, classInfo, neighbours, distances))
+
                 // 
                 + ApproachForce(boid, classInfo, targetBoidIndex, targetViewDistance)
+                + AvoidanceForce(boid, classInfo, neighbours, distances) 
                 + RandomForce(index, classInfo.randomMovements);
 
             if (HeadedForCollisionWithMapBoundary(boid, classInfo))
@@ -493,9 +495,19 @@ public class BoidManager : MonoBehaviour
             // TODO this line assumes there's only two flocks and that the ID of the flock corresponds to the index 
             // TODO in the flocks array. Find better solution
             Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
+
+            float maxDist = 10;
+            float falloffExponent = 2;
+            float dist = math.distance(boid.pos, enemyFlock.avgPos);
+            
+            float scale = 1.0f;
+            if (dist < maxDist)
+            {
+                scale = math.pow(dist / maxDist, falloffExponent);
+            }
             
             if (enemyFlock.boidCount == 0) return float3.zero;
-            return math.normalize(enemyFlock.avgPos - boid.pos) * classInfo.aggressionStrength;
+            return math.normalize(enemyFlock.avgPos - boid.pos) * classInfo.aggressionStrength * scale;
         }
         
         private float3 SearchForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo)
@@ -634,6 +646,43 @@ public class BoidManager : MonoBehaviour
                    CalculatePower(classInfo.approachMovementStrength, 
                        dist / targetDistRange, 
                        classInfo.approachMovementExponent);
+        }
+
+        // Calculates the a force which tries to steer boids away from enemy field of view
+        private float3 AvoidanceForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours,
+            NativeArray<float> distances)
+        {
+            float3 force = float3.zero;
+            float strength = 10;
+            
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                Boid.BoidInfo neighbour = boids[neighbours[i]];
+
+                if (boid.flockId == neighbour.flockId) continue;
+
+                float3 vector = boid.pos - neighbour.pos;
+                float distance = distances[i];
+                float3 forward = neighbour.forward;
+                float attackDistRange = classInfo.attackDistRange;
+                float attackAngleRange = 30;
+
+                bool inRange = BoidIndexInAttackRange(vector, distance, forward, attackDistRange, attackAngleRange);
+
+                if (inRange)
+                {
+                    float3 turnDir = (float3) (boid.forward - neighbour.forward);
+                    if (turnDir.x == 0 && turnDir.y == 0 && turnDir.z == 0) 
+                    {
+                        //TODO handle this (very unlikely) casae
+                        return float3.zero;
+                    }
+
+                    force += math.normalize(turnDir) * strength;
+                }
+            }
+
+            return force;
         }
 
         private bool HeadedForCollisionWithMapBoundary(Boid.BoidInfo boid, Boid.ClassInfo classInfo)
