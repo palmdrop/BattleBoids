@@ -58,7 +58,7 @@ public class Ranged : Boid {
             gravity = 1f,
             
             fearStrength = 140.0f,
-            fearExponent = 1.0f,
+            fearExponent = 1.5f,
 
             attackDistRange = 3f,
             attackAngleRange = Mathf.PI,
@@ -67,12 +67,14 @@ public class Ranged : Boid {
             approachMovementExponent = 0.5f,
             
             aggressionStrength = 5.4f,
+            aggressionFalloff = 2.0f,
+            aggressionDistanceCap = 10.0f,
 
             avoidCollisionWeight = 100f,
 
             searchStrength = 10.4f,
             
-            avoidanceStrength = 30.0f,
+            avoidanceStrength = 130.0f,
             
             randomMovements = 6.0f,
 

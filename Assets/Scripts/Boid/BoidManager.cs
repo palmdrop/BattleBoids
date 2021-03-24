@@ -496,14 +496,12 @@ public class BoidManager : MonoBehaviour
             // TODO in the flocks array. Find better solution
             Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
 
-            float maxDist = 10;
-            float falloffExponent = 2;
             float dist = math.distance(boid.pos, enemyFlock.avgPos);
             
             float scale = 1.0f;
-            if (dist < maxDist)
+            if (dist < classInfo.aggressionDistanceCap)
             {
-                scale = math.pow(dist / maxDist, falloffExponent);
+                scale = math.pow(dist / classInfo.aggressionDistanceCap, classInfo.aggressionFalloff);
             }
             
             if (enemyFlock.boidCount == 0) return float3.zero;
@@ -663,17 +661,17 @@ public class BoidManager : MonoBehaviour
                 if (boid.flockId == neighbour.flockId) continue;
 
                 // Values required to determine if the current boid is in attack range of enemy boid
-                float3 vector = boid.pos - neighbour.pos;
                 float distance = distances[i];
-                float3 forward = neighbour.forward;
                 // The boid will assume the enemy has the same attack distance and attack angle as itself
                 float attackDistRange = classInfo.attackDistRange;
                 float attackAngleRange = classInfo.attackAngleRange; 
 
                 // Determine if boid is in range of enemy
-                bool inRange = BoidIndexInAttackRange(vector, distance, forward, attackDistRange, attackAngleRange);
+                bool isInRange = BoidIndexInAttackRange(boid.pos - neighbour.pos, distance, neighbour.forward, attackDistRange, attackAngleRange);
+                bool enemyInRange = false;
+                    //BoidIndexInAttackRange(neighbour.pos - boid.pos, distance, boid.forward, attackDistRange, attackAngleRange);
 
-                if (inRange)
+                if (isInRange && !enemyInRange)
                 {
                     // Turn away from the enemy boid
                     float3 turnDir = boid.forward - neighbour.forward;

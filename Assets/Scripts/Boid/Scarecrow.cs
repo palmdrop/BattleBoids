@@ -47,8 +47,8 @@ public class Scarecrow : Boid {
             
             gravity = 1f,
             
-            fearStrength = 140.0f,
-            fearExponent = 1.0f,
+            fearStrength = 80.0f,
+            fearExponent = 1.8f,
             
             attackDistRange = 2f,
             attackAngleRange = Mathf.PI,
@@ -57,12 +57,14 @@ public class Scarecrow : Boid {
             approachMovementExponent = 0.5f,
             
             aggressionStrength = 5.4f,
+            aggressionFalloff = 2.0f,
+            aggressionDistanceCap = 10.0f,
 
             avoidCollisionWeight = 100f,
 
             searchStrength = 10.4f,
             
-            avoidanceStrength = 5.0f,
+            avoidanceStrength = 70.0f,
             
             randomMovements = 6.0f,
 
