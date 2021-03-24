@@ -446,7 +446,15 @@ public class BoidManager : MonoBehaviour
 
             // Calculate cohesion force
             if (avgNeighborPosDivider == 0) return float3.zero;
-            return  math.normalize((avgNeighborPos / avgNeighborPosDivider) - boid.pos) * classInfo.cohesionStrength;
+
+            avgNeighborPos /= avgNeighborPosDivider;
+            
+            if (avgNeighborPos.Equals(boid.pos))
+            {
+                return float3.zero;
+            }
+            
+            return  math.normalize(avgNeighborPos - boid.pos) * classInfo.cohesionStrength;
         }
         
         private float3 SeparationForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours, NativeArray<float> distances)
