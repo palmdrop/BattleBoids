@@ -347,11 +347,12 @@ public abstract class Boid : Selectable
 
     public void Die()
     {
-        this._dead = true;
-        SetTarget(null);
-        Destroy(GetComponent<ParticleSystem>());
-        Destroy(GetComponentInChildren<LineRenderer>());
-        AnimateDeath();
+        if (!_dead) {
+            _dead = true;
+            SetTarget(null);
+            Destroy(gameObject);
+            AnimateDeath();
+        }
     }
 
     private void AnimateDeath() {
@@ -360,7 +361,6 @@ public abstract class Boid : Selectable
         psMain.startColor = owner.color;
         death.GetComponent<Rigidbody>().velocity = gameObject.GetComponent<Rigidbody>().velocity;
         Destroy(death, psMain.duration);
-        Destroy(gameObject);
     }
 
     public bool IsDead() {
