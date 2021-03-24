@@ -19,18 +19,16 @@ public class SelectionManager : MonoBehaviour
     //private static Vector3 max;
     private Selectable _anchorPoint;
     
-    int instanceNumber = 1;
 
     private bool inMoveState = false;
     private bool canPlaceSelected = true;
+    private bool canSelect = true;
 
-    private bool inBuyState = false;
-    private int buyGridWidth = 0;
 
     private const float YOffset = 1f;
     
     
-    private static RaycastHit mousePositionInWorld;
+    private static RaycastHit _mousePositionInWorld;
     // We want to check if the mouse is currently hovering over ground tiles
     private bool mouseOverGround;
     
@@ -63,10 +61,13 @@ private void Update()
     }
     
     // Stop if nothing is selected 
-    if (selected.Count == 0) return;
-    
+    if (selected.Count == 0) 
+    {
+        Cursor.visible = true;
+        return; 
+    } 
     // Update mouse position
-    mouseOverGround = Physics.Raycast(_gameManager.GetMainCamera().ScreenPointToRay(Input.mousePosition), out mousePositionInWorld, 1000f, ground);
+    mouseOverGround = Physics.Raycast(_gameManager.GetMainCamera().ScreenPointToRay(Input.mousePosition), out _mousePositionInWorld, 1000f, ground);
     
     // Sell the selected entities
     if (Input.GetKeyDown("k"))
@@ -79,22 +80,29 @@ private void Update()
     if (Input.GetKeyDown("q"))
     {
         inMoveState = true;
+        Cursor.visible = false;
     }
-    
+
 
     // Move the selected entities
     if (inMoveState)
     {
         MoveSelected();
     }
+    else
+    {
+    }
 }
 
     private void UndoChanges()
     {
         ReturnToOriginalPosition();
-        canPlaceSelected = true;
         Deselect();
         
+        canPlaceSelected = true;
+        canSelect = true;
+        
+        // In case the player changed
         activePlayer = _gameUI.GetActivePlayer();
     }
 
@@ -182,7 +190,7 @@ private void Update()
             }
             
             // Move the selected with the correct formation to the mouse position
-            selectable.transform.position = new Vector3(mousePositionInWorld.point.x + selectable.GetOffset().x, mousePositionInWorld.point.y + YOffset, mousePositionInWorld.point.z + selectable.GetOffset().z);
+            selectable.transform.position = new Vector3(_mousePositionInWorld.point.x + selectable.GetOffset().x, _mousePositionInWorld.point.y + YOffset, _mousePositionInWorld.point.z + selectable.GetOffset().z);
             
         }
     }
@@ -191,7 +199,6 @@ private void Update()
     {
         foreach (Selectable selectable in selected)
         {
-            selectable.GetComponent<Boid>().SetColor(activePlayer.color);
             selectable.transform.position = selectable.GetPositionBeforeMoved();
         }
     }
@@ -199,7 +206,7 @@ private void Update()
     private void SellSelected()
     {
         inMoveState = false;
-        
+
         for (int i = selected.Count; i --> 0; )
         {
             activePlayer.AddBoins(selected[i].GetCost());
@@ -210,6 +217,7 @@ private void Update()
             
         }
 
+        canSelect = true;
     }
 
     public bool IsPlaceable()
@@ -217,7 +225,7 @@ private void Update()
         return canPlaceSelected;
     }
 
-    public static RaycastHit MousePositionInWorld => mousePositionInWorld; 
+    public static RaycastHit MousePositionInWorld => _mousePositionInWorld; 
 
     public GameUI GetGameUI()
     {
@@ -227,5 +235,11 @@ private void Update()
     public Camera GetMainCamera()
     {
         return _gameManager.GetMainCamera();
+    }
+
+    public bool CanSelect
+    {
+        get => canSelect;
+        set => canSelect = value;
     }
 }

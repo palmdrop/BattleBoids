@@ -118,10 +118,12 @@ public class SpawnArea : MonoBehaviour
         }
 
         // If left mouse button is pressed
-        if (Input.GetMouseButtonDown(0)) {
-            if (holding.Count > 0 && canPlace && PurchaseSuccess()) {
-                // Place entity
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (holding.Count > 0 && canPlace && PurchaseSuccess())
+            {
                 
+                // Place entity
                 foreach (GameObject currentEntity in holding) {
                     spawned.Add(currentEntity.GetComponent<Boid>());
                 }
