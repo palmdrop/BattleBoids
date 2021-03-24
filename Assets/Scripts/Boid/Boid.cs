@@ -200,7 +200,12 @@ public abstract class Boid : Selectable
         }
 
         Vector3 velocity = _rigidbody.velocity;
-        transform.forward = new Vector3(velocity.x, 0, velocity.z);
+        
+        // Only update forward direction if velocity is non-zero
+        if (Vector3.zero != velocity)
+        {
+            transform.forward = new Vector3(velocity.x, 0, velocity.z);
+        }
     }
 
     private void OnCollisionEnter(Collision collision) {
