@@ -7,31 +7,51 @@ using UnityEngine.Audio;
 // A class for managing playing sounds
 public class AudioManager : MonoBehaviour
 {
+    public static AudioManager instance;
+
     // The music tracks that can be played from this manager
     public Sound[] musicTracks;
-    private float _masterVolume = 1f;
+    private float _masterVolume;
     private float _savedMasterVolume = 1f;
-    private float _effectsVolume = 1f;
-    private float _musicVolume = 1f;
+    private float _effectsVolume;
+    private float _musicVolume;
     private bool _isMuted = false;
 
     
     void Awake()
     {
-        foreach (Sound s in musicTracks)
-        {
-            s.source = gameObject.AddComponent<AudioSource>();
-            s.source.clip = s.clip;
-            s.source.volume = s.volume;
-            s.source.pitch = s.pitch;
-            s.source.loop = s.loop;
+        if (instance != null) {
+            // Destroy new AudioManager if an old one already exists
+            Destroy(gameObject);
+        } else {
+            instance = this;
+            // Do not destroy AudioManager when loading a new Scene
+            DontDestroyOnLoad(gameObject);
+
+            ApplySavedVolume();
+
+            foreach (Sound s in musicTracks)
+            {
+                s.source = gameObject.AddComponent<AudioSource>();
+                s.source.clip = s.clip;
+                s.source.volume = s.volume;
+                s.source.pitch = s.pitch;
+                s.source.loop = s.loop;
+            }
         }
+    }
+
+    private void ApplySavedVolume() {
+        _masterVolume = PlayerPrefs.GetFloat("MasterVolume", 1f);
+        _musicVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
+        _effectsVolume = PlayerPrefs.GetFloat("SfxVolume", 1f);
     }
 
     // Plays a music track from a given name. Name must be in a Sound object of the musicTracks array
     public void PlayMusic(string name)
     {
         Sound s = Array.Find(musicTracks, sound => sound.name == name);
+        s.source.volume = s.volume * _masterVolume * _musicVolume;
         s.source.Play();
     }
 

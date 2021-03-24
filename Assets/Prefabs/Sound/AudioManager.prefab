@@ -43,22 +43,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d58915d469ad304782299d06c556b6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sounds:
-  - name: Collision
-    source: {fileID: 0}
-    volume: 0.25
-    pitch: 1
-    clip: {fileID: 8300000, guid: 8153fe7278567f84aa5325252df224a4, type: 3}
-    loop: 0
+  musicTracks:
   - name: MenuMusic
     source: {fileID: 0}
-    volume: 0.1
+    volume: 0.2
     pitch: 1
     clip: {fileID: 8300000, guid: f97d3f2cb3ddf5343844d97eb0b929dd, type: 3}
     loop: 1
   - name: BattleMusic
     source: {fileID: 0}
-    volume: 0.1
+    volume: 0.2
     pitch: 1
     clip: {fileID: 8300000, guid: dae412bed02684f48b591aef41db69da, type: 3}
     loop: 1

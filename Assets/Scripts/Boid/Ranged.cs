@@ -20,24 +20,30 @@ public class Ranged : Boid {
         base.Start();
 
         type = Type.Ranged;
-        Cost = 10;
-        health = maxHealth = 100;
-        damage = 25;
+        Cost = 15;
+        health = maxHealth = 60;
+        damage = 20;
         boostedDamage = 50;
         maxSpeed = 4f;
-        collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
-        timeBetweenActions = 2f;
+        timeBetweenActions = 1f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 0;
 
-        classInfo = new ClassInfo {
+        ClassInfos.infos[(int)type] = new ClassInfo {
+            type = this.type,
             viewRadius = 3f,
             separationRadius = 0.3f,
-            fearRadius = 1.0f,
+            fearRadius = 2.0f,
             maxForce = 2f,
-            
+
+            maxHealth = this.maxHealth,
+            collisionAvoidanceDistance = 3f,
+            collisionMask = (uint)this.collisionMask.value,
+            groundMask = (uint)this.groundMask.value,
+            abilityDistance = this.abilityDistance,
+
             confidenceThreshold = 3.0f,
             
             alignmentStrength = 5.6f,
@@ -108,7 +114,7 @@ public class Ranged : Boid {
             projectile.GetComponent<RangedProjectile>().SetDamage(IsBoosted() ? boostedDamage : damage);
             projectile.GetComponent<Rigidbody>().AddForce(launchVector, ForceMode.VelocityChange);
 
-            FindObjectOfType<AudioManager>().PlaySoundEffectAtPoint(rangedFireAudio, GetPos(), rangedFireAudioVolume);
+            AudioManager.instance.PlaySoundEffectAtPoint(rangedFireAudio, GetPos(), rangedFireAudioVolume);
         }
     }
 

@@ -18,6 +18,7 @@ public struct BoidGrid
     {
         _boids = new NativeList<Boid.BoidInfo>(10, Allocator.TempJob);
         _grid = new NativeMultiHashMap<GridPoint, int>(10, Allocator.TempJob);
+        float time = Time.time;
         for (int i = 0; i < boids.Count; i++) 
         {
             Boid.BoidInfo info = boids[i].GetInfo();
@@ -37,7 +38,7 @@ public struct BoidGrid
         NativeMultiHashMap<int, int> neighbours = new NativeMultiHashMap<int, int>(10, Allocator.TempJob);
         for (int i = 0; i < _boids.Length; i++)
         {
-            NativeArray<int> neighbourArray = FindBoidsWithinRadius(_boids[i], _boids[i].classInfo.viewRadius);
+            NativeArray<int> neighbourArray = FindBoidsWithinRadius(_boids[i], ClassInfos.infos[(int)_boids[i].type].viewRadius);
             foreach (int j in neighbourArray)
             {
                 neighbours.Add(i, j);

@@ -31,19 +31,25 @@ public class Hero : Boid {
         health = maxHealth = 200;
         damage = 100;
         maxSpeed = 4f;
-        collisionAvoidanceDistance = 3f;
         avoidCollisionWeight = 5f;
         timeBetweenActions = 0.1f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 2f;
 
-        classInfo = new ClassInfo {
+        ClassInfos.infos[(int)type] = new ClassInfo {
+            type = this.type,
             viewRadius = 3f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
-            
+
+            maxHealth = this.maxHealth,
+            collisionAvoidanceDistance = 3f,
+            collisionMask = (uint)this.collisionMask.value,
+            groundMask = (uint)this.groundMask.value,
+            abilityDistance = this.abilityDistance,
+
             confidenceThreshold = 0.5f,
 
             alignmentStrength = 5.6f,
@@ -98,7 +104,14 @@ public class Hero : Boid {
 
     private IEnumerator AimAndFire(Boid target, float waitTime) {
         while (!IsDead()) {
-            Vector3 targetPos = target.GetPos();
+            Vector3 targetPos;
+            if (target != null) { // Target has not been destroyed
+                targetPos = target.GetPos();
+            } else {
+                _aiming = false;
+                lockLaser.SetActive(false);
+                yield break;
+            }
             float width = laserDoneWidth
                         - laserDoneWidth
                         * (_aimLockCompleteTime - Time.time) / aimLockTime;
@@ -110,7 +123,7 @@ public class Hero : Boid {
                 lockLaser.SetActive(false);
                 Fire(targetPos);
                 yield break;
-            } else if (NotReachable(target.GetPos())) { // Target moved away, reset
+            } else if (NotReachable(targetPos)) { // Target moved away, reset
                 _aiming = false;
                 lockLaser.SetActive(false);
                 yield break;
@@ -158,7 +171,7 @@ public class Hero : Boid {
         float dist = vector.magnitude;
         float angle = math.acos(math.dot(vector, transform.forward) / dist);
 
-        if (dist > classInfo.attackDistRange || angle > classInfo.attackAngleRange) {
+        if (dist > ClassInfos.infos[(int) type].attackDistRange || angle > ClassInfos.infos[(int) type].attackAngleRange) {
             return true;
         }
         return false;
