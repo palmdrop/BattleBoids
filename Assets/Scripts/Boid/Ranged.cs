@@ -86,7 +86,7 @@ public class Ranged : Boid {
     }
 
     private void Attack() {
-        if (HasTarget()) {
+        if (HasTarget() && !target.IsDead()) {
             _p = target.GetPos() - GetPos();
             _v = target.GetVel() - GetVel();
 
