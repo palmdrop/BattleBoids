@@ -15,12 +15,12 @@ public class Melee : Boid {
         
         type = Type.Melee;
         Cost = 10;
-        health = maxHealth = 100;
+        health = maxHealth = 80;
         damage = 1;
         boostedDamage = 5;
         maxSpeed = 4f;
         avoidCollisionWeight = 5f;
-        timeBetweenActions = 0.01f;
+        timeBetweenActions = 0.05f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 0;
@@ -43,7 +43,7 @@ public class Melee : Boid {
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 4.0f,
+            cohesionStrength = 3.0f,
             cohesionExponent = 0.0f,
             
             separationStrength = 120.0f,
@@ -51,7 +51,7 @@ public class Melee : Boid {
 
             gravity = 1f,
             
-            fearStrength = 140.0f,
+            fearStrength = 100.0f,
             fearExponent = 1.0f,
             
             attackDistRange = 1f,
