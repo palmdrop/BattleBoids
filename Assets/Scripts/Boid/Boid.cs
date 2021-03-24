@@ -146,6 +146,7 @@ public abstract class Boid : Selectable
     protected void Start()
     {
         owner = GetComponentInParent<Player>();
+        SetColor(owner.color);
 
         // To start off, we don't want to show that the boid is selected 
         SetSelectionIndicator(false);
