@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,8 +10,17 @@ public class OptionsManager : MonoBehaviour
     [SerializeField] private Slider musicVolumeSlider;
     [SerializeField] private Slider sfxVolumeSlider;
 
+    [SerializeField] private Toggle fullscreen;
+    [SerializeField] private Dropdown resolutionDropdown;
+
+    private Resolution[] _resolutions;
+    private int _defaultResolutionIndex;
+
     void Start() {
+        _resolutions = Screen.resolutions;
+        _defaultResolutionIndex = _resolutions.Length - 1;
         ApplySavedOptions();
+        InitResolutionDropdown();
     }
 
     private void ApplySavedOptions() {
@@ -19,7 +29,27 @@ public class OptionsManager : MonoBehaviour
         musicVolumeSlider.value = AudioManager.instance.GetMusicVolume();
         sfxVolumeSlider.value = AudioManager.instance.GetSoundEffectsVolume();
 
-        // TODO Video
+        // Video
+        bool isFullscreen = Boolean.Parse(PlayerPrefs.GetString("Fullscreen", "true"));
+        fullscreen.isOn = isFullscreen;
+        Resolution defaultResolution = _resolutions[_defaultResolutionIndex];
+        int resolutionWidth = PlayerPrefs.GetInt("ResolutionWidth", defaultResolution.width);
+        int resolutionHeigth = PlayerPrefs.GetInt("ResolutionHeight", defaultResolution.height);
+        int refreshRate = PlayerPrefs.GetInt("RefreshRate", defaultResolution.refreshRate);
+        Screen.SetResolution(resolutionWidth, resolutionHeigth, isFullscreen, refreshRate);
+    }
+
+    private void InitResolutionDropdown() {
+        resolutionDropdown.ClearOptions();
+        Dropdown.OptionData option;
+        foreach (Resolution resolution in _resolutions) {
+            option = new Dropdown.OptionData();
+            option.text = resolution.ToString();
+            resolutionDropdown.options.Add(option);
+        }
+        int index = PlayerPrefs.GetInt("ResolutionIndex", _defaultResolutionIndex);
+        resolutionDropdown.value = index < _defaultResolutionIndex ? index : _defaultResolutionIndex;
+        resolutionDropdown.captionText.text = resolutionDropdown.options[resolutionDropdown.value].text;
     }
 
     public void SaveOptions() {
@@ -28,7 +58,18 @@ public class OptionsManager : MonoBehaviour
         PlayerPrefs.SetFloat("MusicVolume", musicVolumeSlider.value);
         PlayerPrefs.SetFloat("SfxVolume", sfxVolumeSlider.value);
 
-        // TODO Video
+        // Video
+        PlayerPrefs.SetString("Fullscreen", fullscreen.isOn.ToString());
+        Resolution resolution = _resolutions[resolutionDropdown.value];
+        PlayerPrefs.SetInt("ResolutionWidth", resolution.width);
+        PlayerPrefs.SetInt("ResolutionHeight", resolution.height);
+        PlayerPrefs.SetInt("RefreshRate", resolution.refreshRate);
+        PlayerPrefs.SetInt("ResolutionIndex", resolutionDropdown.value);
+    }
+
+    public void UpdateResolution() {
+        Resolution resolution = _resolutions[resolutionDropdown.value];
+        Screen.SetResolution(resolution.width, resolution.height, fullscreen.isOn, resolution.refreshRate);
     }
 
     public void SetMasterVolume() {
