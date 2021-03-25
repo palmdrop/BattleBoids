@@ -504,15 +504,18 @@ public class BoidManager : MonoBehaviour
             // TODO in the flocks array. Find better solution
             Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
 
+            // No aggression force if there are no enemy boids
+            if (enemyFlock.boidCount == 0) return float3.zero;
+            
             float dist = math.distance(boid.pos, enemyFlock.avgPos);
             
+            // Scale the aggression force based on distance
+            // The aggression is typically reduced if the boid is closer to the enemy flock
             float scale = 1.0f;
             if (dist < classInfo.aggressionDistanceCap)
             {
                 scale = math.pow(dist / classInfo.aggressionDistanceCap, classInfo.aggressionFalloff);
             }
-            
-            if (enemyFlock.boidCount == 0) return float3.zero;
             
             if(enemyFlock.avgPos.Equals(boid.pos))
             {
