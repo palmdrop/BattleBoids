@@ -103,10 +103,6 @@ public class GameUI : MonoBehaviour
 
     void InitReadyButton()
     {
-        foreach (Player player in players)
-        {
-            player.Unready();
-        }
         UpdateReady();
         ready.onClick.AddListener(ToggleReady);
     }
