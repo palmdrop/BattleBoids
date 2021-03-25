@@ -24,6 +24,7 @@ public class MenuManager : MonoBehaviour
         _creditsMenu = menus[4];
 
         AudioManager.instance.PlayMusic("MenuMusic");
+        _optionsMenu.GetComponent<OptionsManager>().Start();
     }
 
     public void MainMenu() {
