@@ -43,7 +43,7 @@ public class Melee : Boid {
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 3.0f,
+            cohesionStrength = 5.0f,
             cohesionExponent = 0.0f,
             
             separationStrength = 120.0f,
@@ -51,7 +51,7 @@ public class Melee : Boid {
 
             gravity = 1f,
             
-            fearStrength = 80.0f,
+            fearStrength = 50.0f,
             fearExponent = 1.5f,
             
             attackDistRange = 1f,
@@ -68,7 +68,7 @@ public class Melee : Boid {
 
             searchStrength = 10.4f,
             
-            avoidanceStrength = 100.0f,
+            avoidanceStrength = 60.0f,
             
             randomMovements = 6.0f,
 

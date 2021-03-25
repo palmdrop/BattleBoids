@@ -49,7 +49,7 @@ public class Ranged : Boid {
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 4.0f,
+            cohesionStrength = 6.0f,
             cohesionExponent = 0.0f,
             
             separationStrength = 120.0f,
@@ -57,7 +57,7 @@ public class Ranged : Boid {
             
             gravity = 1f,
             
-            fearStrength = 140.0f,
+            fearStrength = 100.0f,
             fearExponent = 1.5f,
 
             attackDistRange = 3f,
@@ -74,7 +74,7 @@ public class Ranged : Boid {
 
             searchStrength = 10.4f,
             
-            avoidanceStrength = 130.0f,
+            avoidanceStrength = 90.0f,
             
             randomMovements = 6.0f,
 

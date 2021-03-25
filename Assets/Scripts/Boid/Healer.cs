@@ -53,7 +53,7 @@ public class Healer : Boid
             alignmentStrength = 6.0f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 6.0f,
+            cohesionStrength = 7.0f,
             cohesionExponent = 0.0f,
             
             separationStrength = 120.0f,
@@ -61,7 +61,7 @@ public class Healer : Boid
 
             gravity = 1f,
             
-            fearStrength = 160.0f,
+            fearStrength = 100.0f,
             fearExponent = 1.4f,
             
             attackDistRange = 0f,
@@ -74,7 +74,7 @@ public class Healer : Boid
             aggressionFalloff = 2.0f,
             aggressionDistanceCap = 10.0f,
             
-            avoidanceStrength = 120f,
+            avoidanceStrength = 70f,
 
             avoidCollisionWeight = 100f,
 

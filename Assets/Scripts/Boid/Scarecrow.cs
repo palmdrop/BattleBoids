@@ -39,7 +39,7 @@ public class Scarecrow : Boid {
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 4.0f,
+            cohesionStrength = 6.0f,
             cohesionExponent = 0.0f,
             
             separationStrength = 120.0f,
@@ -47,7 +47,7 @@ public class Scarecrow : Boid {
             
             gravity = 1f,
             
-            fearStrength = 80.0f,
+            fearStrength = 60.0f,
             fearExponent = 1.8f,
             
             attackDistRange = 2f,
@@ -64,7 +64,7 @@ public class Scarecrow : Boid {
 
             searchStrength = 10.4f,
             
-            avoidanceStrength = 70.0f,
+            avoidanceStrength = 40.0f,
             
             randomMovements = 6.0f,
 

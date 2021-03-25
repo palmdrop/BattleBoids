@@ -55,13 +55,13 @@ public class Hero : Boid {
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
 
-            cohesionStrength = 4.0f,
+            cohesionStrength = 6.0f,
             cohesionExponent = 0.0f,
 
             separationStrength = 120.0f,
             separationExponent = 1.0f,
 
-            fearStrength = 80.0f,
+            fearStrength = 60.0f,
             fearExponent = 1.8f,
 
             gravity = 1f,
@@ -78,7 +78,7 @@ public class Hero : Boid {
             
             searchStrength = 10.4f,
 
-            avoidanceStrength = 100f,
+            avoidanceStrength = 60f,
             
             avoidCollisionWeight = 100f,
             

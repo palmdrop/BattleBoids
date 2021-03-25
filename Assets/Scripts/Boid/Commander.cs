@@ -42,7 +42,7 @@ public class Commander : Boid
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f,
 
-            cohesionStrength = 4.0f,
+            cohesionStrength = 6.0f,
             cohesionExponent = 0.0f,
 
             separationStrength = 120.0f,
@@ -50,7 +50,7 @@ public class Commander : Boid
             
             gravity = 40f,
 
-            fearStrength = 80.0f,
+            fearStrength = 60.0f,
             fearExponent = 1.5f,
 
             attackDistRange = 1f,
@@ -65,7 +65,7 @@ public class Commander : Boid
             
             searchStrength = 10.4f,
             
-            avoidanceStrength = 100f,
+            avoidanceStrength = 70f,
 
             avoidCollisionWeight = 100f,
 
