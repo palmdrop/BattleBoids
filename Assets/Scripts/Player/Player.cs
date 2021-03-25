@@ -31,6 +31,14 @@ public class Player : MonoBehaviour
     void Start()
     {
         _gameUI = GetComponentInParent<GameManager>().GetGameUI();
+        foreach (Boid b in GetComponentsInChildren<Boid>())
+        {
+            flock.Add(b);
+        }
+        if (flock.Count > 0)
+        {
+            Ready();
+        }
         _flockInfo = new FlockInfo()
         {
             avgPos = float3.zero,
@@ -124,6 +132,7 @@ public class Player : MonoBehaviour
     {
         _active = active;
         var state = GetComponentInParent<GameManager>().GetState();
+        var type = GetComponentInParent<GameManager>().GetType();
         if (_active && state == GameManager.GameState.Placement) {
             GetComponentInChildren<SpawnArea>().Activate();
         } else {
@@ -131,7 +140,7 @@ public class Player : MonoBehaviour
         }
         foreach (var boid in flock) {
             foreach (Renderer r in boid.GetComponentsInChildren<Renderer>()) {
-                r.enabled = _active || state != GameManager.GameState.Placement;
+                r.enabled = _active || state != GameManager.GameState.Placement || type != SceneData.Type.Multiplayer;
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameUI : MonoBehaviour
 {
@@ -18,6 +19,8 @@ public class GameUI : MonoBehaviour
     [SerializeField] private int unitButtonCols;
     [SerializeField] private bool showHealthBars;
     [SerializeField] private Text victoryText;
+    [SerializeField] private Button backButton;
+    [SerializeField] private GameObject victoryMenu;
 
     private GameManager _gameManager;
     private string _prefix;
@@ -33,7 +36,7 @@ public class GameUI : MonoBehaviour
         InitPlayerDropdown();
         InitUnitButtons();
         InitReadyButton();
-        victoryText.enabled = false;
+        InitVictoryMenu();
     }
 
     // Update is called once per frame
@@ -48,6 +51,12 @@ public class GameUI : MonoBehaviour
 
     void InitPlayerDropdown()
     {
+        if (_gameManager.GetType() != SceneData.Type.Multiplayer)
+        {
+            playerSelect.gameObject.SetActive(false);
+            activePlayer.SetActive(true);
+            return;
+        }
         playerSelect.ClearOptions();
         foreach (var player in players)
         {
@@ -100,6 +109,12 @@ public class GameUI : MonoBehaviour
         }
         UpdateReady();
         ready.onClick.AddListener(ToggleReady);
+    }
+
+    void InitVictoryMenu()
+    {
+        victoryMenu.gameObject.SetActive(false);
+        backButton.onClick.AddListener(GoBack);
     }
 
     void ManageKeyInput() {
@@ -207,6 +222,11 @@ public class GameUI : MonoBehaviour
         }
     }
 
+    void GoBack()
+    {
+        SceneManager.LoadScene("Menu");
+    }
+
     void UnitButtonClick(GameObject button)
     {
         activePlayer.GetSpawnArea().SetEntityToSpawn(FindUnitByName(button.name));
@@ -284,6 +304,6 @@ public class GameUI : MonoBehaviour
     public void ShowVictor(Player victor)
     {
         victoryText.text = victor.GetNickname() + " won!";
-        victoryText.enabled = true;
+        victoryMenu.SetActive(true);
     }
 }

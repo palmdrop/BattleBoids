@@ -151,6 +151,9 @@ public abstract class Boid : Selectable
     // Start is called before the first frame update
     protected void Start()
     {
+        owner = GetComponentInParent<Player>();
+        SetColor(owner.color);
+
         // To start off, we don't want to show that the boid is selected 
         SetSelectionIndicator(false);
         
@@ -353,11 +356,12 @@ public abstract class Boid : Selectable
 
     public void Die()
     {
-        this._dead = true;
-        SetTarget(null);
-        Destroy(GetComponent<ParticleSystem>());
-        Destroy(GetComponentInChildren<LineRenderer>());
-        AnimateDeath();
+        if (!_dead) {
+            _dead = true;
+            SetTarget(null);
+            Destroy(gameObject);
+            AnimateDeath();
+        }
     }
 
     private void AnimateDeath() {
@@ -366,7 +370,6 @@ public abstract class Boid : Selectable
         psMain.startColor = owner.color;
         death.GetComponent<Rigidbody>().velocity = gameObject.GetComponent<Rigidbody>().velocity;
         Destroy(death, psMain.duration);
-        Destroy(gameObject);
     }
 
     public bool IsDead() {

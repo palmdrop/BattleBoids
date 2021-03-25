@@ -95,28 +95,20 @@ public class Hero : Boid {
     }
 
     protected override void Act() {
-        if (HasTarget() && _aiming == false) {
-            Boid aimedTarget = target;
+        if (HasTarget() && !target.IsDead() && _aiming == false) {
             _aiming = true;
             _aimLockCompleteTime = Time.time + aimLockTime;
-            IEnumerator aimAndFire = AimAndFire(aimedTarget, laserDrawTime);
+            IEnumerator aimAndFire = AimAndFire(target, laserDrawTime);
             StartCoroutine(aimAndFire);
         }
-        if (HasFriendlyTarget()) {
+        if (HasFriendlyTarget() && !friendlyTarget.IsDead()) {
             friendlyTarget.GiveBoost(boostTime);
         }
     }
 
     private IEnumerator AimAndFire(Boid target, float waitTime) {
-        while (!IsDead()) {
-            Vector3 targetPos;
-            if (target != null) { // Target has not been destroyed
-                targetPos = target.GetPos();
-            } else {
-                _aiming = false;
-                lockLaser.SetActive(false);
-                yield break;
-            }
+        while (!IsDead() && !target.IsDead()) {
+            Vector3 targetPos = target.GetPos();
             float width = laserDoneWidth
                         - laserDoneWidth
                         * (_aimLockCompleteTime - Time.time) / aimLockTime;
@@ -124,18 +116,16 @@ public class Hero : Boid {
             lockLaser.SetActive(true);
 
             if (Time.time > _aimLockCompleteTime) { // Aiming done, fire
-                _aiming = false;
-                lockLaser.SetActive(false);
                 Fire(targetPos);
-                yield break;
+                break;
             } else if (NotReachable(targetPos)) { // Target moved away, reset
-                _aiming = false;
-                lockLaser.SetActive(false);
-                yield break;
+                break;
             } else { // Continue aiming
                 yield return new WaitForSeconds(waitTime);
             }
         }
+        _aiming = false;
+        lockLaser.SetActive(false);
     }
 
     private void Fire(Vector3 position) {
