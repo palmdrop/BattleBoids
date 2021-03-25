@@ -514,6 +514,11 @@ public class BoidManager : MonoBehaviour
             
             if (enemyFlock.boidCount == 0) return float3.zero;
             
+            if(enemyFlock.avgPos.Equals(boid.pos))
+            {
+                return float3.zero;
+            }
+            
             return math.normalize(enemyFlock.avgPos - boid.pos) * classInfo.aggressionStrength * scale;
         }
         
