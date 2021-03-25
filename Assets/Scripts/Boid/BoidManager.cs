@@ -674,18 +674,20 @@ public class BoidManager : MonoBehaviour
                 float attackDistRange = classInfo.attackDistRange;
                 float attackAngleRange = classInfo.attackAngleRange; 
 
-                // Determine if boid is in range of enemy
-                bool isInRange = BoidIndexInAttackRange(boid.pos - neighbour.pos, distance, neighbour.forward, attackDistRange, attackAngleRange);
-                bool enemyInRange = false;
-                    //BoidIndexInAttackRange(neighbour.pos - boid.pos, distance, boid.forward, attackDistRange, attackAngleRange);
+                // Determine if boid is in range of enemy and if the enemy is in range of the boid
+                bool selfInRange = BoidIndexInAttackRange(boid.pos - neighbour.pos, distance, neighbour.forward, attackDistRange, attackAngleRange);
+                bool enemyInRange = BoidIndexInAttackRange(neighbour.pos - boid.pos, distance, boid.forward, attackDistRange, attackAngleRange);
 
-                if (isInRange && !enemyInRange)
+                // If the boid itself is in range of the enemy, but the enemy is not in range of the boid itself,
+                // then we want to turn away from the view of the enemy
+                if (selfInRange && !enemyInRange)
                 {
                     // Turn away from the enemy boid
                     float3 turnDir = boid.forward - neighbour.forward;
                     if (turnDir.x == 0 && turnDir.y == 0 && turnDir.z == 0) 
                     {
                         //TODO handle this (very unlikely) case
+                        //TODO this happens when the two boids have the same forward direction
                         return float3.zero;
                     }
 
