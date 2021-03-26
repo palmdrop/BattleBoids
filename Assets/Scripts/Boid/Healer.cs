@@ -73,6 +73,7 @@ public class Healer : Boid
             aggressionStrength = 5.4f,
             aggressionFalloff = 2.0f,
             aggressionDistanceCap = 10.0f,
+            maxAggressionMultiplier = 1.2f,
             
             avoidanceStrength = 70f,
 
