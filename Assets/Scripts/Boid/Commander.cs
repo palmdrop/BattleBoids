@@ -79,6 +79,9 @@ public class Commander : Boid
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, LayerMask.GetMask("Ground"))) {
                 var waypoint = Instantiate(waypointPrefab, hit.point, Quaternion.identity);
+                foreach (var rend in waypoint.GetComponentsInChildren<MeshRenderer>()) {
+                    rend.material.color = owner.color;
+                }
                 _path.Add(waypoint);
             }
         }
