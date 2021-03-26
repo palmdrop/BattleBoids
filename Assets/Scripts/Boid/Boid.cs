@@ -397,5 +397,12 @@ public abstract class Boid : Selectable
         return _rigidbody;
     }
 
+    public virtual void SetHidden(bool hidden)
+    {
+        foreach (Renderer r in GetComponentsInChildren<Renderer>()) {
+            r.enabled = !hidden;
+        }
+    }
+
     protected abstract void Act();
 }

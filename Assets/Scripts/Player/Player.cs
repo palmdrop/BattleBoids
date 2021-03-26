@@ -139,9 +139,7 @@ public class Player : MonoBehaviour
             GetComponentInChildren<SpawnArea>().Deactivate();
         }
         foreach (var boid in flock) {
-            foreach (Renderer r in boid.GetComponentsInChildren<Renderer>()) {
-                r.enabled = _active || state != GameManager.GameState.Placement || type != SceneData.Type.Multiplayer;
-            }
+            boid.SetHidden(!_active && state == GameManager.GameState.Placement && type == SceneData.Type.Multiplayer);
         }
     }
 
