@@ -266,14 +266,14 @@ MonoBehaviour:
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: 'TODO
 
     Credit everyone who have contributed to the game
 
     Music:
-    bensound.com'
+    bensound.com, freesfx.co.uk'
 --- !u!222 &13469985
 CanvasRenderer:
   m_ObjectHideFlags: 0
