@@ -110,6 +110,14 @@ public class Commander : Boid
         }
     }
 
+    public override void SetHidden(bool hidden)
+    {
+        base.SetHidden(hidden);
+        foreach (GameObject waypoint in _path) {
+            waypoint.SetActive(!hidden);
+        }
+    }
+
     protected override void Act() {
     }
 }
