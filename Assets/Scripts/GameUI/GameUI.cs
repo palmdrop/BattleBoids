@@ -299,6 +299,7 @@ public class GameUI : MonoBehaviour
 
     public void ShowVictor(Player victor)
     {
+        AudioManager.instance.StopMusic("BattleMusic");
         victoryText.text = victor.GetNickname() + " won!";
         victoryMenu.SetActive(true);
     }
