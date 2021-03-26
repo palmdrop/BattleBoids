@@ -51,7 +51,7 @@ public class Commander : Boid
             gravity = 40f,
 
             fearStrength = 60.0f,
-            fearExponent = 1.5f,
+            fearExponent = 2.0f,
 
             attackDistRange = 1f,
             attackAngleRange = Mathf.PI / 4.0f,
@@ -62,11 +62,11 @@ public class Commander : Boid
             aggressionStrength = 7.4f,
             aggressionFalloff = 2.0f,
             aggressionDistanceCap = 10.0f,
-            maxAggressionMultiplier = 2.0f,
+            maxAggressionMultiplier = 2.2f,
             
             searchStrength = 10.4f,
             
-            avoidanceStrength = 70f,
+            avoidanceStrength = 50f,
 
             avoidCollisionWeight = 100f,
 

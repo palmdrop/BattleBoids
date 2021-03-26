@@ -62,7 +62,7 @@ public class Hero : Boid {
             separationExponent = 1.0f,
 
             fearStrength = 60.0f,
-            fearExponent = 1.8f,
+            fearExponent = 2.1f,
 
             gravity = 1f,
 
@@ -75,11 +75,11 @@ public class Hero : Boid {
             aggressionStrength = 6.4f,
             aggressionFalloff = 2.0f,
             aggressionDistanceCap = 10.0f,
-            maxAggressionMultiplier = 2.0f,
+            maxAggressionMultiplier = 2.2f,
             
             searchStrength = 10.4f,
 
-            avoidanceStrength = 60f,
+            avoidanceStrength = 40f,
             
             avoidCollisionWeight = 100f,
             

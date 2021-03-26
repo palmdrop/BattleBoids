@@ -52,24 +52,24 @@ public class Melee : Boid {
             gravity = 1f,
             
             fearStrength = 50.0f,
-            fearExponent = 1.5f,
+            fearExponent = 1.8f,
             
             attackDistRange = 1f,
             attackAngleRange = Mathf.PI / 4.0f,
             
-            approachMovementStrength = 20.1f,
+            approachMovementStrength = 30.1f,
             approachMovementExponent = 0.5f,
             
             aggressionStrength = 5.4f,
             aggressionFalloff = 2.0f,
             aggressionDistanceCap = 10.0f,
-            maxAggressionMultiplier = 1.5f,
+            maxAggressionMultiplier = 1.8f,
 
             avoidCollisionWeight = 100f,
 
             searchStrength = 10.4f,
             
-            avoidanceStrength = 60.0f,
+            avoidanceStrength = 48.0f,
             
             randomMovements = 6.0f,
 
