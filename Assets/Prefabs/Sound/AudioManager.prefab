@@ -56,3 +56,9 @@ MonoBehaviour:
     pitch: 1
     clip: {fileID: 8300000, guid: dae412bed02684f48b591aef41db69da, type: 3}
     loop: 1
+  - name: Fanfare
+    source: {fileID: 0}
+    volume: 0.2
+    pitch: 1
+    clip: {fileID: 8300000, guid: a4de25b72b8bdea43a50e9e8561359bd, type: 3}
+    loop: 0
