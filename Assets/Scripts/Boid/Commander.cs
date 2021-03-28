@@ -65,6 +65,8 @@ public class Commander : Boid
 
             searchStrength = 10.4f,
 
+            avoidanceStrength = 50f,
+
             avoidCollisionWeight = 100f,
 
             randomMovements = 6.0f,

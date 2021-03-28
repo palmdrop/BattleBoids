@@ -63,6 +63,8 @@ public class Scarecrow : Boid {
             avoidCollisionWeight = 100f,
 
             searchStrength = 10.4f,
+
+            avoidanceStrength = 30.0f,
             
             randomMovements = 6.0f,
 

@@ -73,6 +73,8 @@ public class Ranged : Boid {
             avoidCollisionWeight = 100f,
 
             searchStrength = 10.4f,
+
+            avoidanceStrength = 70.0f,
             
             randomMovements = 6.0f,
 
