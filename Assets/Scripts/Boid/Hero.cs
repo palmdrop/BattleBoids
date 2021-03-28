@@ -75,6 +75,7 @@ public class Hero : Boid {
             aggressionStrength = 6.4f,
             aggressionFalloff = 2.0f,
             aggressionDistanceCap = 10.0f,
+            maxAggressionMultiplier = 2.2f,
 
             searchStrength = 10.4f,
 

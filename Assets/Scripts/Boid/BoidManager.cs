@@ -503,6 +503,8 @@ public class BoidManager : MonoBehaviour
             // TODO in the flocks array. Find better solution
             Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
 
+            if (enemyFlock.boidCount == 0 || enemyFlock.avgPos.Equals(boid.pos)) return float3.zero;
+
             float dist = math.distance(boid.pos, enemyFlock.avgPos);
 
             float scale = 1.0f;
@@ -510,8 +512,9 @@ public class BoidManager : MonoBehaviour
             {
                 scale = math.pow(dist / classInfo.aggressionDistanceCap, classInfo.aggressionFalloff);
             }
+
+            scale *= math.max(classInfo.maxAggressionMultiplier, (float)flocks[boid.flockId - 1].boidCount / enemyFlock.boidCount);
             
-            if (enemyFlock.boidCount == 0 || enemyFlock.avgPos.Equals(boid.pos)) return float3.zero;
             return math.normalize(enemyFlock.avgPos - boid.pos) * classInfo.aggressionStrength * scale;
         }
         
