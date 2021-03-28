@@ -105,6 +105,10 @@ public abstract class Boid : Selectable
 
 
         public float aggressionStrength; // Controls how much the boid is attracted to the enemy flock
+        public float aggressionFalloff; // A high value will reduce the aggression drastically when a boid moves
+                                        // closer to the enemy flock
+        public float aggressionDistanceCap;  // If the enemy flock is further away than this, the aggression will be at max strength
+
         public float searchStrength;
 
         // Misc behaviors

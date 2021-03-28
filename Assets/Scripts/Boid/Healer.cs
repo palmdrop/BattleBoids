@@ -71,6 +71,8 @@ public class Healer : Boid
             approachMovementExponent = 0.5f,
             
             aggressionStrength = 5.4f,
+            aggressionFalloff = 2.0f,
+            aggressionDistanceCap = 10.0f,
 
             avoidCollisionWeight = 100f,
 
