@@ -59,6 +59,7 @@ public class Scarecrow : Boid {
             aggressionStrength = 5.4f,
             aggressionFalloff = 2.0f,
             aggressionDistanceCap = 10.0f,
+            maxAggressionMultiplier = 1.8f,
 
             avoidCollisionWeight = 100f,
 
