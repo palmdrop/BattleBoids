@@ -501,9 +501,19 @@ public class BoidManager : MonoBehaviour
             // TODO this line assumes there's only two flocks and that the ID of the flock corresponds to the index 
             // TODO in the flocks array. Find better solution
             Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
+
+            float maxDist = 10;
+            float falloffExponent = 2;
+            float dist = math.distance(boid.pos, enemyFlock.avgPos);
+
+            float scale = 1.0f;
+            if (dist < classInfo.aggressionDistanceCap)
+            {
+                scale = math.pow(dist / classInfo.aggressionDistanceCap, classInfo.aggressionFalloff);
+            }
             
             if (enemyFlock.boidCount == 0) return float3.zero;
-            return math.normalize(enemyFlock.avgPos - boid.pos) * classInfo.aggressionStrength;
+            return math.normalize(enemyFlock.avgPos - boid.pos) * classInfo.aggressionStrength * scale;
         }
         
         private float3 SearchForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo)

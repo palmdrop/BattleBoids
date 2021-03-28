@@ -60,6 +60,9 @@ public class Commander : Boid
             approachMovementExponent = 0.5f,
 
             aggressionStrength = 7.4f,
+            aggressionFalloff = 2.0f,
+            aggressionDistanceCap = 10.0f,
+
             searchStrength = 10.4f,
 
             avoidCollisionWeight = 100f,
