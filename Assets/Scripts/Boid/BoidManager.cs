@@ -260,6 +260,7 @@ public class BoidManager : MonoBehaviour
                 
                 // 
                 + ApproachForce(boid, classInfo, targetBoidIndex, targetViewDistance)
+                + AvoidanceForce(boid, classInfo, neighbours, distances) 
                 + RandomForce(index, classInfo.randomMovements);
 
             if (HeadedForCollisionWithMapBoundary(boid, classInfo))
@@ -652,6 +653,51 @@ public class BoidManager : MonoBehaviour
                    CalculatePower(classInfo.approachMovementStrength, 
                        dist / targetDistRange, 
                        classInfo.approachMovementExponent);
+        }
+
+        // Calculates the a force which tries to steer boids away from enemy field of view
+        private float3 AvoidanceForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours,
+            NativeArray<float> distances)
+        {
+            float3 force = float3.zero;
+
+            // Iterate over all the neighbouring boids
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                Boid.BoidInfo neighbour = boids[neighbours[i]];
+
+                // Ignore if the neighbour is a ally
+                if (boid.flockId == neighbour.flockId) continue;
+
+                // Values required to determine if the current boid is in attack range of enemy boid
+                float distance = distances[i];
+                // The boid will assume the enemy has the same attack distance and attack angle as itself
+                float attackDistRange = classInfo.attackDistRange;
+                float attackAngleRange = classInfo.attackAngleRange; 
+
+                // Determine if boid is in range of enemy and if the enemy is in range of the boid
+                bool selfInRange = BoidIndexInAttackRange(boid.pos - neighbour.pos, distance, neighbour.forward, attackDistRange, attackAngleRange);
+                bool enemyInRange = BoidIndexInAttackRange(neighbour.pos - boid.pos, distance, boid.forward, attackDistRange, attackAngleRange);
+
+                // If the boid itself is in range of the enemy, but the enemy is not in range of the boid itself,
+                // then we want to turn away from the view of the enemy
+                if (selfInRange && !enemyInRange)
+                {
+                    // Turn away from the enemy boid
+                    float3 turnDir = boid.forward - neighbour.forward;
+                    if (turnDir.x == 0 && turnDir.y == 0 && turnDir.z == 0) 
+                    {
+                        //TODO handle this (very unlikely) case
+                        //TODO this happens when the two boids have the same forward direction
+                        return float3.zero;
+                    }
+
+                    // Scale force using avoidance strength
+                    force += math.normalize(turnDir) * classInfo.avoidanceStrength;
+                }
+            }
+
+            return force;
         }
 
         private bool HeadedForCollisionWithMapBoundary(Boid.BoidInfo boid, Boid.ClassInfo classInfo)

@@ -67,6 +67,8 @@ public class Melee : Boid {
             avoidCollisionWeight = 100f,
 
             searchStrength = 10.4f,
+
+            avoidanceStrength = 48.0f,
             
             randomMovements = 6.0f,
 

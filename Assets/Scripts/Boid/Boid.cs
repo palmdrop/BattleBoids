@@ -109,7 +109,10 @@ public abstract class Boid : Selectable
                                         // closer to the enemy flock
         public float aggressionDistanceCap;  // If the enemy flock is further away than this, the aggression will be at max strength
 
-        public float searchStrength;
+        public float searchStrength; // Controls how much the boid is attracted to the center of the allied flock
+                                     // This behavior is only active if the boid has a low confidence level
+
+        public float avoidanceStrength; // A boid tries to avoid being in the attack scope of an enemy boid
 
         // Misc behaviors
         public float randomMovements;

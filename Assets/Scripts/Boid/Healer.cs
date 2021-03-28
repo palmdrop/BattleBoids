@@ -74,9 +74,11 @@ public class Healer : Boid
             aggressionFalloff = 2.0f,
             aggressionDistanceCap = 10.0f,
 
-            avoidCollisionWeight = 100f,
+            avoidanceStrength = 60f,
 
             searchStrength = 7.4f,
+
+            avoidCollisionWeight = 100f,
             
             randomMovements = 4.0f,
 
