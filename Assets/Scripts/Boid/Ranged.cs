@@ -33,7 +33,7 @@ public class Ranged : Boid {
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
-            viewRadius = 3f,
+            viewRadius = 1.6f,
             separationRadius = 0.3f,
             fearRadius = 2.0f,
             maxForce = 2f,
@@ -49,7 +49,7 @@ public class Ranged : Boid {
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 4.0f,
+            cohesionStrength = 6.0f,
             cohesionExponent = 0.0f,
             
             separationStrength = 120.0f,
@@ -57,8 +57,8 @@ public class Ranged : Boid {
             
             gravity = 1f,
             
-            fearStrength = 140.0f,
-            fearExponent = 1.0f,
+            fearStrength = 100.0f,
+            fearExponent = 1.8f,
 
             attackDistRange = 3f,
             attackAngleRange = Mathf.PI,
@@ -66,7 +66,7 @@ public class Ranged : Boid {
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
             
-            aggressionStrength = 10.4f,
+            aggressionStrength = 5.4f,
 
             avoidCollisionWeight = 100f,
 

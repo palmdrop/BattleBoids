@@ -39,7 +39,7 @@ public class Hero : Boid {
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
-            viewRadius = 3f,
+            viewRadius = 1f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
@@ -55,14 +55,14 @@ public class Hero : Boid {
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
 
-            cohesionStrength = 4.0f,
+            cohesionStrength = 6.0f,
             cohesionExponent = 0.0f,
 
             separationStrength = 120.0f,
             separationExponent = 1.0f,
 
-            fearStrength = 140.0f,
-            fearExponent = 1.0f,
+            fearStrength = 60.0f,
+            fearExponent = 2.1f,
 
             gravity = 1f,
 
@@ -72,7 +72,7 @@ public class Hero : Boid {
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
 
-            aggressionStrength = 10.4f,
+            aggressionStrength = 6.4f,
             searchStrength = 10.4f,
 
             avoidCollisionWeight = 100f,
