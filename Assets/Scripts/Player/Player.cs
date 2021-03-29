@@ -103,6 +103,18 @@ public class Player : MonoBehaviour
         return _gameUI;
     }
 
+    public bool CanReady()
+    {
+        foreach (Boid boid in flock)
+        {
+            if (boid.GetType() == Boid.Type.Hero || boid.GetType() == Boid.Type.Melee || boid.GetType() == Boid.Type.Ranged)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public bool IsReady()
     {
         return ready;
@@ -110,7 +122,10 @@ public class Player : MonoBehaviour
 
     public void Ready()
     {
-        ready = true;
+        if (CanReady())
+        {
+            ready = true;
+        }
     }
 
     public void Unready()
