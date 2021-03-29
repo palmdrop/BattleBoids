@@ -47,9 +47,7 @@ public class SetupManager : MonoBehaviour
         Dropdown.OptionData option;
         foreach (SceneData.Map map in SceneData.multiplayerMaps) {
             option = new Dropdown.OptionData();
-            StringBuilder entry = new StringBuilder(map.name);
-            entry.Append(" (").Append(map.numberOfPlayers.ToString()).Append(")");
-            option.text = entry.ToString();
+            option.text = map.name;
             dd.options.Add(option);
         }
         dd.value = PlayerPrefs.GetInt("MapIndex", 0);
