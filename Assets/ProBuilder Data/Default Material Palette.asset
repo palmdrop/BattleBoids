@@ -13,14 +13,13 @@ MonoBehaviour:
   m_Name: Default Material Palette
   m_EditorClassIdentifier: 
   array:
-  - {fileID: 2100000, guid: b8c2f4707e27b5848a3445ac58e77e90, type: 2}
-  - {fileID: 2100000, guid: 3f3e855863b373b4e8f5185982acb9ba, type: 2}
-  - {fileID: 2100000, guid: 0d22a6b24d61deb4b99106ac56c2b218, type: 2}
-  - {fileID: 2100000, guid: d708241a0fd258a418c7efad7f1a1412, type: 2}
-  - {fileID: 2100000, guid: 4733caf614af3005798f17e5de8cbea1, type: 2}
-  - {fileID: 2100000, guid: 32bb38cfd803013419afb0a8c03e619f, type: 2}
-  - {fileID: 2100000, guid: 1737f1c9cb8ffdfcf96d57b37bacf551, type: 2}
-  - {fileID: 2100000, guid: abc525879eb0e0442812d8e36c9b7761, type: 2}
-  - {fileID: 2100000, guid: 462738f9cc18ea94b97724fa2464b15f, type: 2}
-  - {fileID: 2100000, guid: 7af98ee22258e0145a994eea8e3ac278, type: 2}
-  - {fileID: 10302, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: c22777d6e868e4f2fb421913386b154e, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
