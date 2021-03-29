@@ -124,12 +124,6 @@ public class GameUI : MonoBehaviour
         } else if (Input.GetKey("2")) {
             // Select player 2
             SetPlayerSelectValue(1);
-        } else if (Input.GetKeyDown("n")) {
-            // Create new entity
-            activePlayer.GetSpawnArea().ChangeGridWidth(1);
-        } else if (Input.GetKeyDown("x")) {
-            // Remove entity
-            activePlayer.GetSpawnArea().ChangeGridWidth(-1);
         } else if (Input.GetKeyDown("r"))
         {
             // Run game
@@ -248,7 +242,7 @@ public class GameUI : MonoBehaviour
     void UnitButtonClick(GameObject button)
     {
         activePlayer.GetSpawnArea().SetEntityToSpawn(FindUnitByName(button.name));
-        activePlayer.GetSpawnArea().ChangeGridWidth(1);
+        activePlayer.GetSpawnArea().SetPlacing(true);
     }
 
     GameObject FindUnitByName(string name)
