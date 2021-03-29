@@ -179,6 +179,15 @@ public class GameUI : MonoBehaviour
         {
             ready.GetComponentInChildren<Text>().text = "Ready";
         }
+
+        if (!activePlayer.CanReady())
+        {
+            ready.interactable = false;
+        }
+        else
+        {
+            ready.interactable = true;
+        }
     }
 
     void UpdateGameState() {
