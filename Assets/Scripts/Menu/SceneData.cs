@@ -150,6 +150,11 @@ public class SceneData : MonoBehaviour
             new Map() {
                 name = "Dusk",
                 numberOfPlayers = 2
+            }, 
+            new Map()
+            {
+                name = "Midnight", 
+                numberOfPlayers = 2
             }
         }
     );
