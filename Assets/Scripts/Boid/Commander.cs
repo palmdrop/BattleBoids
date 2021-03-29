@@ -26,7 +26,7 @@ public class Commander : Boid
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
-            viewRadius = 3f,
+            viewRadius = 1f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
@@ -42,7 +42,7 @@ public class Commander : Boid
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f,
 
-            cohesionStrength = 4.0f,
+            cohesionStrength = 6.0f,
             cohesionExponent = 0.0f,
 
             separationStrength = 120.0f,
@@ -50,8 +50,8 @@ public class Commander : Boid
             
             gravity = 40f,
 
-            fearStrength = 140.0f,
-            fearExponent = 1.0f,
+            fearStrength = 60.0f,
+            fearExponent = 2.0f,
 
             attackDistRange = 1f,
             attackAngleRange = Mathf.PI / 4.0f,
@@ -59,8 +59,14 @@ public class Commander : Boid
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
 
-            aggressionStrength = 10.4f,
+            aggressionStrength = 7.4f,
+            aggressionFalloff = 2.0f,
+            aggressionDistanceCap = 10.0f,
+            maxAggressionMultiplier = 2.2f,
+
             searchStrength = 10.4f,
+
+            avoidanceStrength = 50f,
 
             avoidCollisionWeight = 100f,
 
@@ -79,6 +85,9 @@ public class Commander : Boid
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out hit, Mathf.Infinity, LayerMask.GetMask("Ground"))) {
                 var waypoint = Instantiate(waypointPrefab, hit.point, Quaternion.identity);
+                foreach (var rend in waypoint.GetComponentsInChildren<MeshRenderer>()) {
+                    rend.material.color = owner.color;
+                }
                 _path.Add(waypoint);
             }
         }
@@ -101,6 +110,14 @@ public class Commander : Boid
     {
         foreach (var waypoint in _path) {
             Destroy(waypoint);
+        }
+    }
+
+    public override void SetHidden(bool hidden)
+    {
+        base.SetHidden(hidden);
+        foreach (GameObject waypoint in _path) {
+            waypoint.SetActive(!hidden);
         }
     }
 

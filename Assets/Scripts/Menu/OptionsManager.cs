@@ -16,7 +16,7 @@ public class OptionsManager : MonoBehaviour
     private Resolution[] _resolutions;
     private int _defaultResolutionIndex;
 
-    void Start() {
+    public void Start() {
         _resolutions = Screen.resolutions;
         _defaultResolutionIndex = _resolutions.Length - 1;
         ApplySavedOptions();

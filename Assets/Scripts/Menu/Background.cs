@@ -11,6 +11,10 @@ public class Background : MonoBehaviour
         ScaleToFullScreen();
     }
 
+    void Update() {
+        ScaleToFullScreen();
+    }
+
     public void ScaleToFullScreen() {
         Vector2 spriteSize = GetComponent<Image>().sprite.bounds.size;
         float spriteRatio = spriteSize.x / spriteSize.y;

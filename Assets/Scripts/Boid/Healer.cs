@@ -31,13 +31,13 @@ public class Healer : Boid
         morale = moraleDefault = 1f;
         abilityDistance = 2.0f;
 
-        timeBetweenActions = 0.1f;
-        _healAmount = 2;
+        timeBetweenActions = 0.2f;
+        _healAmount = 1;
         _healRadius = 1.0f;
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
-            viewRadius = 1f,
+            viewRadius = 1.3f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2.0f,
@@ -53,15 +53,15 @@ public class Healer : Boid
             alignmentStrength = 6.0f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 6.0f,
+            cohesionStrength = 7.0f,
             cohesionExponent = 0.0f,
             
             separationStrength = 120.0f,
-            separationExponent = 1.0f,
+            separationExponent = 1.5f,
 
             gravity = 1f,
             
-            fearStrength = 200.0f,
+            fearStrength = 100.0f,
             fearExponent = 1.4f,
             
             attackDistRange = 0f,
@@ -70,11 +70,16 @@ public class Healer : Boid
             approachMovementStrength = 35.0f,
             approachMovementExponent = 0.5f,
             
-            aggressionStrength = 7.4f,
+            aggressionStrength = 5.4f,
+            aggressionFalloff = 2.0f,
+            aggressionDistanceCap = 10.0f,
+            maxAggressionMultiplier = 1.6f,
 
-            avoidCollisionWeight = 100f,
+            avoidanceStrength = 60f,
 
             searchStrength = 7.4f,
+
+            avoidCollisionWeight = 100f,
             
             randomMovements = 4.0f,
 

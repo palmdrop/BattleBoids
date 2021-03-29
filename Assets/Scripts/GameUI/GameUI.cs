@@ -103,10 +103,6 @@ public class GameUI : MonoBehaviour
 
     void InitReadyButton()
     {
-        foreach (Player player in players)
-        {
-            player.Unready();
-        }
         UpdateReady();
         ready.onClick.AddListener(ToggleReady);
     }
@@ -303,6 +299,8 @@ public class GameUI : MonoBehaviour
 
     public void ShowVictor(Player victor)
     {
+        AudioManager.instance.StopMusic("BattleMusic");
+        AudioManager.instance.PlayMusic("Fanfare");
         victoryText.text = victor.GetNickname() + " won!";
         victoryMenu.SetActive(true);
     }
