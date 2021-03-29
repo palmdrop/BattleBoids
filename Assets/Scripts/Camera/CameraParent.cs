@@ -45,11 +45,14 @@ public class CameraParent : MonoBehaviour
     private Vector3 _selectedGameObjectPosition;
     private Vector3 _parentCameraPosition;
 
+    private GameManager _gameManager;
+
     // Start is called before the first frame update
     private void Start()
     {
         _parentCamera = transform;
         _childCamera = _parentCamera.GetChild(0).transform;
+        _gameManager = FindObjectOfType<GameManager>();
         
         // Map script used to find map bounds
         map = FindObjectOfType<Map.Map>();
@@ -86,14 +89,14 @@ public class CameraParent : MonoBehaviour
         }
         
         // Checks if you clicked the button 
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1) && !_gameManager.IsPaused())
         {
             // Saves the position where you originally clicked the button
             _previousCursorPosition = Input.mousePosition;
         }
         
         // If right mouse button is held
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1) && !_gameManager.IsPaused())
         {
             // Saves the position where the cursor currently is when holding right click down
             _currentCursorPosition = Input.mousePosition;
@@ -121,6 +124,8 @@ public class CameraParent : MonoBehaviour
 
     private void MoveCamera()
     {
+        if (_gameManager.IsPaused())
+            return;
         _parentCameraPosition = _parentCamera.position;
                 
         // Make the movement speed dependent on y coordinate (the more we zoom out,the faster we move)
