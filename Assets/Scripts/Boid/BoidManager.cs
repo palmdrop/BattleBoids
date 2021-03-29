@@ -52,8 +52,7 @@ public class BoidManager : MonoBehaviour
         _boids.RemoveAll(b => b.IsDead());
     }
 
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         // Remove all dead boids
         ClearDeadBoids();
