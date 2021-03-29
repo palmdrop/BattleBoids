@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,16 +10,16 @@ public class SpawnArea : MonoBehaviour
 
     private Player _owner;
 
-    int instanceNumber = 1;
+    private int instanceNumber = 1;
 
-    List<Boid> spawned;
-    List<GameObject> holding = new List<GameObject>();
-    int gridWidth = 0;
-    bool canPlace = true;
+    private List<Boid> spawned;
+    private List<GameObject> holding = new List<GameObject>();
+    private bool canPlace = true;
+    private bool placing = false;
+    private Vector3 gridStart;
 
-    bool active = false;
-    
-    
+    private bool active = false;
+
     // Used for bounds creation
     Bounds spawnBounds;
     Vector3 minBoundPosition;
@@ -39,51 +40,34 @@ public class SpawnArea : MonoBehaviour
         boundSize = spawnBounds.extents;
     }
 
-    void UpdateGrid(Vector3 gridCenter)
+    void UpdateGrid(Vector3 gridEnd)
     {
-        while (holding.Count < gridWidth * gridWidth) {
+        float unitWidth = 0.4f;
+        int gridSizeX = (int) Math.Abs((gridEnd.x - gridStart.x) / unitWidth) + 1;
+        int gridSizeY = (int) Math.Abs((gridEnd.z - gridStart.z) / unitWidth) + 1;
+        int dirX = Math.Sign(gridEnd.x - gridStart.x);
+        int dirY = Math.Sign(gridEnd.z - gridStart.z);
+        while (holding.Count < gridSizeX * gridSizeY) {
             GameObject currentEntity;
             currentEntity = Instantiate(entityToSpawn, new Vector3(0, 0, 0), Quaternion.identity, _owner.gameObject.transform);
             currentEntity.name = "Player_" + _owner.id + "_Unit_" + instanceNumber++;
             holding.Add(currentEntity);
         }
-        
-        while (holding.Count > gridWidth * gridWidth) {
+
+        while (holding.Count > gridSizeX * gridSizeY) {
             GameObject currentEntity = holding[0];
-            currentEntity.GetComponent<Boid>().Die();
             Destroy(currentEntity);
             holding.RemoveAt(0);
         }
-        //float unitWidth = entityToSpawn.GetComponent<Collider>().bounds.size.z;
-        float unitWidth = 0.4f;
 
-        float width = gridWidth * unitWidth;
-        
         canPlace = true;
-        
-        for (int x = 0; x < gridWidth; x++) {
-            for (int z = 0; z < gridWidth; z++) {
-                int i = x * gridWidth + z;
+
+        for (int x = 0; x < gridSizeX; x++) {
+            for (int z = 0; z < gridSizeY; z++) {
+                int i = x * gridSizeY + z;
                 GameObject currentEntity = holding[i];
                 // Find ground height
-                Vector3 position = new Vector3(gridCenter.x + x * unitWidth - width / 2, SelectionManager.MousePositionInWorld.point.y + 3f, gridCenter.z + z * unitWidth - width / 2);
-                
-                /*
-                if (map.PointInsideBounds(position))
-                {
-<<<<<<< Updated upstream
-                    position.y =  1.2f;
-=======
-                    //position.y = map.HeightmapLookup(position) + map.transform.position.y + 1f;
-                    position.y = 2f;
->>>>>>> Stashed changes
-                }
-                else
-                {
-                    position.y = 0;
-                }
-                */
-                
+                Vector3 position = new Vector3(gridStart.x + dirX * x * unitWidth, SelectionManager.MousePositionInWorld.point.y + 3f, gridStart.z + dirY * z * unitWidth);
                 currentEntity.transform.position = position;
                 // Check if within spawn area
                 if (IsInside(currentEntity))
@@ -98,12 +82,12 @@ public class SpawnArea : MonoBehaviour
         }
     }
 
+
     // Update is called once per frame
     void Update()
     {
-        if (!active) {
-            gridWidth = 0;
-            UpdateGrid(new Vector3(0, 0, 0));
+        if (!active || !placing) {
+            ClearHolding();
             return;
         }
 
@@ -113,23 +97,24 @@ public class SpawnArea : MonoBehaviour
         // Move current entity to mouse position
         LayerMask mask = LayerMask.GetMask("Ground");
         if (Physics.Raycast(ray, out hit, 1000.0f, mask)) {
-            UpdateGrid(hit.point);
-        }
-
-        // If left mouse button is pressed
-        if (Input.GetMouseButtonDown(0)) {
-            if (holding.Count > 0 && canPlace && PurchaseSuccess()) {
+            // If left mouse button is released
+            if (Input.GetMouseButtonUp(0) &&
+                holding.Count > 0 && canPlace && PurchaseSuccess()) {
                 // Place entity
-                
+
                 foreach (GameObject currentEntity in holding) {
                     spawned.Add(currentEntity.GetComponent<Boid>());
                 }
                 holding.Clear();
-                gridWidth = 0;
-                
+
                 // Tell owner the flock has been updated
                 _owner.FlockUpdate = true;
+
+                this.placing = false;
+            } else if (!Input.GetMouseButton(0)) {
+                gridStart = hit.point;
             }
+            UpdateGrid(hit.point);
         }
     }
 
@@ -137,12 +122,12 @@ public class SpawnArea : MonoBehaviour
     {
         Vector3 goTransformPosition = gameObject.transform.position;
         Vector2 goPosition = new Vector2(goTransformPosition.x, goTransformPosition.z);
-        
-        
+
+
         Rect bounds2D = new Rect(minBoundPosition.x, minBoundPosition.z, boundSize.x * 2, boundSize.z * 2);
 
         Boid boid = gameObject.GetComponent<Boid>();
-        
+
         if (bounds2D.Contains(goPosition))
         {
             boid.SetColor(_owner.color);
@@ -163,7 +148,7 @@ public class SpawnArea : MonoBehaviour
         _owner.AddBoins(SumHoldingCost());
     }
 
-    int SumHoldingCost()
+    public int SumHoldingCost()
     {
         Boid boid;
         int sum = 0;
@@ -175,20 +160,15 @@ public class SpawnArea : MonoBehaviour
         return sum;
     }
 
-    public void ChangeGridWidth(int modifier)
+    public void ClearHolding()
     {
-        if (gridWidth + modifier < 0)
-        {
-            gridWidth = 0;
-        }
-        else
-        {
-            gridWidth += modifier;
-        }
+        holding.ForEach(b => Destroy(b));
+        holding.Clear();
     }
 
     public void SetEntityToSpawn(GameObject entity)
     {
+        ClearHolding();
         entityToSpawn = entity;
     }
 
@@ -203,5 +183,10 @@ public class SpawnArea : MonoBehaviour
     public bool isHolding()
     {
         return holding.Count > 0;
+    }
+
+    public void SetPlacing(bool placing)
+    {
+        this.placing = placing;
     }
 }
