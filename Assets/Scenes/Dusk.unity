@@ -3362,7 +3362,7 @@ PrefabInstance:
       objectReference: {fileID: 1003236198}
     - target: {fileID: 3014710182079087402, guid: 52a5281b4a239769496a87118bae7420, type: 3}
       propertyPath: m_RootOrder
-      value: 4
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3014710182079087402, guid: 52a5281b4a239769496a87118bae7420, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3974,6 +3974,11 @@ PrefabInstance:
       objectReference: {fileID: 1241491918}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 52a5281b4a239769496a87118bae7420, type: 3}
+--- !u!4 &1143783033 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3014710182079087402, guid: 52a5281b4a239769496a87118bae7420, type: 3}
+  m_PrefabInstance: {fileID: 1143783032}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1155872207
 GameObject:
   m_ObjectHideFlags: 0
@@ -4334,12 +4339,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1278620042}
-  m_LocalRotation: {x: -0, y: 0.9999863, z: -0, w: 0.0052361456}
-  m_LocalPosition: {x: 70.19461, y: -99.41514, z: 101.26958}
+  m_LocalRotation: {x: -0, y: -0.74045646, z: -0, w: 0.6721043}
+  m_LocalPosition: {x: 60.475456, y: -69.41514, z: -62.8057}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1381766859}
-  m_RootOrder: 1
+  m_Father: {fileID: 1143783033}
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1284130154
 GameObject:
@@ -4498,11 +4503,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e8f36ff4269681d49875178b71004bbd, type: 3}
---- !u!4 &1381766859 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3859625416502803577, guid: e8f36ff4269681d49875178b71004bbd, type: 3}
-  m_PrefabInstance: {fileID: 1309440133}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1402312536
 GameObject:
   m_ObjectHideFlags: 0
@@ -4594,7 +4594,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 25.97, y: 56.741, z: 0}
 --- !u!4 &1412363487 stripped
 Transform:
@@ -5633,7 +5633,7 @@ Transform:
   - {fileID: 1899056131}
   - {fileID: 1412363487}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1807209026 stripped
 GameObject:
