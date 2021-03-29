@@ -8,6 +8,8 @@ using UnityEngine.SceneManagement;
 public class GameUI : MonoBehaviour
 {
     [SerializeField] private Text boins;
+    [SerializeField] private GameObject currentCost;
+    [SerializeField] private Text currentCostText;
     [SerializeField] private Dropdown playerSelect;
     [SerializeField] private Player activePlayer;
     [SerializeField] private Canvas buttons;
@@ -284,6 +286,9 @@ public class GameUI : MonoBehaviour
     public void UpdateBoins()
     {
         boins.text = activePlayer.GetBoins().ToString();
+        int cost = -activePlayer.GetSpawnArea().SumHoldingCost();
+        currentCost.SetActive(cost != 0);
+        currentCostText.text = cost.ToString();
     }
 
     public Player GetActivePlayer()
