@@ -20,7 +20,10 @@ public class GameUI : MonoBehaviour
     [SerializeField] private bool showHealthBars;
     [SerializeField] private Text victoryText;
     [SerializeField] private Button backButton;
+    [SerializeField] private GameObject gameUI;
     [SerializeField] private GameObject victoryMenu;
+    [SerializeField] private GameObject pauseMenu;
+    [SerializeField] private GameObject optionsMenu;
 
     private GameManager _gameManager;
     private string _prefix;
@@ -37,6 +40,7 @@ public class GameUI : MonoBehaviour
         InitUnitButtons();
         InitReadyButton();
         InitVictoryMenu();
+        Resume();
     }
 
     // Update is called once per frame
@@ -159,6 +163,14 @@ public class GameUI : MonoBehaviour
         {
             AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() - 0.1f);
         }
+        else if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (!_gameManager.IsPaused()) {
+                Pause();
+            } else {
+                Resume();
+            }
+        }
     }
 
     void ManageActivePlayer() {
@@ -227,8 +239,9 @@ public class GameUI : MonoBehaviour
         }
     }
 
-    void GoBack()
+    public void GoBack()
     {
+        AudioManager.instance.StopMusic("BattleMusic");
         SceneManager.LoadScene("Menu");
     }
 
@@ -312,5 +325,32 @@ public class GameUI : MonoBehaviour
         AudioManager.instance.PlayMusic("Fanfare");
         victoryText.text = victor.GetNickname() + " won!";
         victoryMenu.SetActive(true);
+    }
+
+    public void Pause()
+    {
+        gameUI.SetActive(false);
+        pauseMenu.SetActive(true);
+        optionsMenu.SetActive(false);
+        _gameManager.SetPaused(true);
+    }
+
+    public void Resume()
+    {
+        gameUI.SetActive(true);
+        optionsMenu.SetActive(false);
+        pauseMenu.SetActive(false);
+        _gameManager.SetPaused(false);
+    }
+
+    public void OpenOptions()
+    {
+        pauseMenu.SetActive(false);
+        optionsMenu.SetActive(true);
+    }
+
+    public void Exit()
+    {
+        Application.Quit();
     }
 }
