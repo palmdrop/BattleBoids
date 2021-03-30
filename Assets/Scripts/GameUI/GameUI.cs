@@ -202,6 +202,9 @@ public class GameUI : MonoBehaviour
         if (AllPlayersReady() && !hasStarted) {
             _gameManager.BeginBattle();
             ready.gameObject.SetActive(false);
+            boins.transform.parent.gameObject.SetActive(false);
+            buttons.gameObject.SetActive(false);
+            playerSelect.gameObject.SetActive(false);
             hasStarted = true;
         }
     }

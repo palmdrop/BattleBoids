@@ -75,6 +75,9 @@ public class GameManager : MonoBehaviour
         foreach (Player p in _players) {
             p.SetActive(false);
         }
+
+        GetComponentInChildren<SelectionManager>().gameObject.SetActive(false);
+
     }
 
     public SceneData.Type GetType() {
