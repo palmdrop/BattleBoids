@@ -222,7 +222,11 @@ public class GameUI : MonoBehaviour
     }
 
     public void SetActivePlayerId(int i) {
-        _activePlayerId = i;
+        if (_gameManager.GetType() == SceneData.Type.Campaign) {
+            _activePlayerId = 1;
+        } else {
+            _activePlayerId = i;
+        }
         if (_gameManager.GetState() == GameManager.GameState.Placement) {
             ManageActivePlayer();
         }
