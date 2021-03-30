@@ -27,9 +27,9 @@ public class Commander : Boid
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
             viewRadius = 1f,
-            separationRadius = 0.3f,
+            separationRadius = 0.6f,
             fearRadius = 1.0f,
-            maxForce = 2f,
+            maxForce = 7.0f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,
@@ -39,10 +39,10 @@ public class Commander : Boid
 
             confidenceThreshold = 0.5f,
 
-            alignmentStrength = 5.6f,
+            alignmentStrength = 3.6f,
             alignmentExponent = 0.0f,
 
-            cohesionStrength = 6.0f,
+            cohesionStrength = 2.0f,
             cohesionExponent = 0.0f,
 
             separationStrength = 120.0f,
@@ -50,27 +50,27 @@ public class Commander : Boid
             
             gravity = 40f,
 
-            fearStrength = 60.0f,
+            fearStrength = 5.0f,
             fearExponent = 2.0f,
 
             attackDistRange = 1f,
             attackAngleRange = Mathf.PI / 4.0f,
 
-            approachMovementStrength = 20.1f,
+            approachMovementStrength = 30.1f,
             approachMovementExponent = 0.5f,
 
-            aggressionStrength = 7.4f,
+            aggressionStrength = 4.4f,
             aggressionFalloff = 2.0f,
             aggressionDistanceCap = 10.0f,
-            maxAggressionMultiplier = 2.2f,
+            maxAggressionMultiplier = 1.7f,
 
             searchStrength = 10.4f,
 
             avoidanceStrength = 50f,
 
-            avoidCollisionWeight = 100f,
+            avoidCollisionWeight = 1000f,
 
-            randomMovements = 6.0f,
+            randomMovements = 3.0f,
 
             hoverKi = 2f,
             hoverKp = 10f,
