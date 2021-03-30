@@ -12,7 +12,10 @@ public class GameUI : MonoBehaviour
     [SerializeField] private GameObject currentCost;
     [SerializeField] private Text currentCostText;
     [SerializeField] private Player activePlayer;
+    [SerializeField] private GameObject unitsText;
     [SerializeField] private GameObject unitButtons;
+    [SerializeField] private GameObject commadsText;
+    [SerializeField] private GameObject commandButtons;
     [SerializeField] private List<GameObject> unitPrefabs;
     [SerializeField] private Button ready;
     [SerializeField] private bool showHealthBars;
@@ -154,8 +157,10 @@ public class GameUI : MonoBehaviour
             _gameManager.BeginBattle();
             ready.gameObject.SetActive(false);
             boins.transform.parent.gameObject.SetActive(false);
-            buttons.gameObject.SetActive(false);
-            playerSelect.gameObject.SetActive(false);
+            unitsText.SetActive(false);
+            unitButtons.SetActive(false);
+            commadsText.SetActive(false);
+            commandButtons.SetActive(false);
             hasStarted = true;
         }
     }
