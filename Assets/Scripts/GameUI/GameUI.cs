@@ -20,7 +20,7 @@ public class GameUI : MonoBehaviour
     [SerializeField] private Button ready;
     [SerializeField] private bool showHealthBars;
     [SerializeField] private Text victoryText;
-    [SerializeField] private Button backButton;
+    [SerializeField] private GameObject nextLevelButton;
     [SerializeField] private GameObject gameUI;
     [SerializeField] private GameObject victoryMenu;
     [SerializeField] private GameObject pauseMenu;
@@ -75,10 +75,11 @@ public class GameUI : MonoBehaviour
         ready.onClick.AddListener(ToggleReady);
     }
 
-    void InitVictoryMenu()
-    {
-        victoryMenu.gameObject.SetActive(false);
-        backButton.onClick.AddListener(GoBack);
+    void InitVictoryMenu() {
+        bool nextLevelExists = SceneManager.GetActiveScene().buildIndex + 1 < SceneManager.sceneCountInBuildSettings;
+        if (_gameManager.GetType() == SceneData.Type.Multiplayer || !nextLevelExists) {
+            nextLevelButton.SetActive(false);
+        }
     }
 
     void ManageKeyInput() {
@@ -187,10 +188,19 @@ public class GameUI : MonoBehaviour
         }
     }
 
-    public void GoBack()
-    {
+    public void Menu() {
         AudioManager.instance.StopMusic("BattleMusic");
         SceneManager.LoadScene("Menu");
+    }
+
+    public void Replay() {
+        AudioManager.instance.StopMusic("BattleMusic");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void NextLevel() {
+        int next = SceneManager.GetActiveScene().buildIndex + 1;
+        SceneManager.LoadScene(next);
     }
 
     void UnitButtonClick(GameObject button)
