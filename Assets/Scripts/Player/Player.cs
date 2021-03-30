@@ -52,6 +52,10 @@ public class Player : MonoBehaviour
     {
     }
 
+    public bool IsActive() {
+        return _active;
+    }
+
     public List<Boid> GetFlock()
     {
         return flock;
@@ -160,6 +164,10 @@ public class Player : MonoBehaviour
 
     public void SetId(int id) {
         this.id = id;
+    }
+
+    public int GetId() {
+        return this.id;
     }
 
     public void SetNickname(string nickname) {
