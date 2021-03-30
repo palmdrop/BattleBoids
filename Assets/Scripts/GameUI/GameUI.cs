@@ -11,7 +11,6 @@ public class GameUI : MonoBehaviour
     [SerializeField] private Text boins;
     [SerializeField] private GameObject currentCost;
     [SerializeField] private Text currentCostText;
-    [SerializeField] private Dropdown playerSelect;
     [SerializeField] private Player activePlayer;
     [SerializeField] private Canvas buttons;
     [SerializeField] private GameObject buttonPrefab;
@@ -32,6 +31,7 @@ public class GameUI : MonoBehaviour
     private string _prefix;
     private bool hasStarted = false;
     private List<Player> players;
+    private int _activePlayerId;
 
     // Start is called before the first frame update
     void Start()
@@ -39,7 +39,7 @@ public class GameUI : MonoBehaviour
         _gameManager = GetComponentInParent<GameManager>();
         _prefix = _gameManager.GetType().ToString();
         players = _gameManager.GetPlayers();
-        InitPlayerDropdown();
+        SetActivePlayerId(1);
         InitUnitButtons();
         InitReadyButton();
         InitVictoryMenu();
@@ -54,28 +54,6 @@ public class GameUI : MonoBehaviour
         UpdateReady();
         UpdateButtonColors(activePlayer.color);
         UpdateGameState();
-    }
-
-    void InitPlayerDropdown()
-    {
-        if (_gameManager.GetType() != SceneData.Type.Multiplayer)
-        {
-            playerSelect.gameObject.SetActive(false);
-            activePlayer.SetActive(true);
-            return;
-        }
-        playerSelect.ClearOptions();
-        foreach (var player in players)
-        {
-            Dropdown.OptionData newPlayer = new Dropdown.OptionData();
-            newPlayer.text = player.GetNickname();
-            playerSelect.options.Add(newPlayer);
-        }
-        activePlayer = SetActivePlayer();
-        playerSelect.captionText.text = activePlayer.GetNickname();
-        playerSelect.onValueChanged.AddListener(delegate {
-            ManageActivePlayer();
-        });
     }
 
     void InitUnitButtons()
@@ -123,10 +101,10 @@ public class GameUI : MonoBehaviour
     void ManageKeyInput() {
         if (Input.GetKey("1")) {
             // Select player 1
-            SetPlayerSelectValue(0);
+            SetActivePlayerId(1);
         } else if (Input.GetKey("2")) {
             // Select player 2
-            SetPlayerSelectValue(1);
+            SetActivePlayerId(2);
         } else if (Input.GetKeyDown("r"))
         {
             // Run game
@@ -167,14 +145,6 @@ public class GameUI : MonoBehaviour
             } else {
                 Resume();
             }
-        }
-    }
-
-    void ManageActivePlayer() {
-        string selectedPlayerName = playerSelect.options[playerSelect.value].text;
-        string activePlayerName = activePlayer.GetNickname();
-        if (!selectedPlayerName.Equals(activePlayerName)) {
-            activePlayer = SetActivePlayer();
         }
     }
 
@@ -263,28 +233,22 @@ public class GameUI : MonoBehaviour
         return null;
     }
 
-    void SetPlayerSelectValue(int i) {
-        if (i >= 0 && i - 1 <= playerSelect.options.Count) {
-            playerSelect.value = i;
+    public void SetActivePlayerId(int i) {
+        _activePlayerId = i;
+        if (_gameManager.GetState() == GameManager.GameState.Placement) {
+            ManageActivePlayer();
         }
     }
 
-    Player SetActivePlayer()
-    {
-        string nickname = playerSelect.options[playerSelect.value].text;
-        foreach (Player player in players)
-        {
-            player.SetActive(false);
-        }
-        foreach (Player player in players)
-        {
-            if (player.GetNickname().Equals(nickname))
-            {
+    private void ManageActivePlayer() {
+        foreach (Player player in players) {
+            if (player.GetId() == _activePlayerId) {
+                activePlayer = player;
                 player.SetActive(true);
-                return player;
+            } else {
+                player.SetActive(false);
             }
         }
-        return null;
     }
 
     private string IntToHumanReadbleNumber(int number) {
