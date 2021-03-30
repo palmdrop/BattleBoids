@@ -12,13 +12,9 @@ public class GameUI : MonoBehaviour
     [SerializeField] private GameObject currentCost;
     [SerializeField] private Text currentCostText;
     [SerializeField] private Player activePlayer;
-    [SerializeField] private Canvas buttons;
-    [SerializeField] private GameObject buttonPrefab;
-    [SerializeField] private List<GameObject> unitPrefabs; // Use same order for
-    [SerializeField] private List<Sprite> unitSprites;     // unitPrefabs and unitSprites
+    [SerializeField] private GameObject unitButtons;
+    [SerializeField] private List<GameObject> unitPrefabs;
     [SerializeField] private Button ready;
-    [SerializeField] private int unitButtonRows;
-    [SerializeField] private int unitButtonCols;
     [SerializeField] private bool showHealthBars;
     [SerializeField] private Text victoryText;
     [SerializeField] private Button backButton;
@@ -56,33 +52,17 @@ public class GameUI : MonoBehaviour
         UpdateGameState();
     }
 
-    void InitUnitButtons()
-    {
-        for (int i = 0; i < unitPrefabs.Count; i++)
-        {
-            GameObject button = Instantiate(buttonPrefab);
-            button.transform.SetParent(buttons.transform);
-            button.name = unitPrefabs[i].name;
-            RectTransform buttonRectTransform = button.transform.GetComponent<RectTransform>();
-            buttonRectTransform.localScale = new Vector3(1, 1, 1);
-            float width = buttonRectTransform.sizeDelta.x * buttonRectTransform.localScale.x;
-            float height = buttonRectTransform.sizeDelta.y * buttonRectTransform.localScale.y;
-            button.transform.localPosition = new Vector3(
-                -(i % unitButtonCols) * width,
-                (i % unitButtonRows) * height,
-                0
-            );
-
-            Image image = button.GetComponent<Image>();
-            image.sprite = unitSprites[i];
+    void InitUnitButtons() {
+        foreach (Transform child in unitButtons.transform) {
+            GameObject button = child.GetChild(1).gameObject;
+            Image unitImage = button.GetComponent<Image>();
             Color color = activePlayer.color;
-            if (Boolean.Parse(PlayerPrefs.GetString(_prefix + unitPrefabs[i].name, "true"))) {
+            if (Boolean.Parse(PlayerPrefs.GetString(_prefix + button.name, "true"))) {
                 button.GetComponent<Button>().onClick.AddListener(() => UnitButtonClick(button));
             } else {
-                color = GetDisableColor(color);
-                Destroy(button.GetComponent<Button>());
+                button.GetComponent<Button>().interactable = false;
             }
-            image.color = color;
+            unitImage.color = color;
         }
     }
 
@@ -181,20 +161,13 @@ public class GameUI : MonoBehaviour
     }
 
     void UpdateButtonColors(Color color) {
-        foreach (Transform child in buttons.transform) {
+        foreach (Transform child in unitButtons.transform) {
             UpdateButtonColor(child.gameObject, color);
         }
     }
 
     void UpdateButtonColor(GameObject unitButton, Color color) {
-        if (!Boolean.Parse(PlayerPrefs.GetString(_prefix + unitButton.name, "true"))) {
-            color = GetDisableColor(color);
-        }
-        unitButton.GetComponent<Image>().color = color;
-    }
-
-    Color GetDisableColor(Color color) {
-        return new Color(color.r, color.g, color.b, 0.25f);
+        unitButton.transform.GetChild(1).gameObject.GetComponent<Image>().color = color;
     }
 
     void ToggleReady()
