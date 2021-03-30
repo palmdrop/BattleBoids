@@ -76,7 +76,7 @@ public class GameUI : MonoBehaviour
     }
 
     void InitVictoryMenu() {
-        bool nextLevelExists = SceneManager.GetActiveScene().buildIndex + 1 < SceneManager.sceneCountInBuildSettings;
+        bool nextLevelExists = SceneData.GetNextLevel() != null;
         if (_gameManager.GetType() == SceneData.Type.Multiplayer || !nextLevelExists) {
             nextLevelButton.SetActive(false);
         }
@@ -199,8 +199,11 @@ public class GameUI : MonoBehaviour
     }
 
     public void NextLevel() {
-        int next = SceneManager.GetActiveScene().buildIndex + 1;
-        SceneManager.LoadScene(next);
+        var nextLevel = SceneData.GetNextLevel();
+        if (nextLevel != null) {
+            SceneData.SaveGameSettings(((SceneData.Level)nextLevel).gameSettings, SceneData.Type.Campaign);
+            SceneManager.LoadScene(((SceneData.Level)nextLevel).gameSettings.mapName);
+        }
     }
 
     void UnitButtonClick(GameObject button)
