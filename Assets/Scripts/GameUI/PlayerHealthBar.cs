@@ -40,7 +40,11 @@ public class PlayerHealthBar : MonoBehaviour
     }
 
     private void UpdateReady() {
-        readyText.color = player.IsReady() ? ready : unReady;
+        if (_gameManager.GetState() == GameManager.GameState.Placement) {
+            readyText.color = player.IsReady() ? ready : unReady;
+        } else {
+            readyText.gameObject.SetActive(false);
+        }
     }
 
     private void UpdateActivePlayer() {

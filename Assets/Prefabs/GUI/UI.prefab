@@ -2117,7 +2117,10 @@ MonoBehaviour:
   currentCost: {fileID: 2193488113816281013}
   currentCostText: {fileID: 1942401380486649364}
   activePlayer: {fileID: 0}
+  unitsText: {fileID: 2544244654473297628}
   unitButtons: {fileID: 7854776976272426943}
+  commadsText: {fileID: 5230431530304777472}
+  commandButtons: {fileID: 4828007418070270230}
   unitPrefabs:
   - {fileID: 228136357535637124, guid: a8adbcef3b4e9bdfdb31b051916036b7, type: 3}
   - {fileID: 8536187328163653483, guid: fd9de4b9543eb56808b2f2ca101edd52, type: 3}
