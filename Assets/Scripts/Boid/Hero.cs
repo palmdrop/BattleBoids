@@ -39,7 +39,7 @@ public class Hero : Boid {
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
-            viewRadius = 3f,
+            viewRadius = 1f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
@@ -55,14 +55,14 @@ public class Hero : Boid {
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
 
-            cohesionStrength = 4.0f,
+            cohesionStrength = 6.0f,
             cohesionExponent = 0.0f,
 
             separationStrength = 120.0f,
             separationExponent = 1.0f,
 
-            fearStrength = 140.0f,
-            fearExponent = 1.0f,
+            fearStrength = 60.0f,
+            fearExponent = 2.1f,
 
             gravity = 1f,
 
@@ -72,8 +72,14 @@ public class Hero : Boid {
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
 
-            aggressionStrength = 10.4f,
+            aggressionStrength = 6.4f,
+            aggressionFalloff = 2.0f,
+            aggressionDistanceCap = 10.0f,
+            maxAggressionMultiplier = 2.2f,
+
             searchStrength = 10.4f,
+
+            avoidanceStrength = 40f,
 
             avoidCollisionWeight = 100f,
 
@@ -90,28 +96,20 @@ public class Hero : Boid {
     }
 
     protected override void Act() {
-        if (HasTarget() && _aiming == false) {
-            Boid aimedTarget = target;
+        if (HasTarget() && !target.IsDead() && _aiming == false) {
             _aiming = true;
             _aimLockCompleteTime = Time.time + aimLockTime;
-            IEnumerator aimAndFire = AimAndFire(aimedTarget, laserDrawTime);
+            IEnumerator aimAndFire = AimAndFire(target, laserDrawTime);
             StartCoroutine(aimAndFire);
         }
-        if (HasFriendlyTarget()) {
+        if (HasFriendlyTarget() && !friendlyTarget.IsDead()) {
             friendlyTarget.GiveBoost(boostTime);
         }
     }
 
     private IEnumerator AimAndFire(Boid target, float waitTime) {
-        while (!IsDead()) {
-            Vector3 targetPos;
-            if (target != null) { // Target has not been destroyed
-                targetPos = target.GetPos();
-            } else {
-                _aiming = false;
-                lockLaser.SetActive(false);
-                yield break;
-            }
+        while (!IsDead() && !target.IsDead()) {
+            Vector3 targetPos = target.GetPos();
             float width = laserDoneWidth
                         - laserDoneWidth
                         * (_aimLockCompleteTime - Time.time) / aimLockTime;
@@ -119,18 +117,16 @@ public class Hero : Boid {
             lockLaser.SetActive(true);
 
             if (Time.time > _aimLockCompleteTime) { // Aiming done, fire
-                _aiming = false;
-                lockLaser.SetActive(false);
                 Fire(targetPos);
-                yield break;
+                break;
             } else if (NotReachable(targetPos)) { // Target moved away, reset
-                _aiming = false;
-                lockLaser.SetActive(false);
-                yield break;
+                break;
             } else { // Continue aiming
                 yield return new WaitForSeconds(waitTime);
             }
         }
+        _aiming = false;
+        lockLaser.SetActive(false);
     }
 
     private void Fire(Vector3 position) {

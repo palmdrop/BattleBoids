@@ -3,10 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameUI : MonoBehaviour
 {
     [SerializeField] private Text boins;
+    [SerializeField] private GameObject currentCost;
+    [SerializeField] private Text currentCostText;
     [SerializeField] private Dropdown playerSelect;
     [SerializeField] private Player activePlayer;
     [SerializeField] private Canvas buttons;
@@ -18,6 +21,11 @@ public class GameUI : MonoBehaviour
     [SerializeField] private int unitButtonCols;
     [SerializeField] private bool showHealthBars;
     [SerializeField] private Text victoryText;
+    [SerializeField] private Button backButton;
+    [SerializeField] private GameObject gameUI;
+    [SerializeField] private GameObject victoryMenu;
+    [SerializeField] private GameObject pauseMenu;
+    [SerializeField] private GameObject optionsMenu;
 
     private GameManager _gameManager;
     private string _prefix;
@@ -33,7 +41,8 @@ public class GameUI : MonoBehaviour
         InitPlayerDropdown();
         InitUnitButtons();
         InitReadyButton();
-        victoryText.enabled = false;
+        InitVictoryMenu();
+        Resume();
     }
 
     // Update is called once per frame
@@ -48,6 +57,12 @@ public class GameUI : MonoBehaviour
 
     void InitPlayerDropdown()
     {
+        if (_gameManager.GetType() != SceneData.Type.Multiplayer)
+        {
+            playerSelect.gameObject.SetActive(false);
+            activePlayer.SetActive(true);
+            return;
+        }
         playerSelect.ClearOptions();
         foreach (var player in players)
         {
@@ -94,12 +109,14 @@ public class GameUI : MonoBehaviour
 
     void InitReadyButton()
     {
-        foreach (Player player in players)
-        {
-            player.Unready();
-        }
         UpdateReady();
         ready.onClick.AddListener(ToggleReady);
+    }
+
+    void InitVictoryMenu()
+    {
+        victoryMenu.gameObject.SetActive(false);
+        backButton.onClick.AddListener(GoBack);
     }
 
     void ManageKeyInput() {
@@ -109,12 +126,6 @@ public class GameUI : MonoBehaviour
         } else if (Input.GetKey("2")) {
             // Select player 2
             SetPlayerSelectValue(1);
-        } else if (Input.GetKeyDown("n")) {
-            // Create new entity
-            activePlayer.GetSpawnArea().ChangeGridWidth(1);
-        } else if (Input.GetKeyDown("x")) {
-            // Remove entity
-            activePlayer.GetSpawnArea().ChangeGridWidth(-1);
         } else if (Input.GetKeyDown("r"))
         {
             // Run game
@@ -148,6 +159,14 @@ public class GameUI : MonoBehaviour
         {
             AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() - 0.1f);
         }
+        else if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (!_gameManager.IsPaused()) {
+                Pause();
+            } else {
+                Resume();
+            }
+        }
     }
 
     void ManageActivePlayer() {
@@ -167,6 +186,15 @@ public class GameUI : MonoBehaviour
         else
         {
             ready.GetComponentInChildren<Text>().text = "Ready";
+        }
+
+        if (!activePlayer.CanReady())
+        {
+            ready.interactable = false;
+        }
+        else
+        {
+            ready.interactable = true;
         }
     }
 
@@ -207,10 +235,16 @@ public class GameUI : MonoBehaviour
         }
     }
 
+    public void GoBack()
+    {
+        AudioManager.instance.StopMusic("BattleMusic");
+        SceneManager.LoadScene("Menu");
+    }
+
     void UnitButtonClick(GameObject button)
     {
         activePlayer.GetSpawnArea().SetEntityToSpawn(FindUnitByName(button.name));
-        activePlayer.GetSpawnArea().ChangeGridWidth(1);
+        activePlayer.GetSpawnArea().SetPlacing(true);
     }
 
     GameObject FindUnitByName(string name)
@@ -252,6 +286,9 @@ public class GameUI : MonoBehaviour
     public void UpdateBoins()
     {
         boins.text = activePlayer.GetBoins().ToString();
+        int cost = -activePlayer.GetSpawnArea().SumHoldingCost();
+        currentCost.SetActive(cost != 0);
+        currentCostText.text = cost.ToString();
     }
 
     public Player GetActivePlayer()
@@ -283,7 +320,36 @@ public class GameUI : MonoBehaviour
 
     public void ShowVictor(Player victor)
     {
+        AudioManager.instance.StopMusic("BattleMusic");
+        AudioManager.instance.PlayMusic("Fanfare");
         victoryText.text = victor.GetNickname() + " won!";
-        victoryText.enabled = true;
+        victoryMenu.SetActive(true);
+    }
+
+    public void Pause()
+    {
+        gameUI.SetActive(false);
+        pauseMenu.SetActive(true);
+        optionsMenu.SetActive(false);
+        _gameManager.SetPaused(true);
+    }
+
+    public void Resume()
+    {
+        gameUI.SetActive(true);
+        optionsMenu.SetActive(false);
+        pauseMenu.SetActive(false);
+        _gameManager.SetPaused(false);
+    }
+
+    public void OpenOptions()
+    {
+        pauseMenu.SetActive(false);
+        optionsMenu.SetActive(true);
+    }
+
+    public void Exit()
+    {
+        Application.Quit();
     }
 }

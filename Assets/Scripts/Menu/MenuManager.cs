@@ -24,6 +24,7 @@ public class MenuManager : MonoBehaviour
         _creditsMenu = menus[4];
 
         AudioManager.instance.PlayMusic("MenuMusic");
+        _optionsMenu.GetComponent<OptionsManager>().Start();
     }
 
     public void MainMenu() {
@@ -50,21 +51,21 @@ public class MenuManager : MonoBehaviour
         Application.Quit();
     }
 
-    public void Play(string scene) {
-        LoadingScreen(scene);
-        IEnumerator loadSceneAsync = LoadSceneAsync(scene);
+    public void Play(SceneData.GameSettings settings) {
+        LoadingScreen(settings);
+        IEnumerator loadSceneAsync = LoadSceneAsync(settings.mapName);
         StartCoroutine(loadSceneAsync);
     }
 
     // Get the sprite that corresponds to the scene
-    public Sprite GetSceneSprite(string scene) {
+    public Sprite GetSceneSprite(string spriteName) {
         StringBuilder path = new StringBuilder("Sprites/SceneSprites/");
-        path.Append(scene);
+        path.Append(spriteName);
         return Resources.Load<Sprite>(path.ToString());
     }
 
-    private void LoadingScreen(string scene) {
-        loadingScreen.transform.GetChild(1).gameObject.GetComponent<Image>().sprite = GetSceneSprite(scene);
+    private void LoadingScreen(SceneData.GameSettings settings) {
+        loadingScreen.transform.GetChild(1).gameObject.GetComponent<Image>().sprite = GetSceneSprite(settings.spriteName);
         loadingScreen.SetActive(true);
     }
 

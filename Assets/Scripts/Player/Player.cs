@@ -31,6 +31,14 @@ public class Player : MonoBehaviour
     void Start()
     {
         _gameUI = GetComponentInParent<GameManager>().GetGameUI();
+        foreach (Boid b in GetComponentsInChildren<Boid>())
+        {
+            flock.Add(b);
+        }
+        if (flock.Count > 0)
+        {
+            Ready();
+        }
         _flockInfo = new FlockInfo()
         {
             avgPos = float3.zero,
@@ -95,6 +103,18 @@ public class Player : MonoBehaviour
         return _gameUI;
     }
 
+    public bool CanReady()
+    {
+        foreach (Boid boid in flock)
+        {
+            if (boid.GetType() == Boid.Type.Hero || boid.GetType() == Boid.Type.Melee || boid.GetType() == Boid.Type.Ranged)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public bool IsReady()
     {
         return ready;
@@ -102,7 +122,10 @@ public class Player : MonoBehaviour
 
     public void Ready()
     {
-        ready = true;
+        if (CanReady())
+        {
+            ready = true;
+        }
     }
 
     public void Unready()
@@ -124,15 +147,14 @@ public class Player : MonoBehaviour
     {
         _active = active;
         var state = GetComponentInParent<GameManager>().GetState();
+        var type = GetComponentInParent<GameManager>().GetType();
         if (_active && state == GameManager.GameState.Placement) {
             GetComponentInChildren<SpawnArea>().Activate();
         } else {
             GetComponentInChildren<SpawnArea>().Deactivate();
         }
         foreach (var boid in flock) {
-            foreach (Renderer r in boid.GetComponentsInChildren<Renderer>()) {
-                r.enabled = _active || state != GameManager.GameState.Placement;
-            }
+            boid.SetHidden(!_active && state == GameManager.GameState.Placement && type == SceneData.Type.Multiplayer);
         }
     }
 

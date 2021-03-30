@@ -6,7 +6,6 @@ using UnityEngine;
 public class SceneData : MonoBehaviour
 {
     // Struct for holding campaign levels
-    // NOTE This must hold: name == scene name == sprite name
     // Scene name is the name of the scene in /Assets/Scenes/
     // Sprite name is the name of the sprite to show in the campaign menu
     // Put the sprite in /Assests/Resources/Sprite/SceneSprites/
@@ -16,7 +15,6 @@ public class SceneData : MonoBehaviour
     }
 
     // Struct for holding multiplayer maps
-    // NOTE This must hold: name == scene name == sprite name
     // Scene name is the name of the scene in /Assets/Scenes/
     // Sprite name is the name of the sprite to show in the multiplayer menu
     // Put the sprite in /Assests/Resources/Sprite/SceneSprites/
@@ -28,6 +26,7 @@ public class SceneData : MonoBehaviour
     // Struct for the settings to start the match with
     public struct GameSettings {
         public string mapName;
+        public string spriteName;
         public List<PlayerSettings> playerSettingsList;
         public Options options;
     }
@@ -78,10 +77,11 @@ public class SceneData : MonoBehaviour
     // List with campaign levels
     public static readonly IList<Level> campaignLevels = new ReadOnlyCollection<Level>(
         new Level[] {
-            new Level() { // NOTE Placeholder level TODO replace when real campaign level exists
-                description = "There are no campaign levels yet. This is just a placeholder.",
+            new Level() {
+                description = "Level One. Start your journey here!",
                 gameSettings = new GameSettings() {
-                    mapName = "Dusk",
+                    mapName = "Dusk1",
+                    spriteName = "Dusk",
                     playerSettingsList = new List<PlayerSettings>(
                         new PlayerSettings[] {
                             new PlayerSettings() {
@@ -108,6 +108,38 @@ public class SceneData : MonoBehaviour
                         }
                     }
                 }
+            },
+            new Level() {
+                description = "Level Two. Time to start thinking!",
+                gameSettings = new GameSettings() {
+                    mapName = "Dusk2",
+                    spriteName = "Dusk",
+                    playerSettingsList = new List<PlayerSettings>(
+                        new PlayerSettings[] {
+                            new PlayerSettings() {
+                                id = 1,
+                                nickname = "You",
+                                color = Color.blue
+                            },
+                            new PlayerSettings() {
+                                id = 2,
+                                nickname = "The enemy",
+                                color = Color.red
+                            }
+                        }
+                    ),
+                    options = new Options {
+                        boins = 1000,
+                        units = new Dictionary<string, bool>() {
+                            {"Commander", false},
+                            {"Healer", false},
+                            {"Hero", true},
+                            {"Melee", true},
+                            {"Ranged", true},
+                            {"Scarecrow", false}
+                        }
+                    }
+                }
             }
         }
     );
@@ -117,6 +149,11 @@ public class SceneData : MonoBehaviour
         new Map[] {
             new Map() {
                 name = "Dusk",
+                numberOfPlayers = 2
+            }, 
+            new Map()
+            {
+                name = "Midnight", 
                 numberOfPlayers = 2
             }
         }

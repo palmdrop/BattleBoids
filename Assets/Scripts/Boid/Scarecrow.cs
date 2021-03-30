@@ -23,7 +23,7 @@ public class Scarecrow : Boid {
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
-            viewRadius = 3f,
+            viewRadius = 1f,
             separationRadius = 0.3f,
             fearRadius = 1.0f,
             maxForce = 2f,
@@ -39,7 +39,7 @@ public class Scarecrow : Boid {
             alignmentStrength = 5.6f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 4.0f,
+            cohesionStrength = 6.0f,
             cohesionExponent = 0.0f,
             
             separationStrength = 120.0f,
@@ -47,8 +47,8 @@ public class Scarecrow : Boid {
             
             gravity = 1f,
             
-            fearStrength = 140.0f,
-            fearExponent = 1.0f,
+            fearStrength = 60.0f,
+            fearExponent = 2.0f,
             
             attackDistRange = 2f,
             attackAngleRange = Mathf.PI,
@@ -56,11 +56,16 @@ public class Scarecrow : Boid {
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
             
-            aggressionStrength = 10.4f,
+            aggressionStrength = 5.4f,
+            aggressionFalloff = 2.0f,
+            aggressionDistanceCap = 10.0f,
+            maxAggressionMultiplier = 1.8f,
 
             avoidCollisionWeight = 100f,
 
             searchStrength = 10.4f,
+
+            avoidanceStrength = 30.0f,
             
             randomMovements = 6.0f,
 

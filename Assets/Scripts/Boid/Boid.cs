@@ -105,7 +105,15 @@ public abstract class Boid : Selectable
 
 
         public float aggressionStrength; // Controls how much the boid is attracted to the enemy flock
-        public float searchStrength;
+        public float aggressionFalloff; // A high value will reduce the aggression drastically when a boid moves
+                                        // closer to the enemy flock
+        public float aggressionDistanceCap;  // If the enemy flock is further away than this, the aggression will be at max strength
+        public float maxAggressionMultiplier;  // Maximum aggression multiplier. A flock with an advantage will be more aggressive
+
+        public float searchStrength; // Controls how much the boid is attracted to the center of the allied flock
+                                     // This behavior is only active if the boid has a low confidence level
+
+        public float avoidanceStrength; // A boid tries to avoid being in the attack scope of an enemy boid
 
         // Misc behaviors
         public float randomMovements;
@@ -145,6 +153,9 @@ public abstract class Boid : Selectable
     // Start is called before the first frame update
     protected void Start()
     {
+        owner = GetComponentInParent<Player>();
+        SetColor(owner.color);
+
         // To start off, we don't want to show that the boid is selected 
         SetSelectionIndicator(false);
         
@@ -200,7 +211,12 @@ public abstract class Boid : Selectable
         }
 
         Vector3 velocity = _rigidbody.velocity;
-        transform.forward = new Vector3(velocity.x, 0, velocity.z);
+
+        // Only update forward direction if velocity is non-zero
+        if (velocity != Vector3.zero)
+        {
+            transform.forward = new Vector3(velocity.x, 0, velocity.z);
+        }
     }
 
     private void OnCollisionEnter(Collision collision) {
@@ -342,11 +358,12 @@ public abstract class Boid : Selectable
 
     public void Die()
     {
-        this._dead = true;
-        SetTarget(null);
-        Destroy(GetComponent<ParticleSystem>());
-        Destroy(GetComponentInChildren<LineRenderer>());
-        AnimateDeath();
+        if (!_dead) {
+            _dead = true;
+            SetTarget(null);
+            Destroy(gameObject);
+            AnimateDeath();
+        }
     }
 
     private void AnimateDeath() {
@@ -355,7 +372,6 @@ public abstract class Boid : Selectable
         psMain.startColor = owner.color;
         death.GetComponent<Rigidbody>().velocity = gameObject.GetComponent<Rigidbody>().velocity;
         Destroy(death, psMain.duration);
-        Destroy(gameObject);
     }
 
     public bool IsDead() {
@@ -387,6 +403,13 @@ public abstract class Boid : Selectable
     public Rigidbody GetRigidbody()
     {
         return _rigidbody;
+    }
+
+    public virtual void SetHidden(bool hidden)
+    {
+        foreach (Renderer r in GetComponentsInChildren<Renderer>()) {
+            r.enabled = !hidden;
+        }
     }
 
     protected abstract void Act();
