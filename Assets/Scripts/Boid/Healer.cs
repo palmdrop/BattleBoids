@@ -38,9 +38,9 @@ public class Healer : Boid
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
             viewRadius = 1.3f,
-            separationRadius = 0.3f,
+            separationRadius = 0.4f,
             fearRadius = 1.0f,
-            maxForce = 2.0f,
+            maxForce = 7.0f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,
@@ -50,10 +50,10 @@ public class Healer : Boid
 
             confidenceThreshold = 2.0f,
             
-            alignmentStrength = 6.0f,
+            alignmentStrength = 3.0f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 7.0f,
+            cohesionStrength = 3.0f,
             cohesionExponent = 0.0f,
             
             separationStrength = 120.0f,
@@ -61,7 +61,7 @@ public class Healer : Boid
 
             gravity = 1f,
             
-            fearStrength = 100.0f,
+            fearStrength = 10.0f,
             fearExponent = 1.4f,
             
             attackDistRange = 0f,
@@ -70,18 +70,18 @@ public class Healer : Boid
             approachMovementStrength = 35.0f,
             approachMovementExponent = 0.5f,
             
-            aggressionStrength = 5.4f,
+            aggressionStrength = 3.0f,
             aggressionFalloff = 2.0f,
             aggressionDistanceCap = 10.0f,
-            maxAggressionMultiplier = 1.6f,
+            maxAggressionMultiplier = 1.4f,
 
             avoidanceStrength = 60f,
 
             searchStrength = 7.4f,
 
-            avoidCollisionWeight = 100f,
+            avoidCollisionWeight = 1000f,
             
-            randomMovements = 4.0f,
+            randomMovements = 2.0f,
 
             hoverKi = 2f,
             hoverKp = 10f,
