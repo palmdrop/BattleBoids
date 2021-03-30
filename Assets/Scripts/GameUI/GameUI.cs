@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -286,12 +287,29 @@ public class GameUI : MonoBehaviour
         return null;
     }
 
+    private string IntToHumanReadbleNumber(int number) {
+        bool isNegative = number < 0;
+        string sNumber = number.ToString();
+        StringBuilder sbNumber = new StringBuilder();
+        int lastIndex = isNegative ? sNumber.Length - 2 : sNumber.Length - 1;
+        for (int i = 0; i <= lastIndex; i++) {
+            if (i != 0 && i % 3 == 0) {
+                sbNumber.Insert(0, ',');
+            }
+            sbNumber.Insert(0, sNumber[sNumber.Length - 1 - i]);
+        }
+        if (isNegative) {
+            sbNumber.Insert(0, '-');
+        }
+        return sbNumber.ToString();
+    }
+
     public void UpdateBoins()
     {
-        boins.text = activePlayer.GetBoins().ToString();
+        boins.text = IntToHumanReadbleNumber(activePlayer.GetBoins());
         int cost = -activePlayer.GetSpawnArea().SumHoldingCost();
         currentCost.SetActive(cost != 0);
-        currentCostText.text = cost.ToString();
+        currentCostText.text = IntToHumanReadbleNumber(cost);
     }
 
     public Player GetActivePlayer()
