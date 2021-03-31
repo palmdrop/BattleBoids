@@ -68,8 +68,10 @@ public class OptionsManager : MonoBehaviour
     }
 
     public void UpdateResolution() {
-        Resolution resolution = _resolutions[resolutionDropdown.value];
-        Screen.SetResolution(resolution.width, resolution.height, fullscreen.isOn, resolution.refreshRate);
+        if (resolutionDropdown != null) {
+            Resolution resolution = _resolutions[resolutionDropdown.value];
+            Screen.SetResolution(resolution.width, resolution.height, fullscreen.isOn, resolution.refreshRate);
+        }
     }
 
     public void SetMasterVolume() {
