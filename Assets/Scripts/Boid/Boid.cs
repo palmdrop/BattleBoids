@@ -13,6 +13,36 @@ public abstract class Boid : Selectable
         Healer,
         Commander
     }
+    
+    public static string GetDescription(string name)
+    {
+        string description;
+        switch (name)
+        {
+            case "Melee":
+                description = "Fast and cheap and does close range damage";
+                break;
+            case "Ranged":
+                description = "Keeps a distance and shoots projectiles";
+                break;
+            case "Hero":
+                description = "Strong and charges up an explosive shot";
+                break;
+            case "Scarecrow":
+                description = "Sly and scary, repels enemies";
+                break;
+            case "Healer":
+                description = "Careful and peaceful, but heals allies";
+                break;
+            case "Commander":
+                description = "Leader type, follows a path and tries to make allies to join";
+                break;
+            default:
+                return "[NO SUCH TYPE]";
+        }
+
+        return description;
+    }
 
     [SerializeField] private GameObject healthBarPrefab;
     [SerializeField] private GameObject deathAnimationPrefab;
