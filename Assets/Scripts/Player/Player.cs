@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     public struct FlockInfo
     {
         public float3 avgPos;
+        public float3 medianPos;
         public float3 avgVel;
         public int boidCount;
     }
