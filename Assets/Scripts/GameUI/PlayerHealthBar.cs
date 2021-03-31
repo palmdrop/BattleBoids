@@ -7,12 +7,19 @@ public class PlayerHealthBar : MonoBehaviour
 {
     [SerializeField] private GameObject fill;
     [SerializeField] private Player player;
+    [SerializeField] private Text readyText;
+    [SerializeField] private GameObject selected;
     private Image _image;
+    private GameManager _gameManager;
+
+    private Color ready = new Color(0.08f, 0.949f, 0.216f);
+    private Color unReady = new Color(0.333f, 0.333f, 0.333f);
 
     // Start is called before the first frame update
     void Start()
     {
         _image = fill.GetComponent<Image>();
+        _gameManager = GetComponentInParent<GameManager>();
         var text = GetComponentInChildren<Text>();
         text.text = player.GetNickname();
         text.color = player.color;
@@ -28,5 +35,19 @@ public class PlayerHealthBar : MonoBehaviour
             sumMaxHealth += boid.GetMaxHealth();
         }
         _image.fillAmount = sumHealth / sumMaxHealth;
+        UpdateReady();
+        UpdateActivePlayer();
+    }
+
+    private void UpdateReady() {
+        if (_gameManager.GetState() == GameManager.GameState.Placement) {
+            readyText.color = player.IsReady() ? ready : unReady;
+        } else {
+            readyText.gameObject.SetActive(false);
+        }
+    }
+
+    private void UpdateActivePlayer() {
+        selected.SetActive(player.IsActive() && _gameManager.GetState() == GameManager.GameState.Placement);
     }
 }
