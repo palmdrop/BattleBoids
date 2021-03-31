@@ -97,6 +97,7 @@ public class SpawnArea : MonoBehaviour
         // Move current entity to mouse position
         LayerMask mask = LayerMask.GetMask("Ground");
         if (Physics.Raycast(ray, out hit, 1000.0f, mask)) {
+
             // If left mouse button is released
             if (Input.GetMouseButtonUp(0) &&
                 holding.Count > 0 && canPlace && PurchaseSuccess()) {
