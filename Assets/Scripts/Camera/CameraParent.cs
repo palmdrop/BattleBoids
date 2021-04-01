@@ -7,13 +7,9 @@ using ContactPoint = UnityEngine.ContactPoint;
 
 public class CameraParent : MonoBehaviour
 {
-    // Used for zooming in and out
-    [SerializeField] private float MINHeight = 30;
-    private const float MAXHeight = 70f;
-
     // Used to limit where the camera can move
     private Rect _mapBounds;
-    [SerializeField] private float cameraOffset = 15f;
+    [SerializeField] private float allowedMapBoundOffset = 100f;
     
     // Scripts
     private Map.Map map;
@@ -44,14 +40,12 @@ public class CameraParent : MonoBehaviour
 
     private bool _rightMouseButtonHeld = false;
     private bool _cameraFollowGameObject = false;
-    private bool _isColliding;
 
     private Transform selectedObject;
     
     private Vector3 _selectedGameObjectPosition;
     private Vector3 _parentCameraPosition;
 
-    private Vector3 _previousParentCameraPosition;
 
     private GameManager _gameManager;
 
@@ -154,7 +148,7 @@ public class CameraParent : MonoBehaviour
         Vector3 lateralMove = horizontalSpeed * transform.right;
         Vector3 forwardMove = transform.forward;
 
-        float upDownMoveAmount = NormalizeScrollMultiplier(Input.GetAxis("Mouse ScrollWheel")) * zoomSpeed * zoomOutMultiplier;
+        Vector3 upDownMoveAmount = transform.up * (NormalizeScrollMultiplier(Input.GetAxis("Mouse ScrollWheel")) * zoomSpeed * zoomOutMultiplier);
 
         
         // Y is set to zero to avoid moving up and down with movement key, we want to restrict it to scroll
@@ -164,18 +158,16 @@ public class CameraParent : MonoBehaviour
         
                 
         // How much the camera should move in the x, y and z plane
-        Vector3 move = lateralMove + forwardMove + (transform.up * upDownMoveAmount);
+        Vector3 move = lateralMove + forwardMove + upDownMoveAmount;
 
-        // Makes sure that there is no continous movement when right mouse button is held down
-
-        
+        // Moves the camera
         _parentCamera.velocity = move;
         
-        
+        // Constrains the camera to a defined offset
         transform.position = new Vector3(
-            Mathf.Clamp(_parentCameraPosition.x, _mapBounds.xMin - cameraOffset, _mapBounds.xMax + cameraOffset),
-            Mathf.Clamp(_parentCameraPosition.y,  -cameraOffset, cameraOffset),
-            Mathf.Clamp( _parentCameraPosition.z, _mapBounds.yMin - cameraOffset, _mapBounds.yMax + cameraOffset)
+            Mathf.Clamp(_parentCameraPosition.x, _mapBounds.xMin - allowedMapBoundOffset, _mapBounds.xMax + allowedMapBoundOffset),
+            Mathf.Clamp(_parentCameraPosition.y,  -allowedMapBoundOffset, allowedMapBoundOffset),
+            Mathf.Clamp( _parentCameraPosition.z, _mapBounds.yMin - allowedMapBoundOffset, _mapBounds.yMax + allowedMapBoundOffset)
         );
 
     }
