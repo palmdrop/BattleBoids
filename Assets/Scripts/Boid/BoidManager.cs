@@ -537,7 +537,7 @@ public class BoidManager : MonoBehaviour
                 scale = math.pow(dist / classInfo.aggressionDistanceCap, classInfo.aggressionFalloff);
             }
 
-            scale *= math.max(classInfo.maxAggressionMultiplier, (float)flocks[boid.flockId - 1].boidCount / enemyFlock.boidCount);
+            scale *= math.max(1.0f, math.min(classInfo.maxAggressionMultiplier, (float) flocks[boid.flockId - 1].boidCount / enemyFlock.boidCount));
             
             return math.normalize(enemyFlock.avgPos - boid.pos) * classInfo.aggressionStrength * scale;
         }
