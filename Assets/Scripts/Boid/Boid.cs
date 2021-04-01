@@ -203,7 +203,12 @@ public abstract class Boid : Selectable
     public virtual void UpdateBoid(Vector3 force)
     {
         hoverForce = new float3(0,force.y,0);
-        _rigidbody.AddForce(RemoveYComp(force), ForceMode.Acceleration);
+        if (target != null) {
+            _rigidbody.AddForce(RemoveYComp(-_rigidbody.velocity), ForceMode.Acceleration);
+            transform.forward = target.GetPos() - GetPos();
+        } else {
+            _rigidbody.AddForce(RemoveYComp(force), ForceMode.Acceleration);
+        }
 
         if (_rigidbody.velocity.sqrMagnitude > maxSpeed * maxSpeed)
         {
@@ -213,7 +218,7 @@ public abstract class Boid : Selectable
         Vector3 velocity = _rigidbody.velocity;
 
         // Only update forward direction if velocity is non-zero
-        if (velocity != Vector3.zero)
+        if (velocity != Vector3.zero && !_hasTarget)
         {
             transform.forward = new Vector3(velocity.x, 0, velocity.z);
         }
