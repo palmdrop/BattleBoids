@@ -9,8 +9,11 @@ using UnityEngine.SceneManagement;
 public class GameUI : MonoBehaviour
 {
     [SerializeField] private Text boins;
+    
     [SerializeField] private GameObject currentCost;
     [SerializeField] private Text currentCostText;
+    [SerializeField] private GameObject tooltip;
+    [SerializeField] private Text tooltipText;
     [SerializeField] private Player activePlayer;
     [SerializeField] private GameObject unitsText;
     [SerializeField] private GameObject unitButtons;
@@ -38,6 +41,7 @@ public class GameUI : MonoBehaviour
         _gameManager = GetComponentInParent<GameManager>();
         _prefix = _gameManager.GetType().ToString();
         players = _gameManager.GetPlayers();
+        tooltip.SetActive(false);
         SetActivePlayerId(1);
         InitUnitButtons();
         InitReadyButton();
@@ -55,7 +59,8 @@ public class GameUI : MonoBehaviour
         UpdateGameState();
     }
 
-    void InitUnitButtons() {
+    void InitUnitButtons() 
+    {
         foreach (Transform child in unitButtons.transform) {
             GameObject button = child.GetChild(1).gameObject;
             Image unitImage = button.GetComponent<Image>();
@@ -65,8 +70,23 @@ public class GameUI : MonoBehaviour
             } else {
                 button.GetComponent<Button>().interactable = false;
             }
+
+            button.GetComponent<UnitButton>().SetOnEnter(() => SetTooltip(button));
+            button.GetComponent<UnitButton>().SetOnExit(() => UnsetTooltip()); 
             unitImage.color = color;
         }
+    }
+    
+    void SetTooltip(GameObject button) 
+    {
+        if (!button.GetComponent<Button>().interactable) return;
+        tooltip.SetActive(true);
+        tooltipText.text = button.name.ToUpper() + "\n" + Boid.GetDescription(button.name);
+    }
+
+    void UnsetTooltip()
+    {
+        tooltip.SetActive(false);
     }
 
     void InitReadyButton()

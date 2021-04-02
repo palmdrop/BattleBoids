@@ -149,6 +149,7 @@ public class BoidManager : MonoBehaviour
         {
             // Temporary array for holding flock info data
             NativeArray<Player.FlockInfo> tempFlockInfos = new NativeArray<Player.FlockInfo>(flockInfos.Length, Allocator.Temp);
+            NativeArray<float> minSquaredDistanceToAverage = new NativeArray<float>(flockInfos.Length, Allocator.Temp);
             
             // Iterate over all of the boids in order to calculate flock info data
             for (int i = 0; i < boids.Length; i++)
@@ -166,9 +167,8 @@ public class BoidManager : MonoBehaviour
                 // Save new data in array (necessary since "flockInfo" is a temporary value)
                 tempFlockInfos[boid.flockId - 1] = flockInfo;
             }
-
+            
             // Iterate over all the temporary flock info structs and average the results
-            // Also assign the data to the output array
             for (int i = 0; i < tempFlockInfos.Length; i++)
             {
                 Player.FlockInfo flockInfo = tempFlockInfos[i];
@@ -178,7 +178,32 @@ public class BoidManager : MonoBehaviour
                     flockInfo.avgVel /= flockInfo.boidCount;
                 }
 
-                flockInfos[i] = flockInfo;
+                tempFlockInfos[i] = flockInfo;
+                minSquaredDistanceToAverage[i] = float.MaxValue;
+            }
+            
+            // Iterate over all boids again to find the median boid position of each flock
+            for (int i = 0; i < boids.Length; i++)
+            {
+                Boid.BoidInfo boid = boids[i];
+                Player.FlockInfo flockInfo = tempFlockInfos[boid.flockId - 1];
+                
+                // Calculate the squared distance between the boid and the average position of all allied boids
+                float distSqToAverage = math.distancesq(boid.pos, flockInfo.avgPos);
+                
+                // If the calculated value is less than the stored one, update
+                if (distSqToAverage < minSquaredDistanceToAverage[boid.flockId - 1])
+                {
+                    flockInfo.medianPos = boid.pos;
+                    minSquaredDistanceToAverage[boid.flockId - 1] = distSqToAverage;
+                    tempFlockInfos[boid.flockId - 1] = flockInfo;
+                }
+            }
+            
+            // Finally, assign the data to the output array
+            for (int i = 0; i < tempFlockInfos.Length; i++)
+            {
+                flockInfos[i] = tempFlockInfos[i];
             }
 
             // Dispose of temporary data
@@ -504,7 +529,7 @@ public class BoidManager : MonoBehaviour
 
             if (enemyFlock.boidCount == 0 || enemyFlock.avgPos.Equals(boid.pos)) return float3.zero;
 
-            float dist = math.distance(boid.pos, enemyFlock.avgPos);
+            float dist = math.distance(boid.pos, enemyFlock.medianPos);
 
             float scale = 1.0f;
             if (dist < classInfo.aggressionDistanceCap)
@@ -512,7 +537,7 @@ public class BoidManager : MonoBehaviour
                 scale = math.pow(dist / classInfo.aggressionDistanceCap, classInfo.aggressionFalloff);
             }
 
-            scale *= math.max(classInfo.maxAggressionMultiplier, (float)flocks[boid.flockId - 1].boidCount / enemyFlock.boidCount);
+            scale *= math.max(1.0f, math.min(classInfo.maxAggressionMultiplier, (float) flocks[boid.flockId - 1].boidCount / enemyFlock.boidCount));
             
             return math.normalize(enemyFlock.avgPos - boid.pos) * classInfo.aggressionStrength * scale;
         }
