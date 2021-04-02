@@ -62,13 +62,21 @@ public class SpawnArea : MonoBehaviour
 
         canPlace = true;
 
+        LayerMask groundMask = LayerMask.GetMask("Ground");
+
         for (int x = 0; x < gridSizeX; x++) {
             for (int z = 0; z < gridSizeY; z++) {
                 int i = x * gridSizeY + z;
                 GameObject currentEntity = holding[i];
-                // Find ground height
-                Vector3 position = new Vector3(gridStart.x + dirX * x * unitWidth, SelectionManager.MousePositionInWorld.point.y + 3f, gridStart.z + dirY * z * unitWidth);
+
+                // Find correct y-position
+                float y = 0;
+                Ray ray = new Ray(currentEntity.transform.position + new Vector3(0f, 10f, 0f), Vector3.down);
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit, 1000f, groundMask)) y = hit.point.y;
+                Vector3 position = new Vector3(gridStart.x + dirX * x * unitWidth, y + 1f, gridStart.z + dirY * z * unitWidth);
                 currentEntity.transform.position = position;
+
                 // Check if within spawn area
                 if (IsInside(currentEntity))
                 {
