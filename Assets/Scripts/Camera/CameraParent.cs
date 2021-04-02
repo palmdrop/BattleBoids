@@ -1,9 +1,6 @@
-using System;
-using Unity.Physics;
 using UnityEngine;
 using UnityEngine.UIElements;
 using Collider = UnityEngine.Collider;
-using ContactPoint = UnityEngine.ContactPoint;
 
 public class CameraParent : MonoBehaviour
 {
@@ -48,6 +45,8 @@ public class CameraParent : MonoBehaviour
 
 
     private GameManager _gameManager;
+    
+    private float scrollCount = 0;
 
     // Start is called before the first frame update
     private void Start()
@@ -112,7 +111,13 @@ public class CameraParent : MonoBehaviour
             _cameraFollowGameObject = !_cameraFollowGameObject;
         }
 
+        float normalizedScrollDirectionValue = NormalizeScrollMultiplier(Input.GetAxis("Mouse ScrollWheel"));
+        if (normalizedScrollDirectionValue != 0)
+        {
+            scrollCount += normalizedScrollDirectionValue;
+        }
         
+        Debug.Log(scrollCount.ToString());
     }
 
     private void FixedUpdate()
@@ -135,7 +140,11 @@ public class CameraParent : MonoBehaviour
     private void MoveCamera()
     {
         if (_gameManager.IsPaused())
+        {
+            _parentCamera.velocity = Vector3.zero;
             return;
+        }
+        
         _parentCameraPosition = transform.position;
 
         // Movement is faster the higher up you are
@@ -149,9 +158,23 @@ public class CameraParent : MonoBehaviour
         Vector3 lateralMove = horizontalSpeed * transform.right;
         Vector3 forwardMove = transform.forward;
 
-        Vector3 upDownMoveAmount = transform.up * -(NormalizeScrollMultiplier(Input.GetAxis("Mouse ScrollWheel")) * zoomSpeed * zoomOutMultiplier);
+        Vector3 upDownMoveAmount = Vector3.zero;
 
+        Vector3 scrollTransformation = transform.up * (zoomSpeed * zoomOutMultiplier);
         
+        // We do this check to ensure that we register all scroll events from the user
+        if (scrollCount > 0)
+        {
+            upDownMoveAmount += scrollTransformation;
+            scrollCount--;
+        }
+        else if (scrollCount < 0)
+        {
+            upDownMoveAmount -= scrollTransformation;
+            scrollCount++;
+        }
+        
+
         // Y is set to zero to avoid moving up and down with movement key, we want to restrict it to scroll
         forwardMove.y = 0;
         forwardMove.Normalize();
