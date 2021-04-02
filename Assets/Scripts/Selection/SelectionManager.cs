@@ -188,9 +188,15 @@ private void Update()
             {
                 canPlaceSelected = false;
             }
-            
+
+            // Find correct y-position
+            float y = _mousePositionInWorld.point.y;
+            Ray ray = new Ray(selectable.transform.position + new Vector3(0f, 10f, 0f), Vector3.down);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, 1000f, ground)) y = hit.point.y;
+
             // Move the selected with the correct formation to the mouse position
-            selectable.transform.position = new Vector3(_mousePositionInWorld.point.x + selectable.GetOffset().x, _mousePositionInWorld.point.y + YOffset, _mousePositionInWorld.point.z + selectable.GetOffset().z);
+            selectable.transform.position = new Vector3(_mousePositionInWorld.point.x + selectable.GetOffset().x, y + YOffset, _mousePositionInWorld.point.z + selectable.GetOffset().z);
             
         }
     }
