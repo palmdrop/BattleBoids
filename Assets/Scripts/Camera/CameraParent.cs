@@ -117,7 +117,6 @@ public class CameraParent : MonoBehaviour
             scrollCount += normalizedScrollDirectionValue;
         }
         
-        Debug.Log(scrollCount.ToString());
     }
 
     private void FixedUpdate()
@@ -165,12 +164,12 @@ public class CameraParent : MonoBehaviour
         // We do this check to ensure that we register all scroll events from the user
         if (scrollCount > 0)
         {
-            upDownMoveAmount += scrollTransformation;
+            upDownMoveAmount -= scrollTransformation;
             scrollCount--;
         }
         else if (scrollCount < 0)
         {
-            upDownMoveAmount -= scrollTransformation;
+            upDownMoveAmount += scrollTransformation;
             scrollCount++;
         }
         
