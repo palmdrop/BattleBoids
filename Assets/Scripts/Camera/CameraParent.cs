@@ -138,6 +138,7 @@ public class CameraParent : MonoBehaviour
             return;
         _parentCameraPosition = transform.position;
 
+        // Movement is faster the higher up you are
         float zoomOutMultiplier = Mathf.Max(2f, _parentCameraPosition.y/2);
                 
         // Make the movement speed dependent on y coordinate (the more we zoom out,the faster we move)
@@ -148,7 +149,7 @@ public class CameraParent : MonoBehaviour
         Vector3 lateralMove = horizontalSpeed * transform.right;
         Vector3 forwardMove = transform.forward;
 
-        Vector3 upDownMoveAmount = transform.up * (NormalizeScrollMultiplier(Input.GetAxis("Mouse ScrollWheel")) * zoomSpeed * zoomOutMultiplier);
+        Vector3 upDownMoveAmount = transform.up * -(NormalizeScrollMultiplier(Input.GetAxis("Mouse ScrollWheel")) * zoomSpeed * zoomOutMultiplier);
 
         
         // Y is set to zero to avoid moving up and down with movement key, we want to restrict it to scroll
