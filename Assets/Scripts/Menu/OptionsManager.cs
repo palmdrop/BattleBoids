@@ -10,7 +10,7 @@ public class OptionsManager : MonoBehaviour
     [SerializeField] private Slider musicVolumeSlider;
     [SerializeField] private Slider sfxVolumeSlider;
 
-    [SerializeField] private Toggle fullscreen;
+    [SerializeField] private FullscreenButtons fullscreen;
     [SerializeField] private Dropdown resolutionDropdown;
 
     private Resolution[] _resolutions;
@@ -30,13 +30,12 @@ public class OptionsManager : MonoBehaviour
         sfxVolumeSlider.value = AudioManager.instance.GetSoundEffectsVolume();
 
         // Video
-        bool isFullscreen = Boolean.Parse(PlayerPrefs.GetString("Fullscreen", "true"));
-        fullscreen.isOn = isFullscreen;
+        fullscreen.SetButtons(Boolean.Parse(PlayerPrefs.GetString("Fullscreen", "true")));
         Resolution defaultResolution = _resolutions[_defaultResolutionIndex];
         int resolutionWidth = PlayerPrefs.GetInt("ResolutionWidth", defaultResolution.width);
         int resolutionHeigth = PlayerPrefs.GetInt("ResolutionHeight", defaultResolution.height);
         int refreshRate = PlayerPrefs.GetInt("RefreshRate", defaultResolution.refreshRate);
-        Screen.SetResolution(resolutionWidth, resolutionHeigth, isFullscreen, refreshRate);
+        Screen.SetResolution(resolutionWidth, resolutionHeigth, fullscreen.IsOn(), refreshRate);
     }
 
     private void InitResolutionDropdown() {
@@ -59,7 +58,7 @@ public class OptionsManager : MonoBehaviour
         PlayerPrefs.SetFloat("SfxVolume", sfxVolumeSlider.value);
 
         // Video
-        PlayerPrefs.SetString("Fullscreen", fullscreen.isOn.ToString());
+        PlayerPrefs.SetString("Fullscreen", fullscreen.IsOn().ToString());
         Resolution resolution = _resolutions[resolutionDropdown.value];
         PlayerPrefs.SetInt("ResolutionWidth", resolution.width);
         PlayerPrefs.SetInt("ResolutionHeight", resolution.height);
@@ -70,7 +69,7 @@ public class OptionsManager : MonoBehaviour
     public void UpdateResolution() {
         if (resolutionDropdown != null) {
             Resolution resolution = _resolutions[resolutionDropdown.value];
-            Screen.SetResolution(resolution.width, resolution.height, fullscreen.isOn, resolution.refreshRate);
+            Screen.SetResolution(resolution.width, resolution.height, fullscreen.IsOn(), resolution.refreshRate);
         }
     }
 
