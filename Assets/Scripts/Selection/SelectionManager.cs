@@ -1,9 +1,8 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
 using UnityEngine;
 
-public class SelectionManager : MonoBehaviour
+public class SelectionManager : MonoBehaviour, ICommand
 {
     // The UI component used to get the active player
     private GameManager _gameManager;
@@ -31,68 +30,74 @@ public class SelectionManager : MonoBehaviour
     private static RaycastHit _mousePositionInWorld;
     // We want to check if the mouse is currently hovering over ground tiles
     private bool mouseOverGround;
-    
 
-private void Start()
-{ 
-    ground = LayerMask.GetMask("Ground");
-    _gameManager = GetComponentInParent<GameManager>();
-    _gameUI = _gameManager.GetGameUI();
-    activePlayer = _gameUI.GetActivePlayer();
-}
+    private Command command;
 
-private void Update()
-{
-    // You can't edit if the game is currently running
-    if (_gameUI.AllPlayersReady())
+    private void Awake()
     {
-        if (selected.Count > 0)
+        command = new Command();
+    }
+
+    private void Start()
+    { 
+        ground = LayerMask.GetMask("Ground");
+        _gameManager = GetComponentInParent<GameManager>();
+        _gameUI = _gameManager.GetGameUI();
+        activePlayer = _gameUI.GetActivePlayer();
+    }
+
+    private void Update()
+    {
+        // You can't edit if the game is currently running
+        if (_gameUI.AllPlayersReady())
+        {
+            if (selected.Count > 0)
+            {
+                UndoChanges();
+            }
+            
+            return;
+        }
+
+        // Undo every non-confirmed changes when the player change
+        if (!activePlayer.Equals(_gameUI.GetActivePlayer()))
         {
             UndoChanges();
         }
         
-        return;
-    }
-
-    // Undo every non-confirmed changes when the player change
-    if (!activePlayer.Equals(_gameUI.GetActivePlayer()))
-    {
-        UndoChanges();
-    }
-    
-    // Stop if nothing is selected 
-    if (selected.Count == 0) 
-    {
-        Cursor.visible = true;
-        return; 
-    } 
-    // Update mouse position
-    mouseOverGround = Physics.Raycast(_gameManager.GetMainCamera().ScreenPointToRay(Input.mousePosition), out _mousePositionInWorld, 1000f, ground);
-    
-    // Sell the selected entities
-    if (Input.GetKeyDown("k"))
-    {
-        SellSelected();
-        return;
-    }
-    
-    // Move entities around the world
-    if (Input.GetKeyDown("q"))
-    {
-        inMoveState = true;
-        Cursor.visible = false;
-    }
+        // Stop if nothing is selected 
+        if (selected.Count == 0) 
+        {
+            Cursor.visible = true;
+            return; 
+        } 
+        // Update mouse position
+        mouseOverGround = Physics.Raycast(_gameManager.GetMainCamera().ScreenPointToRay(Input.mousePosition), out _mousePositionInWorld, 1000f, ground);
+        
+        // Sell the selected entities
+        if (Input.GetKeyDown("k"))
+        {
+            SellSelected();
+            return;
+        }
+        
+        // Move entities around the world
+        if (Input.GetKeyDown("q"))
+        {
+            inMoveState = true;
+            Cursor.visible = false;
+        }
 
 
-    // Move the selected entities
-    if (inMoveState)
-    {
-        MoveSelected();
+        // Move the selected entities
+        if (inMoveState)
+        {
+            MoveSelected();
+        }
+        else
+        {
+        }
     }
-    else
-    {
-    }
-}
 
     private void UndoChanges()
     {
@@ -247,5 +252,10 @@ private void Update()
     {
         get => canSelect;
         set => canSelect = value;
+    }
+
+    public Command GETCommand()
+    {
+        return command;
     }
 }
