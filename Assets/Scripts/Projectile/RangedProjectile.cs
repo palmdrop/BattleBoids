@@ -44,14 +44,13 @@ public class RangedProjectile : MonoBehaviour
         fastPhysicsUpdate(Time.fixedDeltaTime);
     }
 
-    void OnCollisionEnter(Collision collision) {
-        GameObject hit = collision.gameObject;
-        Boid boid = hit.GetComponent<Boid>();
+    public void ManagedOnTriggerEnter(Boid boid) {
 
         if (boid != null) { // Collision with boid
             if (boid.GetOwner() != _owner) { // Enemy
-                hit.GetComponent<Boid>().TakeDamage(_damage);
-                _hitAnimation = Instantiate(
+                boid.TakeDamage(_damage);
+
+                /*_hitAnimation = Instantiate(
                     hitAnimation,
                     gameObject.transform.position,
                     gameObject.transform.rotation
@@ -59,13 +58,24 @@ public class RangedProjectile : MonoBehaviour
                 _hitAnimation.GetComponent<ParticleSystem>().startColor = _owner.color;
                 Destroy(_hitAnimation,
                     _hitAnimation.GetComponent<ParticleSystem>().main.duration
-                );
-                Destroy(gameObject);
+                );*/
+                GameObject hit = ParticlePoolManager.SharedInstance.getPooledObject(ParticlePoolManager.Type.Hit);
+                if (hit != null)
+                {
+                    hit.transform.position = transform.position;
+                    hit.transform.rotation = transform.rotation;
+                    hit.SetActive(true);
+                    hit.GetComponent<ParticleSystem>().startColor = _owner.color;
+                }
+
+                //Destroy(gameObject);
+                gameObject.SetActive(false);
             } else { // Friendly
                 return;
             }
         } else { // Collision with environment
-            Destroy(gameObject);
+            //Destroy(gameObject);
+            gameObject.SetActive(false);
         }
     }
 
