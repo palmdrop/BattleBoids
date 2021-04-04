@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: -3964848625625761657}
   - component: {fileID: 5695779523534083667}
   - component: {fileID: 1007373904914247846}
-  m_Layer: 0
+  m_Layer: 13
   m_Name: Death Animation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
