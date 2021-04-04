@@ -40,7 +40,7 @@ public class Outline : MonoBehaviour
 
     void OnRenderImage(RenderTexture src, RenderTexture dst)
 	{
-        if (renderOutlines && !EditorApplication.isPaused)
+        if (renderOutlines && !EditorApplication.isPaused) //For some reason can't be compiled during building. Comment out second conditional.
         {
 			RenderTexture tmp = RenderTexture.GetTemporary(src.descriptor);
 			RenderTexture lastOutput = RenderTexture.GetTemporary(tmp.descriptor); //Don't ask.

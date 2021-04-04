@@ -1012,7 +1012,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4679105028047868, guid: 95354847711d363408aebd57a0dc92ae, type: 3}
       propertyPath: m_RootOrder
-      value: 5
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4679105028047868, guid: 95354847711d363408aebd57a0dc92ae, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4599,11 +4599,6 @@ MonoBehaviour:
   HitAnimPrefab: {fileID: 7304726371351317174, guid: b592303414090794ab53c4910974bf3a, type: 3}
   deathActiveTime: 0
   hitActiveTime: 0
---- !u!4 &1381766859 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 3859625416502803577, guid: e8f36ff4269681d49875178b71004bbd, type: 3}
-  m_PrefabInstance: {fileID: 1309440133}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1402312536
 GameObject:
   m_ObjectHideFlags: 0
@@ -5827,6 +5822,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   drawAsSolidColor: {fileID: 4800000, guid: 22920b10088fcc7488cfea45b0a8ac9a, type: 3}
   outline: {fileID: 4800000, guid: 075aa2d70d6b5ef45bb1ef0318e9233e, type: 3}
+  renderOutlines: 1
 --- !u!43 &1823763691
 Mesh:
   m_ObjectHideFlags: 0
