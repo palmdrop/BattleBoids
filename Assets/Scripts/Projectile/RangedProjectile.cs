@@ -10,16 +10,38 @@ public class RangedProjectile : MonoBehaviour
     private Player _owner;
     private int _damage;
     private GameObject _hitAnimation;
-
-    void Start() {
-        SetColor();
-    }
+    private Vector3 vel;
+    private Vector3 gravity = Physics.gravity;
+    public static float projectileRadius = 0.05f;
+    private static List<Material> materials = new List<Material>();
 
     void Update() {
         // If under map destroy
-        if (transform.position.y < -10f) {
-            Destroy(gameObject);
-        }
+        //if (transform.position.y < 0f) {
+        //    gameObject.SetActive(false);
+            //Destroy(gameObject);
+        //}
+    }
+
+    public void SetForce(Vector3 force)
+    {
+        vel = force;
+    }
+    public Vector3 GetVel()
+    {
+        return vel;
+    }
+
+
+    private void fastPhysicsUpdate(float dt)
+    {
+        vel += gravity * dt;
+        transform.position += vel * dt;
+    }
+
+    public void ManagedFixedUpdate()
+    {
+        fastPhysicsUpdate(Time.fixedDeltaTime);
     }
 
     void OnCollisionEnter(Collision collision) {
