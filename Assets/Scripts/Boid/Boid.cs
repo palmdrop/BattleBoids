@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Mathematics;
 using System.Collections.Generic;
+using System.Collections;
 
 public abstract class Boid : Selectable
 {
@@ -27,6 +28,8 @@ public abstract class Boid : Selectable
     private Material _material;
     private Vector3 _localScale;
     private bool _hasMaterial = false;
+    private GameObject cachedDeath;
+    protected int meshDefaultLayer;
     // Cache shader property to avoid expensive shader uniform lookups
     //private static readonly int Color = Shader.PropertyToID("_Color");
     [SerializeField] private AudioClip collisionAudio;
@@ -116,6 +119,8 @@ public abstract class Boid : Selectable
 
         // Only used by scarecrow
         public float fearMultiplier;
+
+        public float colliderRadius;
     }
 
     // Struct for holding relevant information about the boid
@@ -274,7 +279,7 @@ public abstract class Boid : Selectable
     // Returns the position of this boid
     public Vector3 GetPos()
     {
-        return _rigidbody.position;
+        return _dead ? new Vector3(0,0,0) : _rigidbody.position;
     }
 
     // Returns the velocity of this boid
@@ -353,17 +358,28 @@ public abstract class Boid : Selectable
         if (!_dead) {
             _dead = true;
             SetTarget(null);
-            Destroy(gameObject);
             AnimateDeath();
+            Destroy(gameObject);
         }
     }
 
     private void AnimateDeath() {
-        GameObject death = Instantiate(deathAnimationPrefab, transform.position, transform.rotation);
-        ParticleSystem.MainModule psMain = death.GetComponent<ParticleSystem>().main;
-        psMain.startColor = owner.color;
-        death.GetComponent<Rigidbody>().velocity = gameObject.GetComponent<Rigidbody>().velocity;
-        Destroy(death, psMain.duration);
+        //GameObject death = Instantiate(deathAnimationPrefab, transform.position, transform.rotation);
+        //ParticleSystem.MainModule psMain = death.GetComponent<ParticleSystem>().main;
+        //psMain.startColor = owner.color;
+        //death.GetComponent<Rigidbody>().velocity = gameObject.GetComponent<Rigidbody>().velocity;
+        //Destroy(death, psMain.duration);
+
+        GameObject death = ParticlePoolManager.SharedInstance.getPooledObject(ParticlePoolManager.Type.Death);
+        if (death != null)
+        {
+            death.transform.position = transform.position;
+            death.transform.rotation = transform.rotation;
+            death.SetActive(true);
+            cachedDeath = death;
+            ParticleSystem.MainModule psMain = death.GetComponent<ParticleSystem>().main;
+            psMain.startColor = owner.color;
+        }
     }
 
     public bool IsDead() {
