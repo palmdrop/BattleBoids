@@ -110,12 +110,30 @@ public class Ranged : Boid {
             launchVector.y = launchVector.magnitude * Mathf.Tan(inclination);
             launchVector = launchVector.normalized * _projSpeed;
 
-            // Spawn and fire
-            GameObject projectile = Instantiate(projectilePrefeb, launchPos, transform.rotation);
+            // Spawn and fire - old code
+            /*GameObject projectile = Instantiate(projectilePrefeb, launchPos, transform.rotation);
             Physics.IgnoreCollision(projectile.GetComponent<Collider>(), GetComponent<Collider>());
             projectile.GetComponent<RangedProjectile>().SetOwner(owner);
             projectile.GetComponent<RangedProjectile>().SetDamage(IsBoosted() ? boostedDamage : damage);
-            projectile.GetComponent<Rigidbody>().AddForce(launchVector, ForceMode.VelocityChange);
+            projectile.GetComponent<Rigidbody>().AddForce(launchVector, ForceMode.VelocityChange);*/
+
+            GameObject projectile = ProjectilePoolManager.SharedInstance.getPooledObject();
+            if (projectile != null)
+            {
+                projectile.transform.position = launchPos;
+                projectile.transform.rotation = transform.rotation;
+                projectile.gameObject.SetActive(true);
+                //Physics.IgnoreCollision(projectile.GetComponent<Collider>(), GetComponent<Collider>());
+                RangedProjectile p = projectile.GetComponent<RangedProjectile>();
+                p.SetOwner(owner);
+                p.SetDamage(IsBoosted() ? boostedDamage : damage);
+                //Rigidbody body = projectile.GetComponent<Rigidbody>();
+                //body.velocity = new Vector3(0,0,0);
+                //body.angularVelocity = new Vector3(0,0,0);
+                //body.AddForce(launchVector, ForceMode.VelocityChange);
+                p.SetForce(launchVector);
+                p.SetColor();
+            }
 
             AudioManager.instance.PlaySoundEffectAtPoint(rangedFireAudio, GetPos(), rangedFireAudioVolume);
         }
