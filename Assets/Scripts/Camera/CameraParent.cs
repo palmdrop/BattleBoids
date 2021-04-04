@@ -1,14 +1,12 @@
 using UnityEngine;
+using UnityEngine.UIElements;
+using Collider = UnityEngine.Collider;
 
 public class CameraParent : MonoBehaviour
 {
-    // Used for zooming in and out
-    [SerializeField] private float MINHeight = 30;
-    private const float MAXHeight = 70f;
-
     // Used to limit where the camera can move
     private Rect _mapBounds;
-    [SerializeField] private float cameraOffset = 15f;
+    [SerializeField] private float allowedMapBoundOffset = 100f;
     
     // Scripts
     private Map.Map map;
@@ -33,7 +31,7 @@ public class CameraParent : MonoBehaviour
     
     // Yaw: parent camera
     // Pitch: child camera
-    private Transform _parentCamera;
+    private Rigidbody _parentCamera;
     private Transform _childCamera;
     
 
@@ -45,13 +43,16 @@ public class CameraParent : MonoBehaviour
     private Vector3 _selectedGameObjectPosition;
     private Vector3 _parentCameraPosition;
 
+
     private GameManager _gameManager;
+    
+    private float scrollCount = 0;
 
     // Start is called before the first frame update
     private void Start()
     {
-        _parentCamera = transform;
-        _childCamera = _parentCamera.GetChild(0).transform;
+        _parentCamera = GetComponent<Rigidbody>();
+        _childCamera = transform.GetChild(0).transform;
         _gameManager = FindObjectOfType<GameManager>();
         
         // Map script used to find map bounds
@@ -110,63 +111,88 @@ public class CameraParent : MonoBehaviour
             _cameraFollowGameObject = !_cameraFollowGameObject;
         }
 
+        float normalizedScrollDirectionValue = NormalizeScrollMultiplier(Input.GetAxis("Mouse ScrollWheel"));
+        if (normalizedScrollDirectionValue != 0)
+        {
+            scrollCount += normalizedScrollDirectionValue;
+        }
         
-        ZoomCamera();
     }
 
     private void FixedUpdate()
     {
-        MoveCamera();
         LockCameraToGameObject();
         RotateCamera();
+        MoveCamera();
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        // We don't want the camera to collide with the invisible wall surrounding the map
+        if (other.gameObject.name == "Wall")
+        {
+            Physics.IgnoreCollision(other.collider, GetComponent<Collider>());
+        }
     }
 
 
     private void MoveCamera()
     {
         if (_gameManager.IsPaused())
+        {
+            _parentCamera.velocity = Vector3.zero;
             return;
-        _parentCameraPosition = _parentCamera.position;
+        }
+        
+        _parentCameraPosition = transform.position;
+
+        // Movement is faster the higher up you are
+        float zoomOutMultiplier = Mathf.Max(2f, _parentCameraPosition.y/2);
                 
         // Make the movement speed dependent on y coordinate (the more we zoom out,the faster we move)
-        float horizontalSpeed = _parentCameraPosition.y * speed * Input.GetAxis("Horizontal");
-        float verticalSpeed = _parentCameraPosition.y * speed * Input.GetAxis("Vertical");
+        float horizontalSpeed = zoomOutMultiplier * speed * Input.GetAxis("Horizontal");
+        float verticalSpeed = zoomOutMultiplier * speed * Input.GetAxis("Vertical");
                 
         
-        Vector3 lateralMove = horizontalSpeed * _parentCamera.right;
-        Vector3 forwardMove = _parentCamera.forward;
+        Vector3 lateralMove = horizontalSpeed * transform.right;
+        Vector3 forwardMove = transform.forward;
 
+        Vector3 upDownMoveAmount = Vector3.zero;
+
+        Vector3 scrollTransformation = transform.up * (zoomSpeed * zoomOutMultiplier);
+        
+        // We do this check to ensure that we register all scroll events from the user
+        if (scrollCount > 0)
+        {
+            upDownMoveAmount -= scrollTransformation;
+            scrollCount--;
+        }
+        else if (scrollCount < 0)
+        {
+            upDownMoveAmount += scrollTransformation;
+            scrollCount++;
+        }
+        
+
+        // Y is set to zero to avoid moving up and down with movement key, we want to restrict it to scroll
         forwardMove.y = 0;
         forwardMove.Normalize();
         forwardMove *= verticalSpeed;
+        
                 
-        // How much the camera should move in the x and z plane
-        Vector3 move = lateralMove + forwardMove;
+        // How much the camera should move in the x, y and z plane
+        Vector3 move = lateralMove + forwardMove + upDownMoveAmount;
 
-        // Makes sure that there is no continous movement when right mouse button is held down
-
-        _parentCamera.position = new Vector3(
-            Mathf.Clamp(move.x + _parentCameraPosition.x, _mapBounds.xMin - cameraOffset, _mapBounds.xMax + cameraOffset),
-            _parentCameraPosition.y,
-            Mathf.Clamp(move.z + _parentCameraPosition.z, _mapBounds.yMin - cameraOffset, _mapBounds.yMax + cameraOffset)
+        // Moves the camera
+        _parentCamera.velocity = move;
+        
+        // Constrains the camera to a defined offset
+        transform.position = new Vector3(
+            Mathf.Clamp(_parentCameraPosition.x, _mapBounds.xMin - allowedMapBoundOffset, _mapBounds.xMax + allowedMapBoundOffset),
+            Mathf.Clamp(_parentCameraPosition.y,  -allowedMapBoundOffset, allowedMapBoundOffset),
+            Mathf.Clamp( _parentCameraPosition.z, _mapBounds.yMin - allowedMapBoundOffset, _mapBounds.yMax + allowedMapBoundOffset)
         );
 
-    }
-
-    private void ZoomCamera()
-    {
-        float scrollSpeed = -zoomSpeed * NormalizeScrollMultiplier(Input.GetAxis("Mouse ScrollWheel"));
-
-        // If the user is not scrolling, do nothing
-        if (scrollSpeed == 0) return;
-        Vector3 currentPosition = _parentCamera.position;
-
-        // else increment the height of the camera with the zoomSpeed and limit its height
-        _parentCamera.position = new Vector3(
-            currentPosition.x,
-            Mathf.Clamp(scrollSpeed + currentPosition.y, MINHeight, MAXHeight),
-            currentPosition.z
-        );
     }
 
     
