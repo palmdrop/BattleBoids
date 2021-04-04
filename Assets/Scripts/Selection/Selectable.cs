@@ -7,7 +7,7 @@ public abstract class Selectable : MonoBehaviour, ISelectable
     protected int Cost;
     
     [SerializeField] private GameObject selectionIndicatorPrefab;
-    private GameObject selectionIndicator;
+    //private GameObject selectionIndicator;
     private bool _selected = false;
 
     private Vector3 offset;
@@ -18,17 +18,25 @@ public abstract class Selectable : MonoBehaviour, ISelectable
     private void Awake()
     {
         thisTransform = transform; 
-        selectionIndicator = Instantiate(selectionIndicatorPrefab, Vector3.zero, Quaternion.identity);
-        selectionIndicatorTransform = selectionIndicator.transform;
+        //selectionIndicator = Instantiate(selectionIndicatorPrefab, Vector3.zero, Quaternion.identity);
+        //selectionIndicatorTransform = selectionIndicator.transform;
         
-        selectionIndicatorTransform.parent = thisTransform;
-        selectionIndicatorTransform.position = thisTransform.localPosition;
+        //selectionIndicatorTransform.parent = thisTransform;
+        //selectionIndicatorTransform.position = thisTransform.localPosition;
     }
 
     // Adds the selected visualisation 
     public void SetSelectionIndicator(bool isSelected)
     {
-        selectionIndicator.SetActive(isSelected);
+        //selectionIndicator.SetActive(isSelected);
+        if (isSelected)
+        {
+            GetComponent<Boid>().SetMeshLayer(LayerMask.NameToLayer("OutlineSelection"));
+        }
+        else
+        {
+            GetComponent<Boid>().SetMeshLayer();
+        }
         _selected = isSelected;
     }
 

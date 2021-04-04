@@ -150,6 +150,7 @@ public abstract class Boid : Selectable
     // Start is called before the first frame update
     protected void Start()
     {
+        meshDefaultLayer = LayerMask.NameToLayer("OutlineWhite");
         owner = GetComponentInParent<Player>();
         SetColor(owner.color);
 
@@ -386,6 +387,7 @@ public abstract class Boid : Selectable
         return _dead;
     }
 
+
     protected Vector3 RemoveYComp(Vector3 v)
     {
         return new Vector3(v.x, 0, v.z);
@@ -405,6 +407,16 @@ public abstract class Boid : Selectable
         tmp.color = color;
         materials.Add(tmp);
         transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material = tmp;
+    }
+
+    public void SetMeshLayer(int layer)
+    {
+        transform.GetChild(0).transform.GetChild(0).gameObject.layer = layer;
+    } 
+    
+    public void SetMeshLayer()
+    {
+        transform.GetChild(0).transform.GetChild(0).gameObject.layer = meshDefaultLayer;
     }
 
 
