@@ -8,6 +8,7 @@ using Random = System.Random;
 
 public class BoidManager : MonoBehaviour
 {
+    public static BoidManager SharedInstance;
     private List<Player> players;
 
     private readonly List<Boid> _boids = new List<Boid>();
@@ -23,11 +24,18 @@ public class BoidManager : MonoBehaviour
     //Needed for burst rays
     private static Unity.Physics.Systems.BuildPhysicsWorld _bpw;
 
+    private bool firstRun = true;
+
     // Start is called before the first frame update
     void Start()
     {
         players = GetComponentInParent<GameManager>().GetPlayers();
         _bpw = Unity.Entities.World.DefaultGameObjectInjectionWorld.GetExistingSystem<Unity.Physics.Systems.BuildPhysicsWorld>();
+    }
+
+    private void Awake()
+    {
+        SharedInstance = this;
     }
 
     // Fetches the boids from the respective players and places them in the boids list
@@ -46,6 +54,21 @@ public class BoidManager : MonoBehaviour
         }
     }
 
+    public List<Boid> GetBoids()
+    {
+        return _boids;
+    }
+
+    public Unity.Physics.Systems.BuildPhysicsWorld GetPhysicsWorld()
+    {
+        return _bpw;
+    }
+
+    public BoidGrid GetGrid()
+    {
+        return _grid;
+    }
+
     // Clear dead boids
     private void ClearDeadBoids()
     {
@@ -55,9 +78,12 @@ public class BoidManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //So the grid does not have to be populated more than once
+        if (!firstRun)
+            _grid.Dispose();
+        
         // Remove all dead boids
         ClearDeadBoids();
-
         // Allocate arrays for all the data required to calculate the boid behaviors
         NativeArray<Boid.BoidInfo> boidInfos = new NativeArray<Boid.BoidInfo>(_boids.Count, Allocator.TempJob); // In data
         // Get all the boid info from the boids
@@ -135,7 +161,9 @@ public class BoidManager : MonoBehaviour
         targetIndices.Dispose();
         friendlyTargetIndices.Dispose();
         DisposableBoidClassInfos.Dispose();
-        _grid.Dispose();
+        //_grid.Dispose();
+
+        firstRun = false;
     }
 
     // This job calculates information specific for the entire flock, such as 
