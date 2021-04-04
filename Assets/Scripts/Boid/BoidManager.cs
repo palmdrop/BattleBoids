@@ -75,8 +75,7 @@ public class BoidManager : MonoBehaviour
         _boids.RemoveAll(b => b.IsDead());
     }
 
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         //So the grid does not have to be populated more than once
         if (!firstRun)
@@ -178,6 +177,7 @@ public class BoidManager : MonoBehaviour
         {
             // Temporary array for holding flock info data
             NativeArray<Player.FlockInfo> tempFlockInfos = new NativeArray<Player.FlockInfo>(flockInfos.Length, Allocator.Temp);
+            NativeArray<float> minSquaredDistanceToAverage = new NativeArray<float>(flockInfos.Length, Allocator.Temp);
             
             // Iterate over all of the boids in order to calculate flock info data
             for (int i = 0; i < boids.Length; i++)
@@ -195,9 +195,8 @@ public class BoidManager : MonoBehaviour
                 // Save new data in array (necessary since "flockInfo" is a temporary value)
                 tempFlockInfos[boid.flockId - 1] = flockInfo;
             }
-
+            
             // Iterate over all the temporary flock info structs and average the results
-            // Also assign the data to the output array
             for (int i = 0; i < tempFlockInfos.Length; i++)
             {
                 Player.FlockInfo flockInfo = tempFlockInfos[i];
@@ -207,7 +206,32 @@ public class BoidManager : MonoBehaviour
                     flockInfo.avgVel /= flockInfo.boidCount;
                 }
 
-                flockInfos[i] = flockInfo;
+                tempFlockInfos[i] = flockInfo;
+                minSquaredDistanceToAverage[i] = float.MaxValue;
+            }
+            
+            // Iterate over all boids again to find the median boid position of each flock
+            for (int i = 0; i < boids.Length; i++)
+            {
+                Boid.BoidInfo boid = boids[i];
+                Player.FlockInfo flockInfo = tempFlockInfos[boid.flockId - 1];
+                
+                // Calculate the squared distance between the boid and the average position of all allied boids
+                float distSqToAverage = math.distancesq(boid.pos, flockInfo.avgPos);
+                
+                // If the calculated value is less than the stored one, update
+                if (distSqToAverage < minSquaredDistanceToAverage[boid.flockId - 1])
+                {
+                    flockInfo.medianPos = boid.pos;
+                    minSquaredDistanceToAverage[boid.flockId - 1] = distSqToAverage;
+                    tempFlockInfos[boid.flockId - 1] = flockInfo;
+                }
+            }
+            
+            // Finally, assign the data to the output array
+            for (int i = 0; i < tempFlockInfos.Length; i++)
+            {
+                flockInfos[i] = tempFlockInfos[i];
             }
 
             // Dispose of temporary data
@@ -288,6 +312,7 @@ public class BoidManager : MonoBehaviour
                 
                 // 
                 + ApproachForce(boid, classInfo, targetBoidIndex, targetViewDistance)
+                + AvoidanceForce(boid, classInfo, neighbours, distances) 
                 + RandomForce(index, classInfo.randomMovements);
 
             if (HeadedForCollisionWithMapBoundary(boid, classInfo))
@@ -529,9 +554,20 @@ public class BoidManager : MonoBehaviour
             // TODO this line assumes there's only two flocks and that the ID of the flock corresponds to the index 
             // TODO in the flocks array. Find better solution
             Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
+
+            if (enemyFlock.boidCount == 0 || enemyFlock.avgPos.Equals(boid.pos)) return float3.zero;
+
+            float dist = math.distance(boid.pos, enemyFlock.medianPos);
+
+            float scale = 1.0f;
+            if (dist < classInfo.aggressionDistanceCap)
+            {
+                scale = math.pow(dist / classInfo.aggressionDistanceCap, classInfo.aggressionFalloff);
+            }
+
+            scale *= math.max(1.0f, math.min(classInfo.maxAggressionMultiplier, (float) flocks[boid.flockId - 1].boidCount / enemyFlock.boidCount));
             
-            if (enemyFlock.boidCount == 0) return float3.zero;
-            return math.normalize(enemyFlock.avgPos - boid.pos) * classInfo.aggressionStrength;
+            return math.normalize(enemyFlock.avgPos - boid.pos) * classInfo.aggressionStrength * scale;
         }
         
         private float3 SearchForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo)
@@ -670,6 +706,51 @@ public class BoidManager : MonoBehaviour
                    CalculatePower(classInfo.approachMovementStrength, 
                        dist / targetDistRange, 
                        classInfo.approachMovementExponent);
+        }
+
+        // Calculates the a force which tries to steer boids away from enemy field of view
+        private float3 AvoidanceForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours,
+            NativeArray<float> distances)
+        {
+            float3 force = float3.zero;
+
+            // Iterate over all the neighbouring boids
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                Boid.BoidInfo neighbour = boids[neighbours[i]];
+
+                // Ignore if the neighbour is a ally
+                if (boid.flockId == neighbour.flockId) continue;
+
+                // Values required to determine if the current boid is in attack range of enemy boid
+                float distance = distances[i];
+                // The boid will assume the enemy has the same attack distance and attack angle as itself
+                float attackDistRange = classInfo.attackDistRange;
+                float attackAngleRange = classInfo.attackAngleRange; 
+
+                // Determine if boid is in range of enemy and if the enemy is in range of the boid
+                bool selfInRange = BoidIndexInAttackRange(boid.pos - neighbour.pos, distance, neighbour.forward, attackDistRange, attackAngleRange);
+                bool enemyInRange = BoidIndexInAttackRange(neighbour.pos - boid.pos, distance, boid.forward, attackDistRange, attackAngleRange);
+
+                // If the boid itself is in range of the enemy, but the enemy is not in range of the boid itself,
+                // then we want to turn away from the view of the enemy
+                if (selfInRange && !enemyInRange)
+                {
+                    // Turn away from the enemy boid
+                    float3 turnDir = boid.forward - neighbour.forward;
+                    if (turnDir.x == 0 && turnDir.y == 0 && turnDir.z == 0) 
+                    {
+                        //TODO handle this (very unlikely) case
+                        //TODO this happens when the two boids have the same forward direction
+                        return float3.zero;
+                    }
+
+                    // Scale force using avoidance strength
+                    force += math.normalize(turnDir) * classInfo.avoidanceStrength;
+                }
+            }
+
+            return force;
         }
 
         private bool HeadedForCollisionWithMapBoundary(Boid.BoidInfo boid, Boid.ClassInfo classInfo)

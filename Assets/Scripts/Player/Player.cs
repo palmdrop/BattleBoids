@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     public struct FlockInfo
     {
         public float3 avgPos;
+        public float3 medianPos;
         public float3 avgVel;
         public int boidCount;
     }
@@ -50,6 +51,10 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+    }
+
+    public bool IsActive() {
+        return _active;
     }
 
     public List<Boid> GetFlock()
@@ -103,6 +108,18 @@ public class Player : MonoBehaviour
         return _gameUI;
     }
 
+    public bool CanReady()
+    {
+        foreach (Boid boid in flock)
+        {
+            if (boid.GetType() == Boid.Type.Hero || boid.GetType() == Boid.Type.Melee || boid.GetType() == Boid.Type.Ranged)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public bool IsReady()
     {
         return ready;
@@ -110,7 +127,10 @@ public class Player : MonoBehaviour
 
     public void Ready()
     {
-        ready = true;
+        if (CanReady())
+        {
+            ready = true;
+        }
     }
 
     public void Unready()
@@ -139,14 +159,16 @@ public class Player : MonoBehaviour
             GetComponentInChildren<SpawnArea>().Deactivate();
         }
         foreach (var boid in flock) {
-            foreach (Renderer r in boid.GetComponentsInChildren<Renderer>()) {
-                r.enabled = _active || state != GameManager.GameState.Placement || type != SceneData.Type.Multiplayer;
-            }
+            boid.SetHidden(!_active && state == GameManager.GameState.Placement && type == SceneData.Type.Multiplayer);
         }
     }
 
     public void SetId(int id) {
         this.id = id;
+    }
+
+    public int GetId() {
+        return this.id;
     }
 
     public void SetNickname(string nickname) {

@@ -29,9 +29,9 @@ public class Melee : Boid {
         ClassInfos.infos[(int) type] = new ClassInfo {
             type = this.type,
             viewRadius = 1f,
-            separationRadius = 0.3f,
+            separationRadius = 0.35f,
             fearRadius = 1.0f,
-            maxForce = 2f,
+            maxForce = 8.0f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,
@@ -41,33 +41,38 @@ public class Melee : Boid {
 
             confidenceThreshold = 1.0f,
             
-            alignmentStrength = 5.6f,
+            alignmentStrength = 3.6f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 3.0f,
+            cohesionStrength = 2.0f,
             cohesionExponent = 0.0f,
             
             separationStrength = 120.0f,
-            separationExponent = 1.0f,
+            separationExponent = 0.5f,
 
             gravity = 1f,
             
-            fearStrength = 100.0f,
-            fearExponent = 1.0f,
+            fearStrength = 5.0f,
+            fearExponent = 1.8f,
             
             attackDistRange = 1f,
             attackAngleRange = Mathf.PI / 4.0f,
             
-            approachMovementStrength = 20.1f,
+            approachMovementStrength = 30.1f,
             approachMovementExponent = 0.5f,
             
-            aggressionStrength = 10.4f,
+            aggressionStrength = 3.4f,
+            aggressionFalloff = 2.0f,
+            aggressionDistanceCap = 10.0f,
+            maxAggressionMultiplier = 1.7f,
 
-            avoidCollisionWeight = 100f,
+            avoidCollisionWeight = 1000f,
 
             searchStrength = 10.4f,
+
+            avoidanceStrength = 48.0f,
             
-            randomMovements = 6.0f,
+            randomMovements = 3.0f,
 
             hoverKi = 2f,
             hoverKp = 10f,

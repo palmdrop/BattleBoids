@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
     private BoidManager _boidManager;
 
     private GameState _state;
+    private bool _paused;
     private List<Player> _players;
 
     [SerializeField] private Camera mainCamera;
@@ -77,6 +78,7 @@ public class GameManager : MonoBehaviour
 
         InstantiateProjectiles();
         InstantiateDeathAnimations();
+		GetComponentInChildren<SelectionManager>().gameObject.SetActive(false);
     }
 
     //Instantiate one projectile for each ranged boid
@@ -128,6 +130,16 @@ public class GameManager : MonoBehaviour
     public Camera GetMainCamera()
     {
         return mainCamera;
+    }
+
+    public void SetPaused(bool paused)
+    {
+        _paused = paused;
+    }
+
+    public bool IsPaused()
+    {
+        return _paused;
     }
 
 }

@@ -34,10 +34,10 @@ public class Ranged : Boid {
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
-            viewRadius = 3f,
-            separationRadius = 0.3f,
-            fearRadius = 2.0f,
-            maxForce = 2f,
+            viewRadius = 1.6f,
+            separationRadius = 0.35f,
+            fearRadius = 1.6f,
+            maxForce = 6.5f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,
@@ -46,34 +46,39 @@ public class Ranged : Boid {
             abilityDistance = this.abilityDistance,
 
             confidenceThreshold = 3.0f,
-
-            alignmentStrength = 5.6f,
-            alignmentExponent = 0.0f,
-
-            cohesionStrength = 4.0f,
+            
+            alignmentStrength = 3.6f,
+            alignmentExponent = 0.0f, 
+            
+            cohesionStrength = 2.0f,
             cohesionExponent = 0.0f,
 
             separationStrength = 120.0f,
             separationExponent = 1.0f,
 
             gravity = 1f,
-
-            fearStrength = 140.0f,
-            fearExponent = 1.0f,
+            
+            fearStrength = 10.0f,
+            fearExponent = 2.0f,
 
             attackDistRange = 3f,
             attackAngleRange = Mathf.PI,
 
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
+            
+            aggressionStrength = 3.4f,
+            aggressionFalloff = 2.0f,
+            aggressionDistanceCap = 10.0f,
+            maxAggressionMultiplier = 1.8f,
 
-            aggressionStrength = 10.4f,
-
-            avoidCollisionWeight = 100f,
+            avoidCollisionWeight = 1000f,
 
             searchStrength = 10.4f,
 
-            randomMovements = 6.0f,
+            avoidanceStrength = 70.0f,
+            
+            randomMovements = 3.0f,
 
             hoverKi = 2f,
             hoverKp = 10f,

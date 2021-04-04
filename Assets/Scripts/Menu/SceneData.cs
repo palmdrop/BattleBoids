@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SceneData : MonoBehaviour
 {
@@ -150,7 +151,26 @@ public class SceneData : MonoBehaviour
             new Map() {
                 name = "Dusk",
                 numberOfPlayers = 2
+            }, 
+            new Map()
+            {
+                name = "Midnight", 
+                numberOfPlayers = 2
             }
         }
     );
+
+    public static Level? GetNextLevel()
+    {
+        int next = 0;
+        foreach (var level in SceneData.campaignLevels) {
+            next += 1;
+            if (level.gameSettings.mapName == SceneManager.GetActiveScene().name)
+                break;
+        }
+        if (next == SceneData.campaignLevels.Count) {
+            return null;
+        }
+        return SceneData.campaignLevels[next];
+    }
 }

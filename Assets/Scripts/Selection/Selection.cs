@@ -25,8 +25,9 @@ public class Selection : MonoBehaviour
     private Vector2 _endSelectionPosition;
 
     // Offset for finding closest boid when clicking
-    private const float Offset = 10f;
+    private const float Offset = 6f;
 
+    
     
     private void Start()
     {
@@ -42,7 +43,14 @@ public class Selection : MonoBehaviour
         // You can't select if you are currently purchasing new units
         if (_gameUI.GetActivePlayer().GetSpawnArea().isHolding())
         {
+            _selectionManager.CanSelect = false;
             return;     
+        }
+        
+
+        if (_selectionManager.GETSelectedEntities().Count > 0)
+        {
+            _selectionManager.CanSelect = false;
         }
         
         // If you are currently moving entities around, you can't select new ones before they are placed
@@ -56,7 +64,6 @@ public class Selection : MonoBehaviour
         {
             _selectionManager.Deselect();
 
-
             // Get the position of the mouse once
             _startSelectionPosition = Input.mousePosition;
 
@@ -66,10 +73,14 @@ public class Selection : MonoBehaviour
         
 
         // When the left mouse button is held down
-        if (Input.GetMouseButton(0))
+        if (Input.GetMouseButton(0) && _selectionManager.CanSelect)
         {
+            
+            
             // Continuously update the position of the mouse
             _endSelectionPosition = Input.mousePosition;
+            
+           
 
             DrawUISelectionArea();
             
@@ -88,19 +99,23 @@ public class Selection : MonoBehaviour
         // When the left mouse button is released
         if (Input.GetMouseButtonUp(0))
         {
-            // Detects if the mouse is clicked in without moving
-            if (_startSelectionPosition == _endSelectionPosition)
+            if (_selectionManager.CanSelect)
             {
-                _selectionArea.xMin = Input.mousePosition.x - Offset;
-                _selectionArea.xMax = Input.mousePosition.x + Offset;
+                // Detects if the mouse is clicked in without moving
+                if (_startSelectionPosition == _endSelectionPosition)
+                {
+                    _selectionArea.xMin = Input.mousePosition.x - Offset;
+                    _selectionArea.xMax = Input.mousePosition.x + Offset;
+                    
+                    _selectionArea.yMin = Input.mousePosition.y - Offset;
+                    _selectionArea.yMax = Input.mousePosition.y + Offset;
+                }
                 
-                _selectionArea.yMin = Input.mousePosition.y - Offset;
-                _selectionArea.yMax = Input.mousePosition.y + Offset;
+                SelectPlayerFlockEntities();
+                ResetDrawUISelectionArea();
             }
-            
-            SelectPlayerFlockEntities();
-            ResetDrawUISelectionArea();
-            
+
+            _selectionManager.CanSelect = true;
         }
 }
 

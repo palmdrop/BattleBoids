@@ -40,10 +40,10 @@ public class Hero : Boid {
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
-            viewRadius = 3f,
-            separationRadius = 0.3f,
+            viewRadius = 1f,
+            separationRadius = 0.5f,
             fearRadius = 1.0f,
-            maxForce = 2f,
+            maxForce = 6.0f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,
@@ -53,32 +53,38 @@ public class Hero : Boid {
 
             confidenceThreshold = 0.5f,
 
-            alignmentStrength = 5.6f,
+            alignmentStrength = 3.6f,
             alignmentExponent = 0.0f, 
 
-            cohesionStrength = 4.0f,
+            cohesionStrength = 2.0f,
             cohesionExponent = 0.0f,
 
             separationStrength = 120.0f,
             separationExponent = 1.0f,
 
-            fearStrength = 140.0f,
-            fearExponent = 1.0f,
+            fearStrength = 3.0f,
+            fearExponent = 2.1f,
 
             gravity = 1f,
 
             attackDistRange = 3f,
             attackAngleRange = 2f * Mathf.PI / 3f,
 
-            approachMovementStrength = 20.1f,
+            approachMovementStrength = 30.1f,
             approachMovementExponent = 0.5f,
 
-            aggressionStrength = 10.4f,
+            aggressionStrength = 4.4f,
+            aggressionFalloff = 2.0f,
+            aggressionDistanceCap = 10.0f,
+            maxAggressionMultiplier = 1.7f,
+
             searchStrength = 10.4f,
 
-            avoidCollisionWeight = 100f,
+            avoidanceStrength = 40f,
 
-            randomMovements = 6.0f,
+            avoidCollisionWeight = 1000f,
+
+            randomMovements = 3.0f,
 
             hoverKi = 2f,
             hoverKp = 10f,

@@ -14,6 +14,36 @@ public abstract class Boid : Selectable
         Healer,
         Commander
     }
+    
+    public static string GetDescription(string name)
+    {
+        string description;
+        switch (name)
+        {
+            case "Melee":
+                description = "Fast and cheap and does close range damage";
+                break;
+            case "Ranged":
+                description = "Keeps a distance and shoots projectiles";
+                break;
+            case "Hero":
+                description = "Strong and charges up an explosive shot";
+                break;
+            case "Scarecrow":
+                description = "Sly and scary, repels enemies";
+                break;
+            case "Healer":
+                description = "Careful and peaceful, but heals allies";
+                break;
+            case "Commander":
+                description = "Leader type, follows a path and tries to make allies to join";
+                break;
+            default:
+                return "[NO SUCH TYPE]";
+        }
+
+        return description;
+    }
 
     [SerializeField] private GameObject healthBarPrefab;
     [SerializeField] private GameObject deathAnimationPrefab;
@@ -108,7 +138,15 @@ public abstract class Boid : Selectable
 
 
         public float aggressionStrength; // Controls how much the boid is attracted to the enemy flock
-        public float searchStrength;
+        public float aggressionFalloff; // A high value will reduce the aggression drastically when a boid moves
+                                        // closer to the enemy flock
+        public float aggressionDistanceCap;  // If the enemy flock is further away than this, the aggression will be at max strength
+        public float maxAggressionMultiplier;  // Maximum aggression multiplier. A flock with an advantage will be more aggressive
+
+        public float searchStrength; // Controls how much the boid is attracted to the center of the allied flock
+                                     // This behavior is only active if the boid has a low confidence level
+
+        public float avoidanceStrength; // A boid tries to avoid being in the attack scope of an enemy boid
 
         // Misc behaviors
         public float randomMovements;
@@ -423,6 +461,13 @@ public abstract class Boid : Selectable
     public Rigidbody GetRigidbody()
     {
         return _rigidbody;
+    }
+
+    public virtual void SetHidden(bool hidden)
+    {
+        foreach (Renderer r in GetComponentsInChildren<Renderer>()) {
+            r.enabled = !hidden;
+        }
     }
 
     protected abstract void Act();
