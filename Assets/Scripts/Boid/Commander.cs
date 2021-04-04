@@ -23,6 +23,7 @@ public class Commander : Boid
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 0;
+        meshDefaultLayer = LayerMask.NameToLayer("OutlineWhite");
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
@@ -68,7 +69,9 @@ public class Commander : Boid
 
             hoverKi = 2f,
             hoverKp = 10f,
-            targetHeight = 2f
+            targetHeight = 2f,
+
+            colliderRadius = GetComponent<SphereCollider>().radius
         };
     }
 

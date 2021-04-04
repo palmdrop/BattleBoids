@@ -24,6 +24,7 @@ public class Melee : Boid {
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 0;
+        meshDefaultLayer = LayerMask.NameToLayer("OutlineWhite");
 
         ClassInfos.infos[(int) type] = new ClassInfo {
             type = this.type,
@@ -70,8 +71,10 @@ public class Melee : Boid {
 
             hoverKi = 2f,
             hoverKp = 10f,
-            targetHeight = 2f
-    };
+            targetHeight = 2f,
+
+            colliderRadius = GetComponent<SphereCollider>().radius
+        };
 
         _laserRenderer = laser.GetComponent<LineRenderer>();
         laser.SetActive(false);
@@ -86,8 +89,8 @@ public class Melee : Boid {
     private void Attack() 
     {
         if (HasTarget() && !target.IsDead()) {
-            target.TakeDamage(IsBoosted() ? boostedDamage : damage);
             SetLaser(this.GetPos(), target.GetPos());
+            target.TakeDamage(IsBoosted() ? boostedDamage : damage);
             laser.SetActive(true);
 
             if (Time.time - _previousAudioTime >= audioCooldown)

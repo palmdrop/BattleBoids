@@ -36,6 +36,7 @@ public class Hero : Boid {
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 2f;
+        meshDefaultLayer = LayerMask.NameToLayer("OutlineWhite");
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
@@ -81,7 +82,9 @@ public class Hero : Boid {
 
             hoverKi = 2f,
             hoverKp = 10f,
-            targetHeight = 2f
+            targetHeight = 2f,
+
+            colliderRadius = GetComponent<SphereCollider>().radius
         };
 
         _lockLaserRenderer = lockLaser.GetComponent<LineRenderer>();

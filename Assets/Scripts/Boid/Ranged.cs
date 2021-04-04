@@ -30,6 +30,7 @@ public class Ranged : Boid {
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 0;
+        meshDefaultLayer = LayerMask.NameToLayer("OutlineWhite");
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
@@ -45,38 +46,40 @@ public class Ranged : Boid {
             abilityDistance = this.abilityDistance,
 
             confidenceThreshold = 3.0f,
-            
+
             alignmentStrength = 5.6f,
-            alignmentExponent = 0.0f, 
-            
+            alignmentExponent = 0.0f,
+
             cohesionStrength = 4.0f,
             cohesionExponent = 0.0f,
-            
+
             separationStrength = 120.0f,
             separationExponent = 1.0f,
-            
+
             gravity = 1f,
-            
+
             fearStrength = 140.0f,
             fearExponent = 1.0f,
 
             attackDistRange = 3f,
             attackAngleRange = Mathf.PI,
-            
+
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
-            
+
             aggressionStrength = 10.4f,
 
             avoidCollisionWeight = 100f,
 
             searchStrength = 10.4f,
-            
+
             randomMovements = 6.0f,
 
             hoverKi = 2f,
             hoverKp = 10f,
-            targetHeight = 2f
+            targetHeight = 2f,
+
+            colliderRadius = GetComponent<SphereCollider>().radius
         };
     }
 
@@ -117,6 +120,7 @@ public class Ranged : Boid {
             AudioManager.instance.PlaySoundEffectAtPoint(rangedFireAudio, GetPos(), rangedFireAudioVolume);
         }
     }
+
 
     private float FindTimeToImpact() {
         float minSpeed = _projSpeed * Mathf.Cos(Mathf.PI / 4f);
