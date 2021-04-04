@@ -5,7 +5,7 @@ using UnityEngine;
 public class RangedProjectile : MonoBehaviour
 {
     [SerializeField] private GameObject hitAnimation;
-    [SerializeField] private GameObject[] particleObjects;
+    [SerializeField] protected Material baseMaterial;
 
     private Player _owner;
     private int _damage;
@@ -79,14 +79,40 @@ public class RangedProjectile : MonoBehaviour
         }
     }
 
-    private void SetColor() {
-        foreach (GameObject particleObject in particleObjects) {
-            particleObject.GetComponent<ParticleSystem>().startColor = _owner.color;
-        }
+    //private void SetColor() {
+    /*foreach (GameObject particleObject in particleObjects) {
+        particleObject.GetComponent<ParticleSystem>().startColor = _owner.color;
+    }
+    TrailRenderer tr = gameObject.GetComponent<TrailRenderer>();
+    Color trColor = new Color(_owner.color.r, _owner.color.g, _owner.color.b, 0.1f);
+    tr.startColor = trColor;
+    tr.endColor = trColor;*/
+    //}
+
+    public void SetColor(Color color)
+    {
         TrailRenderer tr = gameObject.GetComponent<TrailRenderer>();
-        Color trColor = new Color(_owner.color.r, _owner.color.g, _owner.color.b, 0.1f);
+        Color trColor = new Color(color.r, color.g, color.b, 0.1f);
         tr.startColor = trColor;
         tr.endColor = trColor;
+
+        foreach (Material material in materials)
+        {
+            if (color.Equals(material.color))
+            {
+                transform.GetChild(0).GetComponent<MeshRenderer>().material = material;
+                return;
+            }
+        }
+        Material tmp = new Material(baseMaterial);
+        tmp.color = color;
+        materials.Add(tmp);
+        transform.GetChild(0).GetComponent<MeshRenderer>().material = tmp;
+    }
+
+    public void SetColor()
+    {
+        SetColor(_owner.color);
     }
 
     public void SetOwner(Player owner) {
