@@ -39,7 +39,7 @@ namespace Map
             CalculateBounds();
             
             // Calculate the heightmap representation of the ground of the map 
-            CalculateHeightmap();
+            // CalculateHeightmap();
             
             // Create wall tiles
             // CreateWallTiles();

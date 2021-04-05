@@ -15,7 +15,7 @@ public class WallEditor : Editor
             Map.Map script = target as Map.Map;
             script.MoveGroundTilesToGround();
             script.CalculateBounds();
-            script.CalculateHeightmap();
+            //script.CalculateHeightmap();
             script.CreateWallTiles();
         }
 
