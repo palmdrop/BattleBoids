@@ -24,7 +24,7 @@ public class Ranged : Boid {
         health = maxHealth = 60;
         damage = 20;
         boostedDamage = 50;
-        maxSpeed = 4f;
+        maxSpeed = 7f;
         avoidCollisionWeight = 5f;
         timeBetweenActions = 1f;
         emotionalState = 0f;
@@ -34,8 +34,8 @@ public class Ranged : Boid {
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
             viewRadius = 1.6f,
-            separationRadius = 0.35f,
-            fearRadius = 1.6f,
+            separationRadius = 0.43f,
+            fearRadius = 1.3f,
             maxForce = 6.5f,
 
             maxHealth = this.maxHealth,
@@ -44,40 +44,38 @@ public class Ranged : Boid {
             groundMask = (uint)this.groundMask.value,
             abilityDistance = this.abilityDistance,
 
-            confidenceThreshold = 3.0f,
-            
-            alignmentStrength = 3.6f,
+            alignmentStrength = 4.0f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 2.0f,
+            cohesionStrength = 3.0f,
             cohesionExponent = 0.0f,
             
-            separationStrength = 120.0f,
+            separationStrength = 220.0f,
             separationExponent = 1.0f,
             
             gravity = 1f,
             
-            fearStrength = 10.0f,
-            fearExponent = 2.0f,
+            fearStrength = 20.0f,
+            fearExponent = 1.0f,
 
             attackDistRange = 3f,
             attackAngleRange = Mathf.PI,
             
-            approachMovementStrength = 20.1f,
+            approachMovementStrength = 3.1f,
             approachMovementExponent = 0.5f,
             
             aggressionStrength = 3.4f,
-            aggressionFalloff = 2.0f,
+            aggressionFalloff = 1.5f,
             aggressionDistanceCap = 10.0f,
-            maxAggressionMultiplier = 1.8f,
+            maxAggressionMultiplier = 2.2f,
 
             avoidCollisionWeight = 1000f,
 
-            searchStrength = 10.4f,
+            searchStrength = 5.4f,
 
-            avoidanceStrength = 70.0f,
+            avoidanceStrength = 40.0f,
             
-            randomMovements = 3.0f,
+            randomMovements = 2.0f,
 
             hoverKi = 2f,
             hoverKp = 10f,

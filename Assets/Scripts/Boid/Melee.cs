@@ -18,7 +18,7 @@ public class Melee : Boid {
         health = maxHealth = 80;
         damage = 1;
         boostedDamage = 5;
-        maxSpeed = 4f;
+        maxSpeed = 7f;
         avoidCollisionWeight = 5f;
         timeBetweenActions = 0.05f;
         emotionalState = 0f;
@@ -28,9 +28,9 @@ public class Melee : Boid {
         ClassInfos.infos[(int) type] = new ClassInfo {
             type = this.type,
             viewRadius = 1f,
-            separationRadius = 0.35f,
-            fearRadius = 1.0f,
-            maxForce = 8.0f,
+            separationRadius = 0.41f,
+            fearRadius = 0.5f,
+            maxForce = 12.0f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,
@@ -38,40 +38,38 @@ public class Melee : Boid {
             groundMask = (uint)this.groundMask.value,
             abilityDistance = this.abilityDistance,
 
-            confidenceThreshold = 1.0f,
-            
-            alignmentStrength = 3.6f,
+            alignmentStrength = 4.0f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 2.0f,
+            cohesionStrength = 3.0f,
             cohesionExponent = 0.0f,
             
-            separationStrength = 120.0f,
+            separationStrength = 220.0f,
             separationExponent = 0.5f,
 
             gravity = 1f,
             
-            fearStrength = 5.0f,
-            fearExponent = 1.8f,
+            fearStrength = 7.0f,
+            fearExponent = 1.0f,
             
             attackDistRange = 1f,
             attackAngleRange = Mathf.PI / 4.0f,
             
-            approachMovementStrength = 30.1f,
-            approachMovementExponent = 0.5f,
+            approachMovementStrength = 3.1f,
+            approachMovementExponent = 1.0f,
             
             aggressionStrength = 3.4f,
-            aggressionFalloff = 2.0f,
+            aggressionFalloff = 1.2f,
             aggressionDistanceCap = 10.0f,
-            maxAggressionMultiplier = 1.7f,
+            maxAggressionMultiplier = 2.3f,
 
             avoidCollisionWeight = 1000f,
 
-            searchStrength = 10.4f,
+            searchStrength = 5.4f,
 
-            avoidanceStrength = 48.0f,
+            avoidanceStrength = 28.0f,
             
-            randomMovements = 3.0f,
+            randomMovements = 2.0f,
 
             hoverKi = 2f,
             hoverKp = 10f,
