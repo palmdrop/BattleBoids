@@ -3,17 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Background : MonoBehaviour
+public class LoadingScreen : MonoBehaviour
 {
-    [SerializeField] Canvas canvas;
-
-    void Start() {
-        ScaleToFullScreen();
-    }
-
-    void Update() {
-        ScaleToFullScreen();
-    }
+    [SerializeField] private Canvas canvas;
+    [SerializeField] private Image loadingBar;
 
     public void ScaleToFullScreen() {
         Vector2 spriteSize = GetComponent<Image>().sprite.bounds.size;
@@ -35,5 +28,9 @@ public class Background : MonoBehaviour
 
         Vector2 size = new Vector2(width, height) / canvas.scaleFactor;
         GetComponent<RectTransform>().sizeDelta = size;
+    }
+
+    public void SetLoadingBar(float percent) {
+        loadingBar.fillAmount = percent;
     }
 }

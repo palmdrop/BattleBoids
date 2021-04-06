@@ -65,7 +65,9 @@ public class MenuManager : MonoBehaviour
     }
 
     private void LoadingScreen(SceneData.GameSettings settings) {
-        loadingScreen.transform.GetChild(1).gameObject.GetComponent<Image>().sprite = GetSceneSprite(settings.spriteName);
+        loadingScreen.GetComponent<Image>().sprite =
+            Resources.Load<Sprite>("Sprites/LoadingScreen/" + settings.spriteName);
+        loadingScreen.GetComponent<LoadingScreen>().ScaleToFullScreen();
         loadingScreen.SetActive(true);
     }
 
@@ -74,6 +76,7 @@ public class MenuManager : MonoBehaviour
 
         // Wait until the asynchronous scene fully loads
         while (!asyncLoad.isDone) {
+            loadingScreen.GetComponent<LoadingScreen>().SetLoadingBar(asyncLoad.progress);
             yield return null;
         }
     }
