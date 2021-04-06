@@ -58,7 +58,7 @@ public class GameManager : MonoBehaviour
                 Color color;
                 ColorUtility.TryParseHtmlString(PlayerPrefs.GetString(prefix + "Color " + number.ToString()), out color);
                 _players[i].SetColor(color);
-                _players[i].SetBoins(PlayerPrefs.GetInt(prefix + "Boins"));
+                _players[i].SetBoins(PlayerPrefs.GetInt(prefix + "Boins " + number.ToString()));
             }
         }
     }

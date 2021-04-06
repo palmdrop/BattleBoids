@@ -9,14 +9,12 @@ using UnityEngine.SceneManagement;
 public class SetupManager : MonoBehaviour
 {
     [SerializeField] private MenuManager menuManager;
-    [SerializeField] private GameObject mapDropdown;
-    [SerializeField] private GameObject mapName;
-    [SerializeField] private GameObject mapImage;
-    [SerializeField] private GameObject playerContainerPrefab;
-    [SerializeField] private GameObject playerListContent;
-    [SerializeField] private GameObject boins;
+    [SerializeField] private GameObject mapListContent;
+    [SerializeField] private GameObject mapContainerPrefab;
+    [SerializeField] private Text mapName;
+    [SerializeField] private Image mapImage;
+    [SerializeField] private PlayerContainer[] players;
     [SerializeField] private GameObject allowedUnits;
-    [SerializeField] private GameObject colorPopup;
 
     private string _prefix = SceneData.Type.Multiplayer.ToString();
 
@@ -24,74 +22,70 @@ public class SetupManager : MonoBehaviour
     private int _defaultBoins = 10000;
     private Color[] _defaultColors;
 
+    private int _indexOfSelectedMap;
+
     void Start() {
-        InitColors();
-        InitDropdownOptions();
-        UpdateHolders();
+        _indexOfSelectedMap = PlayerPrefs.GetInt("MapIndex", 0);
+        InitMapScrollView();
+        UpdateMapHolder();
         InitOptions();
     }
 
-    // Set color array
-    private void InitColors() {
-        int numberOfColors = colorPopup.transform.childCount;
-        _defaultColors = new Color[numberOfColors];
-        for (int i = 0; i < numberOfColors; i++) {
-            _defaultColors[i] = colorPopup.transform.GetChild(i).gameObject.GetComponent<Image>().color;
+    void Update() {
+        UpdateMapHolder();
+        HighlightSelected();
+    }
+
+    // Init map scroll view with maps
+    private void InitMapScrollView() {
+        RectTransform maprt = mapContainerPrefab.transform.GetComponent<RectTransform>();
+        float mapContainerHeight = maprt.sizeDelta.y * maprt.localScale.y;
+        float mapListHeight = mapContainerHeight * SceneData.multiplayerMaps.Count;
+        mapListContent.transform.GetComponent<RectTransform>().sizeDelta = new Vector2(0, mapListHeight);
+        for (int i = 0; i < SceneData.multiplayerMaps.Count; i++) {
+            CreateMapContainer(i, mapContainerHeight);
         }
     }
 
-    // Init map dropdown with maps
-    private void InitDropdownOptions() {
-        Dropdown dd = mapDropdown.GetComponent<Dropdown>();
-        dd.ClearOptions();
-        Dropdown.OptionData option;
-        foreach (SceneData.Map map in SceneData.multiplayerMaps) {
-            option = new Dropdown.OptionData();
-            option.text = map.name;
-            dd.options.Add(option);
-        }
-        dd.value = PlayerPrefs.GetInt("MapIndex", 0);
-        dd.captionText.text = dd.options[dd.value].text;
+    // Create map container
+    private void CreateMapContainer(int i, float offsetStep) {
+        GameObject map = Instantiate(mapContainerPrefab, mapListContent.transform);
+        string name = SceneData.multiplayerMaps[i].name;
+        map.name = name;
+        map.GetComponent<Text>().text = name;
+        float offset = -(i * offsetStep);
+        map.GetComponent<RectTransform>().localPosition = new Vector3(0, offset, 0);
+        map.GetComponent<Button>().onClick.AddListener(() => UpdateSelectedMap(i));
     }
 
-    // Init options with default values
+    public void UpdateSelectedMap(int i) {
+        _indexOfSelectedMap = i;
+    }
+
+    private void HighlightSelected() {
+        for (int i = 0; i < mapListContent.transform.childCount; i++) {
+            Text text = mapListContent.transform.GetChild(i).gameObject.GetComponent<Text>();
+            if (i == _indexOfSelectedMap) {
+                text.fontStyle = FontStyle.Bold;
+                text.color = new Color(1, 1, 1, 1);
+            } else {
+                text.fontStyle = FontStyle.Normal;
+                text.color = new Color(0.9f, 0.9f, 0.9f, 1);
+            }
+        }
+    }
+
+    // Init options
     private void InitOptions() {
-        boins.GetComponentInChildren<InputField>().text = PlayerPrefs.GetInt(_prefix + "Boins", _defaultBoins).ToString();
         SetUnits();
     }
 
-    // Update map holder and player holder
-    public void UpdateHolders() {
-        // Map holder, set name and sprite
-        SceneData.Map selected = SceneData.multiplayerMaps[mapDropdown.GetComponent<Dropdown>().value];
-        mapName.GetComponent<Text>().text = selected.name;
-        mapImage.GetComponent<Image>().sprite = menuManager.GetSceneSprite(selected.name);
-
-        // Player holder, set content height and create player containers
-        RectTransform pcrt = playerContainerPrefab.transform.GetComponent<RectTransform>();
-        float playerContainerHeight = pcrt.sizeDelta.y * pcrt.localScale.y;
-        float playerListHeight = playerContainerHeight * selected.numberOfPlayers;
-        playerListContent.transform.GetComponent<RectTransform>().sizeDelta = new Vector2(0, playerListHeight);
-        for (int i = 0; i < selected.numberOfPlayers; i++) {
-            CreatePlayerContainer(i, playerContainerHeight);
-        }
-    }
-
-    // Create player container
-    private void CreatePlayerContainer(int i, float offsetStep) {
-        GameObject player = Instantiate(playerContainerPrefab, playerListContent.transform);
-        float offset = -(i * offsetStep);
-        player.GetComponent<RectTransform>().localPosition = new Vector3(0, offset, 0);
-        string number = (i + 1).ToString();
-        player.transform.GetChild(0).gameObject.GetComponent<Text>().text = number;
-        player.transform.GetChild(1).gameObject.GetComponent<InputField>().text =
-            PlayerPrefs.GetString(_prefix + "Player " + number, _defaultPlayerName + number);
-        GameObject colorButton = player.transform.GetChild(2).gameObject;
-        colorButton.GetComponent<Button>().onClick.AddListener(() => ColorSelector(colorButton));
-        string defaultColor = "#" + ColorUtility.ToHtmlStringRGBA(i < _defaultColors.Length ? _defaultColors[i] : Color.white);
-        Color selectedColor;
-        ColorUtility.TryParseHtmlString(PlayerPrefs.GetString(_prefix + "Color " + number, defaultColor), out selectedColor);
-        colorButton.GetComponent<Image>().color = selectedColor;
+    // Update map holder
+    public void UpdateMapHolder() {
+        // set name and sprite
+        SceneData.Map selected = SceneData.multiplayerMaps[_indexOfSelectedMap];
+        mapName.text = selected.name;
+        mapImage.sprite = menuManager.GetSceneSprite(selected.name);
     }
 
     // Get the game settings from the menu
@@ -106,48 +100,40 @@ public class SetupManager : MonoBehaviour
 
     // Get name of the selected map
     private string GetMapName() {
-        return mapName.GetComponent<Text>().text;
+        return mapName.text;
     }
 
     // Get list of player settings from the menu
     private List<SceneData.PlayerSettings> GetPlayerSettingsList() {
         List<SceneData.PlayerSettings> playerSettings = new List<SceneData.PlayerSettings>();
-        foreach (Transform child in playerListContent.transform) {
-            playerSettings.Add(GetPlayerSettings(child.gameObject));
+        foreach (PlayerContainer player in players) {
+            playerSettings.Add(GetPlayerSettings(player));
         }
         return playerSettings;
     }
 
     // Get player settings from a player container
-    private SceneData.PlayerSettings GetPlayerSettings(GameObject playerContainer) {
-        int id = int.Parse(playerContainer.transform.GetChild(0).gameObject.GetComponent<Text>().text);
-        string nickname = playerContainer.transform.GetChild(1).gameObject.GetComponent<InputField>().text;
-        Color color = playerContainer.transform.GetChild(2).gameObject.GetComponent<Image>().color;
+    private SceneData.PlayerSettings GetPlayerSettings(PlayerContainer player) {
         return new SceneData.PlayerSettings {
-            id = id,
-            nickname = nickname,
-            color = color
+            id = player.GetId(),
+            nickname = player.GetName(),
+            color = player.GetColor(),
+            boins = player.GetBoins()
         };
     }
 
     // Get options from menu
     private SceneData.Options GetOptions() {
         return new SceneData.Options {
-            boins = GetBoins(),
             units = GetUnits()
         };
-    }
-
-    // Get boins from menu
-    private int GetBoins() {
-        return int.Parse(boins.GetComponentInChildren<InputField>().text);
     }
 
     // Set allowed units in menu
     private void SetUnits() {
         foreach (Transform child in allowedUnits.transform) {
             child.gameObject.GetComponent<Toggle>().isOn =
-                Boolean.Parse(PlayerPrefs.GetString(_prefix + child.gameObject.name, "True"));
+                Boolean.Parse(PlayerPrefs.GetString(_prefix + child.gameObject.name, "true"));
         }
     }
 
@@ -162,15 +148,16 @@ public class SetupManager : MonoBehaviour
 
     // Save selected game settings to playerprefs
     private void ApplyMultiplayerSettings(SceneData.GameSettings gameSettings) {
-        PlayerPrefs.SetInt("MapIndex", mapDropdown.GetComponent<Dropdown>().value);
+        foreach (PlayerContainer player in players) {
+            player.SaveColorIndex();
+        }
+        PlayerPrefs.SetInt("MapIndex", _indexOfSelectedMap);
         SceneData.SaveGameSettings(gameSettings, SceneData.Type.Multiplayer);
     }
 
-    // Popup window for selecting color
-    public void ColorSelector(GameObject button) {
-        colorPopup.GetComponent<ColorPopup>().SetSourceButton(button);
-        colorPopup.transform.position = button.transform.position;
-        colorPopup.SetActive(true);
+    public void SaveCurrentSetup() {
+        SceneData.GameSettings gameSettings = GetGameSettings();
+        ApplyMultiplayerSettings(gameSettings);
     }
 
     // Start a match with the selected options
