@@ -16,8 +16,8 @@ public struct BoidGrid
     // Populates the grid by placing the indices of the boids in cells
     public void Populate(List<Boid> boids)
     {
-        _boids = new NativeList<Boid.BoidInfo>(10, Allocator.TempJob);
-        _grid = new NativeMultiHashMap<GridPoint, int>(10, Allocator.TempJob);
+        _boids = new NativeList<Boid.BoidInfo>(10, Allocator.Persistent);
+        _grid = new NativeMultiHashMap<GridPoint, int>(10, Allocator.Persistent);
         float time = Time.time;
         for (int i = 0; i < boids.Count; i++) 
         {
@@ -84,6 +84,55 @@ public struct BoidGrid
                 }
             }
         }
+
+
+
+        // Construct resulting array
+        NativeArray<int> result = new NativeArray<int>(boidsInRadius.Length, Allocator.Temp);
+        for (int i = 0; i < boidsInRadius.Length; i++)
+        {
+            result[i] = boidsInRadius[i];
+        }
+
+        return result;
+    }
+
+    public NativeArray<int> FindBoidsWithinRadius(float3 pos, float radius)
+    {
+        // The cell that the current boid is in
+        int xIndex = (int)(math.floor(pos.x) / cellWidth);
+        int zIndex = (int)(math.floor(pos.z) / cellDepth);
+        NativeList<int> boidsInRadius = new NativeList<int>(10, Allocator.Temp);
+
+        // The cells that cover the view radius of the boid
+        int minI = xIndex - (int)math.ceil(radius / cellWidth);
+        int maxI = xIndex + (int)math.ceil(radius / cellWidth);
+        int minJ = zIndex - (int)math.ceil(radius / cellDepth);
+        int maxJ = zIndex + (int)math.ceil(radius / cellDepth);
+
+        // Iterate over surrounding cells
+        for (int i = minI; i <= maxI; i++)
+        {
+            for (int j = minJ; j <= maxJ; j++)
+            {
+
+                GridPoint gp = new GridPoint(i, j, cellXAmount);
+                if (_grid.ContainsKey(gp))
+                {
+                    // Iterate over the boids in surrounding cells
+                    foreach (int b in _grid.GetValuesForKey(gp))
+                    {
+                        float3 horizontalDistance = _boids[b].pos - pos;
+                        if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z * horizontalDistance.z < radius * radius)
+                        {
+                            boidsInRadius.Add(b);
+                        }
+                    }
+                }
+            }
+        }
+
+
 
         // Construct resulting array
         NativeArray<int> result = new NativeArray<int>(boidsInRadius.Length, Allocator.Temp);

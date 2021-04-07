@@ -30,6 +30,7 @@ public class Ranged : Boid {
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 0;
+        meshDefaultLayer = LayerMask.NameToLayer("OutlineWhite");
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
@@ -51,10 +52,10 @@ public class Ranged : Boid {
             
             cohesionStrength = 2.0f,
             cohesionExponent = 0.0f,
-            
+
             separationStrength = 120.0f,
             separationExponent = 1.0f,
-            
+
             gravity = 1f,
             
             fearStrength = 10.0f,
@@ -62,7 +63,7 @@ public class Ranged : Boid {
 
             attackDistRange = 3f,
             attackAngleRange = Mathf.PI,
-            
+
             approachMovementStrength = 20.1f,
             approachMovementExponent = 0.5f,
             
@@ -81,7 +82,9 @@ public class Ranged : Boid {
 
             hoverKi = 2f,
             hoverKp = 10f,
-            targetHeight = 2f
+            targetHeight = 2f,
+
+            colliderRadius = GetComponent<SphereCollider>().radius
         };
     }
 
@@ -112,16 +115,35 @@ public class Ranged : Boid {
             launchVector.y = launchVector.magnitude * Mathf.Tan(inclination);
             launchVector = launchVector.normalized * _projSpeed;
 
-            // Spawn and fire
-            GameObject projectile = Instantiate(projectilePrefeb, launchPos, transform.rotation);
+            // Spawn and fire - old code
+            /*GameObject projectile = Instantiate(projectilePrefeb, launchPos, transform.rotation);
             Physics.IgnoreCollision(projectile.GetComponent<Collider>(), GetComponent<Collider>());
             projectile.GetComponent<RangedProjectile>().SetOwner(owner);
             projectile.GetComponent<RangedProjectile>().SetDamage(IsBoosted() ? boostedDamage : damage);
-            projectile.GetComponent<Rigidbody>().AddForce(launchVector, ForceMode.VelocityChange);
+            projectile.GetComponent<Rigidbody>().AddForce(launchVector, ForceMode.VelocityChange);*/
+
+            GameObject projectile = ProjectilePoolManager.SharedInstance.getPooledObject();
+            if (projectile != null)
+            {
+                projectile.transform.position = launchPos;
+                projectile.transform.rotation = transform.rotation;
+                projectile.gameObject.SetActive(true);
+                //Physics.IgnoreCollision(projectile.GetComponent<Collider>(), GetComponent<Collider>());
+                RangedProjectile p = projectile.GetComponent<RangedProjectile>();
+                p.SetOwner(owner);
+                p.SetDamage(IsBoosted() ? boostedDamage : damage);
+                //Rigidbody body = projectile.GetComponent<Rigidbody>();
+                //body.velocity = new Vector3(0,0,0);
+                //body.angularVelocity = new Vector3(0,0,0);
+                //body.AddForce(launchVector, ForceMode.VelocityChange);
+                p.SetForce(launchVector);
+                p.SetColor();
+            }
 
             AudioManager.instance.PlaySoundEffectAtPoint(rangedFireAudio, GetPos(), rangedFireAudioVolume);
         }
     }
+
 
     private float FindTimeToImpact() {
         float minSpeed = _projSpeed * Mathf.Cos(Mathf.PI / 4f);

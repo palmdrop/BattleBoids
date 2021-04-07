@@ -30,6 +30,7 @@ public class Healer : Boid
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 2.0f;
+        meshDefaultLayer = LayerMask.NameToLayer("OutlineWhite");
 
         timeBetweenActions = 0.2f;
         _healAmount = 1;
@@ -85,7 +86,9 @@ public class Healer : Boid
 
             hoverKi = 2f,
             hoverKp = 10f,
-            targetHeight = 2f
+            targetHeight = 2f,
+
+            colliderRadius = GetComponent<SphereCollider>().radius
         };
         
         _healBeamRenderer = healBeam.GetComponent<LineRenderer>();

@@ -148,15 +148,18 @@ public class Selection : MonoBehaviour
         
         foreach (Boid entity in activePlayerFlock)
         {
-            Selectable selected = entity.GetComponent<Selectable>();
-            
-            entityScreenPosition = _selectionCamera.WorldToScreenPoint(selected.transform.position);
-            
-            if (_selectionArea.Contains(entityScreenPosition))
+            if (entity != null)
             {
-                selected.SetSelectionIndicator(true);
-                _selectionManager.Select(selected);
-                
+                Selectable selected = entity.GetComponent<Selectable>();
+
+                entityScreenPosition = _selectionCamera.WorldToScreenPoint(selected.transform.position);
+
+                if (_selectionArea.Contains(entityScreenPosition))
+                {
+                    selected.SetSelectionIndicator(true);
+                    _selectionManager.Select(selected);
+
+                }
             }
 
             
