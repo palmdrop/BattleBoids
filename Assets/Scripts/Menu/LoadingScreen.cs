@@ -11,7 +11,7 @@ public class LoadingScreen : MonoBehaviour
     public void ScaleToFullScreen() {
         Vector2 spriteSize = GetComponent<Image>().sprite.bounds.size;
         float spriteRatio = spriteSize.x / spriteSize.y;
-        float screenRatio = Camera.main.aspect;
+        float screenRatio = (float) Screen.width / Screen.height;
 
         float width;
         float height;

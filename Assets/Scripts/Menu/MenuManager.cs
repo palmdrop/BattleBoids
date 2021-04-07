@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class MenuManager : MonoBehaviour
 {
     [SerializeField] private List<GameObject> menus;
+    [SerializeField] private MenuCameraManager cameras;
     [SerializeField] private GameObject loadingScreen;
 
     private GameObject _mainMenu;
@@ -29,22 +30,27 @@ public class MenuManager : MonoBehaviour
 
     public void MainMenu() {
         Show(_mainMenu);
+        cameras.Main();
     }
 
     public void CampaignMenu() {
         Show(_campaignMenu);
+        cameras.Campaign();
     }
 
     public void MultiplayerMenu() {
         Show(_multiplayerMenu);
+        cameras.Multiplayer();
     }
 
     public void OptionsMenu() {
         Show(_optionsMenu);
+        cameras.Settings();
     }
 
     public void CreditsMenu() {
         Show(_creditsMenu);
+        cameras.Credits();
     }
 
     public void Quit() {
