@@ -13,6 +13,7 @@ public class ProjectilePoolManager : MonoBehaviour
     public List<RangedProjectile> pooledObjects;
     public GameObject objectToPool;
     private float maxBoidRadius;
+    private float maxAliveTime = 3f;
     // Start is called before the first frame update
 
     private void Awake()
@@ -46,10 +47,17 @@ public class ProjectilePoolManager : MonoBehaviour
             if (!pooledObjects[i].gameObject.activeSelf)
             {
                 pooledObjects[i].gameObject.GetComponent<TrailRenderer>().Clear();
+                StartCoroutine(DeactivateAfterTime(pooledObjects[i].gameObject, maxAliveTime));
                 return pooledObjects[i].gameObject;
             }
         }
         return null;
+    }
+
+    public IEnumerator DeactivateAfterTime(GameObject o, float time)
+    {
+        yield return new WaitForSeconds(time);
+        o.SetActive(false);
     }
 
     public void FixedUpdate()
