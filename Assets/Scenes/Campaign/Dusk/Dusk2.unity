@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 1402312537}
-  m_IndirectSpecularColor: {r: 1.3215088, g: 0.24801579, b: 0.07399088, a: 1}
+  m_IndirectSpecularColor: {r: 0.735781, g: 0.13807625, b: 0.041185103, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -309,6 +309,51 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7617498329724413649, guid: ccece6cda768b03559db382780e40289, type: 3}
   m_PrefabInstance: {fileID: 61070045}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &113546513
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 113546514}
+  - component: {fileID: 113546515}
+  m_Layer: 0
+  m_Name: ProjectilePoolManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &113546514
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 113546513}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1794299354}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &113546515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 113546513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ed24fce67cde7f4da100f2eec947e1c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pooledObjects: []
+  objectToPool: {fileID: 444880832077755612, guid: 5006c7c2a54b0d240bd08bdb0d45b462, type: 3}
 --- !u!1001 &136517707
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6893,6 +6938,53 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1 &1505284181
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1505284182}
+  - component: {fileID: 1505284183}
+  m_Layer: 0
+  m_Name: ParticlePoolManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1505284182
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1505284181}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1794299354}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1505284183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1505284181}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ce5d8933976feb429cb277f70978954, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DeathAnimPrefab: {fileID: 4367637297873276509, guid: 2a0b6197256d06040b159f5f560a26ab, type: 3}
+  HitAnimPrefab: {fileID: 7304726371351317174, guid: b592303414090794ab53c4910974bf3a, type: 3}
+  deathActiveTime: 0
+  hitActiveTime: 0
 --- !u!1001 &1596198640
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7680,6 +7772,8 @@ Transform:
   - {fileID: 140721663}
   - {fileID: 1899056131}
   - {fileID: 1412363487}
+  - {fileID: 113546514}
+  - {fileID: 1505284182}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7753,6 +7847,21 @@ MonoBehaviour:
   m_BeforeTransparentBundles: []
   m_BeforeStackBundles: []
   m_AfterStackBundles: []
+--- !u!114 &1807209029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1807209026}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08f9fbf241d8a9a4d9b56b316c359449, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  drawAsSolidColor: {fileID: 4800000, guid: 22920b10088fcc7488cfea45b0a8ac9a, type: 3}
+  outline: {fileID: 4800000, guid: 075aa2d70d6b5ef45bb1ef0318e9233e, type: 3}
+  renderOutlines: 1
 --- !u!20 &1807209030 stripped
 Camera:
   m_CorrespondingSourceObject: {fileID: 3859625415673329777, guid: e8f36ff4269681d49875178b71004bbd, type: 3}
