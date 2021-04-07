@@ -65,7 +65,11 @@ public class Outline : MonoBehaviour
 				Graphics.Blit(rt, tx, m._outlineMaterial);
 				RenderTexture.ReleaseTemporary(lastOutput);
 				RenderTexture.ReleaseTemporary(rt);
-				Graphics.Blit(tx, lastOutput, new Vector2(1.0f, -1.0f), new Vector2(0.0f, 1.0f)); //Just don't ask.
+                if (SystemInfo.graphicsUVStartsAtTop)
+                    Graphics.Blit(tx, lastOutput, new Vector2(1.0f, -1.0f), new Vector2(0.0f, 1.0f));
+                else
+                    Graphics.Blit(tx, lastOutput);
+
 				RenderTexture.ReleaseTemporary(tx);
 			}
 

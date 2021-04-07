@@ -46,7 +46,12 @@ Shader "Custom/Post Outline"
                 //for every iteration we need to do horizontally
                 for (int k = 0; k < NumberOfIterations; k += 1)
                 {
-                    ColorIntensityInRadius += kernel[k] * tex2D(_MainTex, float2 ( i.uvs.x + (k - NumberOfIterations / 2) * TX_x, i.uvs.y)).r;
+#if UNITY_UV_STARTS_AT_TOP
+                    float y = i.uvs.y;
+#else
+                    float y = 1 - i.uvs.y;
+#endif
+                    ColorIntensityInRadius += kernel[k] * tex2D(_MainTex, float2 ( i.uvs.x + (k - NumberOfIterations / 2) * TX_x, y)).r;
                 }
                 return ColorIntensityInRadius;
             }
