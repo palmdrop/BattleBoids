@@ -17,10 +17,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Midnight.unity
     guid: b31e3f024b5e03343bf2f4fe55cf1d3e
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/Campaign/Dusk/Dusk1.unity
     guid: e43747da61d29cdbdba75e8be0f766ac
-  - enabled: 0
+  - enabled: 1
     path: Assets/Scenes/Campaign/Dusk/Dusk2.unity
     guid: ad1729d0b5c9690a7bc57154182de995
   m_configObjects: {}
