@@ -232,22 +232,6 @@ public class BoidManager : MonoBehaviour
             Boid.ClassInfo classInfo = boidClassInfos[(int)boid.type];
             NativeArray<int> neighbours = grid.FindBoidsWithinRadius(boid, classInfo.viewRadius);
 
-            /*NativeList<int> tmp = new NativeList<int>(10, Allocator.Temp);
-            for (int i = 0; i < boids.Length; i++)
-            {
-                float3 horizontalDistance = boids[i].pos - boid.pos;
-                if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z * horizontalDistance.z < classInfo.viewRadius * classInfo.viewRadius && !boid.Equals(boids[i]))
-                {
-                    tmp.Add(i);
-                }
-            }
-            NativeArray<int> result = new NativeArray<int>(tmp.Length, Allocator.Temp);
-            for (int i = 0; i < tmp.Length; i++)
-            {
-                result[i] = tmp[i];
-            }
-            NativeArray<int> neighbours = result;*/
-
             // Calculate the distances between the current boid and the neighbours once at the start,
             // and send these distances to each behavior function. This avoids having to recalculate the distances for
             // each behavior.
@@ -256,11 +240,9 @@ public class BoidManager : MonoBehaviour
             int targetBoidIndex = -1;
             int friendlyTargetBoidIndex = -1;
             float targetViewDistance = 0.0f;
-            float friendlyTargetViewDistance = 0.0f;
             if (boid.type == Boid.Type.Healer || boid.type == Boid.Type.Hero)
             {
                 friendlyTargetBoidIndex = FindFriendlyTargetIndex(boid, classInfo, neighbours, distances);
-                friendlyTargetViewDistance = classInfo.viewRadius;
             }
             targetBoidIndex = FindEnemyTargetIndex(boid, classInfo, neighbours, distances);
             targetViewDistance = classInfo.attackDistRange;
@@ -278,11 +260,10 @@ public class BoidManager : MonoBehaviour
                 // Additional behaviors
                 + (confidence >= classInfo.confidenceThreshold
                     // If confidence is high, be aggressive and have normal fear levels
-                    ? AggressionForce(boid, classInfo) + 1 * FearForce(boid, classInfo, neighbours, distances) 
+                    ? AggressionForce(boid, classInfo, targetBoidIndex) + 1 * FearForce(boid, classInfo, neighbours, distances) 
                     // If confidence is low, search for the ally flock and duplicate fear levels
                     : SearchForce(boid, classInfo)     + 2 * FearForce(boid, classInfo, neighbours, distances))
                 
-                // 
                 + ApproachForce(boid, classInfo, targetBoidIndex, targetViewDistance)
                 + AvoidanceForce(boid, classInfo, neighbours, distances) 
                 + RandomForce(index, classInfo.randomMovements);
@@ -520,8 +501,11 @@ public class BoidManager : MonoBehaviour
             return (avgSeparation / separationDivider) * classInfo.separationStrength;
         }
 
-        private float3 AggressionForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo)
+        private float3 AggressionForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, int targetIndex)
         {
+            // If the boid has found a target, disable aggression force (the approach force will then take precedence)
+            if (targetIndex != -1) return float3.zero;
+            
             // Calculate aggression force
             // TODO this line assumes there's only two flocks and that the ID of the flock corresponds to the index 
             // TODO in the flocks array. Find better solution
