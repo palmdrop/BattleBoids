@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 1402312537}
-  m_IndirectSpecularColor: {r: 1.3215088, g: 0.24801579, b: 0.07399088, a: 1}
+  m_IndirectSpecularColor: {r: 0.735781, g: 0.13807625, b: 0.041185103, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -648,6 +648,51 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3409344825326890314, guid: e9e3dcb9dd635214586135fe1826b09f, type: 3}
   m_PrefabInstance: {fileID: 144174765}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &160350226
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 160350227}
+  - component: {fileID: 160350228}
+  m_Layer: 0
+  m_Name: ProjectilePoolManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &160350227
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 160350226}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1794299354}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &160350228
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 160350226}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ed24fce67cde7f4da100f2eec947e1c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pooledObjects: []
+  objectToPool: {fileID: 444880832077755612, guid: 5006c7c2a54b0d240bd08bdb0d45b462, type: 3}
 --- !u!1001 &166999089
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -7680,6 +7725,8 @@ Transform:
   - {fileID: 140721663}
   - {fileID: 1899056131}
   - {fileID: 1412363487}
+  - {fileID: 160350227}
+  - {fileID: 1920822478}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -8347,6 +8394,53 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1 &1920822477
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1920822478}
+  - component: {fileID: 1920822479}
+  m_Layer: 0
+  m_Name: DeathAnimationPoolManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1920822478
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1920822477}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1794299354}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1920822479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1920822477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ce5d8933976feb429cb277f70978954, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DeathAnimPrefab: {fileID: 4367637297873276509, guid: 2a0b6197256d06040b159f5f560a26ab, type: 3}
+  HitAnimPrefab: {fileID: 7304726371351317174, guid: b592303414090794ab53c4910974bf3a, type: 3}
+  deathActiveTime: 0
+  hitActiveTime: 0
 --- !u!43 &1964637391
 Mesh:
   m_ObjectHideFlags: 0
