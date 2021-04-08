@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SelectionManager : MonoBehaviour, ICommand
+public class SelectionManager : MonoBehaviour
 {
     // The UI component used to get the active player
     private GameManager _gameManager;
@@ -14,8 +14,6 @@ public class SelectionManager : MonoBehaviour, ICommand
     
     private readonly List<Selectable> selected = new List<Selectable>();
     
-    //private static Vector3 min;
-    //private static Vector3 max;
     private Selectable _anchorPoint;
     
 
@@ -30,13 +28,14 @@ public class SelectionManager : MonoBehaviour, ICommand
     private static RaycastHit _mousePositionInWorld;
     // We want to check if the mouse is currently hovering over ground tiles
     private bool mouseOverGround;
-
-    private Command command;
-
+    
+    
     private void Awake()
     {
-        command = new Command();
+        CommandManager.RegisterPressedAction("k", PressedSellKey);
+        CommandManager.RegisterPressedAction("q", PressedMoveSelectedKey);
     }
+    
 
     private void Start()
     { 
@@ -44,6 +43,7 @@ public class SelectionManager : MonoBehaviour, ICommand
         _gameManager = GetComponentInParent<GameManager>();
         _gameUI = _gameManager.GetGameUI();
         activePlayer = _gameUI.GetActivePlayer();
+        
     }
 
     private void Update()
@@ -75,27 +75,19 @@ public class SelectionManager : MonoBehaviour, ICommand
         mouseOverGround = Physics.Raycast(_gameManager.GetMainCamera().ScreenPointToRay(Input.mousePosition), out _mousePositionInWorld, 1000f, ground);
         
         // Sell the selected entities
+        /*
         if (Input.GetKeyDown("k"))
         {
             SellSelected();
             return;
         }
-        
-        // Move entities around the world
-        if (Input.GetKeyDown("q"))
-        {
-            inMoveState = true;
-            Cursor.visible = false;
-        }
+        */
 
 
         // Move the selected entities
         if (inMoveState)
         {
             MoveSelected();
-        }
-        else
-        {
         }
     }
 
@@ -127,30 +119,6 @@ public class SelectionManager : MonoBehaviour, ICommand
         
         // Sets the offset in relation to the first selectable registered in the _selected array
         selectable.SetOffset(_anchorPoint.transform.position);
-        
-        /*
-        Vector3 selectedPosition = selected.transform.position;
-        
-        if (selectedPosition.x < min.x)
-        {
-            min.x = selectedPosition.x;
-        } 
-        
-        if (selectedPosition.x > max.x)
-        {
-            max.x = selectedPosition.x;
-        }
-
-        if (selectedPosition.z < min.z)
-        {
-            min.z = selectedPosition.z;
-        } 
-        
-        if (selectedPosition.z > max.z)
-        {
-            max.z = selectedPosition.z;
-        }
-        */
         
     }
 
@@ -254,8 +222,25 @@ public class SelectionManager : MonoBehaviour, ICommand
         set => canSelect = value;
     }
 
-    public Command GETCommand()
+    private void PressedSellKey()
     {
-        return command;
+        if (selected.Count > 0)
+        {
+            SellSelected();
+        }
     }
+
+    private void PressedMoveSelectedKey()
+    {
+        if (selected.Count > 0)
+        {
+            inMoveState = true;
+            Cursor.visible = false;
+        }
+        else
+        {
+            inMoveState = false;
+        }
+    }
+
 }
