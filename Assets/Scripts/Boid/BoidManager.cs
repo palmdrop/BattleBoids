@@ -530,9 +530,8 @@ public class BoidManager : MonoBehaviour
         {
             Player.FlockInfo flock = flocks[boid.flockId - 1];
             
-            if (flock.boidCount <= 1) return float3.zero;
-            //TODO do not use aggression strength for search as well?
-            return math.normalize(flock.avgPos - boid.pos) * classInfo.searchStrength;
+            if (flock.boidCount <= 1 || flock.medianPos.Equals(boid.pos)) return float3.zero;
+            return math.normalize(flock.medianPos - boid.pos) * classInfo.searchStrength;
         }
 
         private float3 FearForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours, NativeArray<float> distances)
