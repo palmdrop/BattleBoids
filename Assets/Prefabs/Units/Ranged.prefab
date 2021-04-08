@@ -79,7 +79,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selectionIndicatorPrefab: {fileID: 1473401980719432369, guid: d1755760120f61e43879ab4b335b27b3, type: 3}
   healthBarPrefab: {fileID: 7905063384867870836, guid: ebcc6bc324f8b80879127b201ed2e8f5, type: 3}
-  deathAnimationPrefab: {fileID: 4367637297873276509, guid: 3ff6da34a54d691279152546b99c8c16, type: 3}
+  deathAnimationPrefab: {fileID: 4367637297873276509, guid: 2a0b6197256d06040b159f5f560a26ab, type: 3}
   collisionMask:
     serializedVersion: 2
     m_Bits: 1536
@@ -92,7 +92,7 @@ MonoBehaviour:
     x: 0
     y: 0
     z: 0
-  projectilePrefeb: {fileID: 444880832077755612, guid: e6334f514380c4ec7bb30de4c812be7e, type: 3}
+  projectilePrefeb: {fileID: 444880832077755612, guid: 06e51fe8e2b1a7b448d661b9ac4cdde9, type: 3}
   rangedFireAudio: {fileID: 8300000, guid: 3d969cb3fe956b147a8bded24c054360, type: 3}
   rangedFireAudioVolume: 0.4
 --- !u!23 &-6181522758910804146
@@ -147,7 +147,7 @@ GameObject:
   - component: {fileID: 7437478044885313421}
   - component: {fileID: 8853195611269408378}
   - component: {fileID: 9216650576972531049}
-  m_Layer: 0
+  m_Layer: 14
   m_Name: mesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}

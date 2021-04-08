@@ -115,7 +115,7 @@ public class GameUI : MonoBehaviour
         CommandManager.RegisterPressedAction(KeyCode.U, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() + 0.1f));
         CommandManager.RegisterPressedAction(KeyCode.J, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() - 0.1f));
         CommandManager.RegisterPressedAction(KeyCode.I, () => AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() + 0.1f));
-        CommandManager.RegisterPressedAction(KeyCode.K, () => AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() - 0.1f));
+        CommandManager.RegisterPressedAction(KeyCode.P, () => AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() - 0.1f));
         CommandManager.RegisterPressedAction(KeyCode.O, () => AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() + 0.1f));
         CommandManager.RegisterPressedAction(KeyCode.L, () => AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() - 0.1f));
         CommandManager.RegisterPressedAction(KeyCode.Escape, () => {
@@ -157,6 +157,7 @@ public class GameUI : MonoBehaviour
             unitButtons.SetActive(false);
             commadsText.SetActive(false);
             commandButtons.SetActive(false);
+            tooltip.SetActive(false);
             hasStarted = true;
         }
     }

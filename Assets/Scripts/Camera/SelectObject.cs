@@ -23,7 +23,6 @@ public class SelectObject : MonoBehaviour
 
     public GameObject RetrieveGameObject()
     {
-        Debug.Log("called");
         RaycastHit hit;
         // Sends a ray from the cursor position into the scene
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
@@ -33,7 +32,6 @@ public class SelectObject : MonoBehaviour
             return currentlySelected;
         }
         
-        Debug.Log(hit.transform.name);
         return hit.transform.gameObject;
     }
 

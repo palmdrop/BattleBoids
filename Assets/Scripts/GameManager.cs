@@ -58,7 +58,7 @@ public class GameManager : MonoBehaviour
                 Color color;
                 ColorUtility.TryParseHtmlString(PlayerPrefs.GetString(prefix + "Color " + number.ToString()), out color);
                 _players[i].SetColor(color);
-                _players[i].SetBoins(PlayerPrefs.GetInt(prefix + "Boins"));
+                _players[i].SetBoins(PlayerPrefs.GetInt(prefix + "Boins " + number.ToString()));
             }
         }
     }
@@ -76,8 +76,31 @@ public class GameManager : MonoBehaviour
             p.SetActive(false);
         }
 
-        GetComponentInChildren<SelectionManager>().gameObject.SetActive(false);
+        InstantiateProjectiles();
+        InstantiateDeathAnimations();
+		GetComponentInChildren<SelectionManager>().gameObject.SetActive(false);
+    }
 
+    //Instantiate one projectile for each ranged boid
+    private void InstantiateProjectiles()
+    {
+        List<Boid> boids = _boidManager.GetBoids();
+        int amount = 0;
+        foreach (Boid b in boids)
+        {
+            if (b.GetType().Equals(Boid.Type.Ranged))
+            {
+                amount++;
+            }
+        }
+        ProjectilePoolManager.SharedInstance.InstancePoolObjects(amount);
+        ParticlePoolManager.SharedInstance.InstancePoolObjects(amount, ParticlePoolManager.Type.Hit);
+    }
+
+    private void InstantiateDeathAnimations()
+    {
+        List<Boid> boids = _boidManager.GetBoids();
+        ParticlePoolManager.SharedInstance.InstancePoolObjects(boids.Count/2+10, ParticlePoolManager.Type.Death); //Do not expect half of all boids will die in an instant
     }
 
     public SceneData.Type GetType() {

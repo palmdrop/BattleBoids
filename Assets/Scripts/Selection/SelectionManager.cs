@@ -185,6 +185,7 @@ public class SelectionManager : MonoBehaviour
     private void SellSelected()
     {
         inMoveState = false;
+        Debug.Log(selected.Count.ToString());
 
         for (int i = selected.Count; i --> 0; )
         {

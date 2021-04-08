@@ -16,6 +16,8 @@ public class AudioManager : MonoBehaviour
     private float _effectsVolume;
     private float _musicVolume;
     private bool _isMuted = false;
+    private int _totalAudioSources = 0;
+    [SerializeField] private int maxAudioSources;
 
     
     void Awake()
@@ -40,6 +42,14 @@ public class AudioManager : MonoBehaviour
             }
         }
     }
+
+
+    void Update()
+    {
+        _totalAudioSources = FindObjectsOfType<AudioSource>().Length;
+        
+    }
+
 
     private void ApplySavedVolume() {
         _masterVolume = PlayerPrefs.GetFloat("MasterVolume", 1f);
@@ -67,6 +77,8 @@ public class AudioManager : MonoBehaviour
     // by the volume values when this method is called
     public void PlaySoundEffectAtPoint(AudioClip clip, Vector3 point, float volume)
     {
+        if (_totalAudioSources >= maxAudioSources) return;
+        _totalAudioSources++;
         AudioSource.PlayClipAtPoint(clip, point, _masterVolume * _effectsVolume * volume);
     }
 

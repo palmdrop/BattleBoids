@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class HealthBar_V2 : MonoBehaviour
@@ -7,6 +8,7 @@ public class HealthBar_V2 : MonoBehaviour
     MaterialPropertyBlock _blockMaterial;
     MeshRenderer _renderer;
     Boid _boid;
+    private float renderDistance = 30;
 
 
     private void Awake()
@@ -21,9 +23,17 @@ public class HealthBar_V2 : MonoBehaviour
     {
         if (_boid.GetHealth() < _boid.GetMaxHealth())
         {
-            _renderer.enabled = true;
-            AlignCamera();
-            UpdateHealth();
+            Vector3 relativeCameraVector = transform.position - Camera.main.transform.position;
+            if (relativeCameraVector.sqrMagnitude < renderDistance * renderDistance)
+            {
+                _renderer.enabled = true;
+                AlignCamera(relativeCameraVector);
+                UpdateHealth();
+            }
+            else
+            {
+                _renderer.enabled = false;
+            }
         }
         else
         {
@@ -42,9 +52,9 @@ public class HealthBar_V2 : MonoBehaviour
         _renderer.SetPropertyBlock(_blockMaterial);
     }
 
-    private void AlignCamera()
+    private void AlignCamera(Vector3 relativeCameraVector)
     {
-        Vector3 forward = (transform.position - Camera.main.transform.position).normalized;
+        Vector3 forward = relativeCameraVector.normalized;
         Vector3 up = Vector3.Cross(forward, Camera.main.transform.right);
         transform.rotation = Quaternion.LookRotation(forward, up);
     }

@@ -21,7 +21,6 @@ public class SceneData : MonoBehaviour
     // Put the sprite in /Assests/Resources/Sprite/SceneSprites/
     public struct Map {
         public string name;
-        public int numberOfPlayers;
     }
 
     // Struct for the settings to start the match with
@@ -37,11 +36,11 @@ public class SceneData : MonoBehaviour
         public int id;
         public string nickname;
         public Color color;
+        public int boins;
     }
 
     // Struct with match options, used in GameSettings
     public struct Options {
-        public int boins;
         public Dictionary<string, bool> units;
     }
 
@@ -66,10 +65,13 @@ public class SceneData : MonoBehaviour
                 prefix + "Color " + playerSettings.id.ToString(),
                 "#" + ColorUtility.ToHtmlStringRGBA(playerSettings.color)
             );
+            PlayerPrefs.SetInt(
+                prefix + "Boins " + playerSettings.id.ToString(),
+                playerSettings.boins
+            );
         }
 
         // Options
-        PlayerPrefs.SetInt(prefix + "Boins", gameSettings.options.boins);
         foreach (KeyValuePair<string, bool> entry in gameSettings.options.units) {
             PlayerPrefs.SetString(prefix + entry.Key, entry.Value.ToString());
         }
@@ -88,17 +90,18 @@ public class SceneData : MonoBehaviour
                             new PlayerSettings() {
                                 id = 1,
                                 nickname = "You",
-                                color = Color.blue
+                                color = Color.blue,
+                                boins = 1000
                             },
                             new PlayerSettings() {
                                 id = 2,
                                 nickname = "The enemy",
-                                color = Color.red
+                                color = Color.red,
+                                boins = 1000
                             }
                         }
                     ),
                     options = new Options {
-                        boins = 1000,
                         units = new Dictionary<string, bool>() {
                             {"Commander", false},
                             {"Healer", false},
@@ -120,17 +123,18 @@ public class SceneData : MonoBehaviour
                             new PlayerSettings() {
                                 id = 1,
                                 nickname = "You",
-                                color = Color.blue
+                                color = Color.blue,
+                                boins = 1000
                             },
                             new PlayerSettings() {
                                 id = 2,
                                 nickname = "The enemy",
-                                color = Color.red
+                                color = Color.red,
+                                boins = 1000
                             }
                         }
                     ),
                     options = new Options {
-                        boins = 1000,
                         units = new Dictionary<string, bool>() {
                             {"Commander", false},
                             {"Healer", false},
@@ -150,12 +154,10 @@ public class SceneData : MonoBehaviour
         new Map[] {
             new Map() {
                 name = "Dusk",
-                numberOfPlayers = 2
             }, 
             new Map()
             {
                 name = "Midnight", 
-                numberOfPlayers = 2
             }
         }
     );
