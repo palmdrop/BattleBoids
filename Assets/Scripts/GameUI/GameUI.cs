@@ -35,6 +35,11 @@ public class GameUI : MonoBehaviour
     private List<Player> players;
     private int _activePlayerId;
 
+    private void Awake()
+    {
+        RegisterKeyInputs();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -52,7 +57,6 @@ public class GameUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ManageKeyInput();
         UpdateBoins();
         UpdateReady();
         UpdateButtonColors(activePlayer.color);
@@ -102,54 +106,25 @@ public class GameUI : MonoBehaviour
         }
     }
 
-    void ManageKeyInput() {
-        if (Input.GetKey("1")) {
-            // Select player 1
-            SetActivePlayerId(1);
-        } else if (Input.GetKey("2")) {
-            // Select player 2
-            SetActivePlayerId(2);
-        } else if (Input.GetKeyDown("r"))
-        {
-            // Run game
-            players.ForEach(p => p.Ready());
-        } else if (Input.GetKeyDown("y")) {
-            showHealthBars = !showHealthBars;
-        } else if (Input.GetKeyDown("m")) {
-            AudioManager.instance.ToggleMute();
-        }
-        else if (Input.GetKeyDown("u"))
-        {
-            AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() + 0.1f);
-        }
-        else if (Input.GetKeyDown("j"))
-        {
-            AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() - 0.1f);
-        }
-        else if (Input.GetKeyDown("i"))
-        {
-            AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() + 0.1f);
-        }
-        else if (Input.GetKeyDown("k"))
-        {
-            AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() - 0.1f);
-        }
-        else if (Input.GetKeyDown("o"))
-        {
-            AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() + 0.1f);
-        }
-        else if (Input.GetKeyDown("l"))
-        {
-            AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() - 0.1f);
-        }
-        else if (Input.GetKeyDown(KeyCode.Escape))
-        {
+    private void RegisterKeyInputs() {
+        CommandManager.RegisterPressedAction(KeyCode.Alpha1, () => SetActivePlayerId(1));
+        CommandManager.RegisterPressedAction(KeyCode.Alpha2, () => SetActivePlayerId(2));
+        CommandManager.RegisterPressedAction(KeyCode.R, () => players.ForEach(p => p.Ready()));
+        CommandManager.RegisterPressedAction(KeyCode.Y, () => showHealthBars = !showHealthBars);
+        CommandManager.RegisterPressedAction(KeyCode.M, () => AudioManager.instance.ToggleMute());
+        CommandManager.RegisterPressedAction(KeyCode.U, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() + 0.1f));
+        CommandManager.RegisterPressedAction(KeyCode.J, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() - 0.1f));
+        CommandManager.RegisterPressedAction(KeyCode.I, () => AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() + 0.1f));
+        CommandManager.RegisterPressedAction(KeyCode.K, () => AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() - 0.1f));
+        CommandManager.RegisterPressedAction(KeyCode.O, () => AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() + 0.1f));
+        CommandManager.RegisterPressedAction(KeyCode.L, () => AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() - 0.1f));
+        CommandManager.RegisterPressedAction(KeyCode.Escape, () => {
             if (!_gameManager.IsPaused()) {
                 Pause();
             } else {
                 Resume();
             }
-        }
+        });
     }
 
     void UpdateReady()
