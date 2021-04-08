@@ -640,7 +640,7 @@ public class BoidManager : MonoBehaviour
             float dist = math.length(vector);
             return vector * 
                    CalculatePower(classInfo.approachMovementStrength, 
-                       dist / targetDistRange, 
+                       1.0f - dist / targetDistRange,
                        classInfo.approachMovementExponent);
         }
 
