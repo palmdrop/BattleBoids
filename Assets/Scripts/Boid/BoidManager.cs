@@ -247,9 +247,6 @@ public class BoidManager : MonoBehaviour
             targetBoidIndex = FindEnemyTargetIndex(boid, classInfo, neighbours, distances);
             targetViewDistance = classInfo.attackDistRange;
             
-            // Calculate the confidence of the current boid
-            float confidence = CalculateConfidence(boid, neighbours);
-            
             // Sum all the forces
             float3 desire =
                 // Reynolds behaviors
@@ -258,7 +255,7 @@ public class BoidManager : MonoBehaviour
                 + SeparationForce(boid, classInfo, neighbours, distances)
                 
                 // Additional behaviors
-                + (confidence >= classInfo.confidenceThreshold
+                + (IsConfident(boid, neighbours)
                     // If confidence is high, be aggressive and have normal fear levels
                     ? AggressionForce(boid, classInfo, targetBoidIndex) + 1 * FearForce(boid, classInfo, neighbours, distances) 
                     // If confidence is low, search for the ally flock and duplicate fear levels
@@ -353,46 +350,30 @@ public class BoidManager : MonoBehaviour
             return distances;
         }
         
-        private float CalculateConfidence(Boid.BoidInfo boid, NativeArray<int> neighbours)
+        private bool IsConfident(Boid.BoidInfo boid, NativeArray<int> neighbours)
         {
-            // Count the number of neighbouring allies and enemies
-            int allyCounter = 0;
-            int enemyCounter = 0;
+            // If the boid is the last one left, they will automatically become confident.
+            // The last boid has nothing to loose, and might as well be aggressive.
+            // This also avoids stalemates
+            if (flocks[boid.flockId - 1].boidCount == 1)
+            {
+                return true;
+            }
 
+            // Iterate over all the neighbouring boids and check if at least one of them are friendly
             for (int i = 0; i < neighbours.Length; i++)
             {
                 int index = neighbours[i];
                 Boid.BoidInfo neighbour = boids[index];
+                // If a friendly boid is found, then the current boid grows confident (it is not alone)
                 if (boid.flockId == neighbour.flockId)
                 {
-                    allyCounter++;
-                }
-                else
-                {
-                    enemyCounter++;
+                    return true;
                 }
             }
 
-            // We need to handle the case of there being no neighbouring enemies separately, to avoid
-            // dividing by zero, and because we might want to set the confidence differently in this case,
-            // to avoid stalemate situations.
-            if (enemyCounter == 0)
-            {
-                // If the boid is alone in its flock, it has nothing to lose and will be confident anyway
-                if(flocks[boid.flockId - 1].boidCount == 1)
-                {
-                    return 1;
-                }
-
-                // Otherwise, set the confidence level to the number of allies around the current boid
-                // This will ensure a confidence level of 0.0 for boids that are alone (and there are allies still
-                // on the field)
-                return allyCounter;
-            }
-            
-            // Otherwise, calculate the confidence...
-            // We add one to the ally counter, otherwise the boids will not count themselves
-            return (float)(allyCounter + 1) / enemyCounter;
+            // If no ally is found, the boid becomes scared and tries to find its flock
+            return false;
         }
 
        
