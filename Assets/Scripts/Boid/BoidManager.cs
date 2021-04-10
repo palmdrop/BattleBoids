@@ -492,19 +492,37 @@ public class BoidManager : MonoBehaviour
             // TODO in the flocks array. Find better solution
             Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
 
-            if (enemyFlock.boidCount == 0 || enemyFlock.avgPos.Equals(boid.pos)) return float3.zero;
+            // If there are no enemy boids or if the median enemy flock position is equal to that of the current boid,
+            // then return a zero vector
+            if (enemyFlock.boidCount == 0 || enemyFlock.medianPos.Equals(boid.pos)) return float3.zero;
 
+            // Calculate the distance between the current boid and the enemy flock
             float dist = math.distance(boid.pos, enemyFlock.medianPos);
 
+            // If the boid is closer than the aggression distance cap, then apply aggression falloff
             float scale = 1.0f;
             if (dist < classInfo.aggressionDistanceCap)
             {
                 scale = math.pow(dist / classInfo.aggressionDistanceCap, classInfo.aggressionFalloff);
             }
 
+            // Scale the aggression based on the difference between the flock sizes. Make sure the scaling is at least 1.0,
+            // and not more than the max aggression multiplier
             scale *= math.max(1.0f, math.min(classInfo.maxAggressionMultiplier, (float) flocks[boid.flockId - 1].boidCount / enemyFlock.boidCount));
             
-            return math.normalize(enemyFlock.avgPos - boid.pos) * classInfo.aggressionStrength * scale;
+            // Calculate the initial aggression force
+            float3 force = math.normalize(enemyFlock.medianPos - boid.pos) * classInfo.aggressionStrength * scale;
+            
+            // Finally, if the enemy flock is beside or behind the boid, it will try to break to more efficiently
+            // turn in the direction of the enemy flock
+            float dot = math.dot(boid.vel, force);
+            if (dot < 1.0)
+            {
+                float breakScale = math.pow((1.0f - (dot + 1.0f) / 2.0f), 2.0f);
+                force += -boid.vel * breakScale;
+            }
+            
+            return force;
         }
         
         private float3 SearchForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo)
