@@ -134,6 +134,7 @@ public class GameManager : MonoBehaviour
 
     public void SetPaused(bool paused)
     {
+        Time.timeScale = paused ? 0 : 1;
         _paused = paused;
     }
 
