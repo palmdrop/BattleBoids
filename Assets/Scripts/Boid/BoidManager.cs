@@ -495,9 +495,27 @@ public class BoidManager : MonoBehaviour
             // If there are no enemy boids or if the median enemy flock position is equal to that of the current boid,
             // then return a zero vector
             if (enemyFlock.boidCount == 0 || enemyFlock.medianPos.Equals(boid.pos)) return float3.zero;
-
+            
             // Calculate the distance between the current boid and the enemy flock
             float dist = math.distance(boid.pos, enemyFlock.medianPos);
+            
+            // Calculate expected future location of enemy flock
+            float3 expectedEnemyFlockPos = enemyFlock.medianPos;
+            {
+                // Compare the position of the current boid in relation to the position of the enemy flock
+                // If the boid is moving away from the enemy flock, do no prediction, just try to turn
+                float3 directionToEnemyFlock = enemyFlock.avgPos - boid.pos;
+                float dot = math.dot(boid.vel, directionToEnemyFlock);
+                
+                if (!float3.zero.Equals(boid.vel) && dot > 0.0)
+                { 
+                    // Make a crude calculation of the time required to reach the enemy boid
+                    float timeToReach = 
+                            math.min(dist / math.lengthsq(boid.vel), 2f);
+                    
+                    expectedEnemyFlockPos += enemyFlock.avgVel * timeToReach;
+                }
+            }
 
             // If the boid is closer than the aggression distance cap, then apply aggression falloff
             float scale = 1.0f;
@@ -511,17 +529,17 @@ public class BoidManager : MonoBehaviour
             scale *= math.max(1.0f, math.min(classInfo.maxAggressionMultiplier, (float) flocks[boid.flockId - 1].boidCount / enemyFlock.boidCount));
             
             // Calculate the initial aggression force
-            float3 force = math.normalize(enemyFlock.medianPos - boid.pos) * classInfo.aggressionStrength * scale;
+            float3 force = math.normalize(expectedEnemyFlockPos - boid.pos) * classInfo.aggressionStrength * scale;
             
             // Finally, if the enemy flock is beside or behind the boid, it will try to break to more efficiently
             // turn in the direction of the enemy flock
-            float dot = math.dot(boid.vel, force);
-            if (dot < 1.0)
+            /*float d = math.dot(boid.vel, force);
+            if (d < 1.0)
             {
-                float breakScale = math.pow((1.0f - (dot + 1.0f) / 2.0f), 2.0f);
+                float breakScale = math.pow((1.0f - (d + 1.0f) / 2.0f), 2.0f);
                 force += -boid.vel * breakScale;
-            }
-            
+            }*/
+
             return force;
         }
         
