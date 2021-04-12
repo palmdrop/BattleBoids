@@ -1,9 +1,15 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 public class UnitButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+    [SerializeField] private Image border;
+    [SerializeField] private Color borderHoverColor;
+
+    private Color _borderNormalColor;
+
     // Will be called when the pointer the button
     private Action _onEnter;
 
@@ -12,6 +18,7 @@ public class UnitButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
 
     void Start()
     {
+        _borderNormalColor = border.color;
     }
 
     void Update()
@@ -31,10 +38,16 @@ public class UnitButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     public void OnPointerEnter(PointerEventData eventData)
     {
         _onEnter.Invoke();
+        HoverEffect(true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         _onExit.Invoke();
+        HoverEffect(false);
+    }
+
+    private void HoverEffect(bool set) {
+        border.color = set && GetComponent<Button>().interactable ? borderHoverColor : _borderNormalColor;
     }
 }
