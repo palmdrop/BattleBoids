@@ -31,6 +31,8 @@ public class Melee : Boid {
             separationRadius = 0.41f,
             fearRadius = 0.5f,
             maxForce = 12.0f,
+            
+            accelerationDesire = 0.1f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,

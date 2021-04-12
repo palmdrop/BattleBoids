@@ -270,6 +270,12 @@ public class BoidManager : MonoBehaviour
                 desire += AvoidCollisionDir(boid, classInfo) * classInfo.avoidCollisionWeight;
             }
 
+            // Boids will accelerate if they are moving in their desired direction
+            float dot = math.dot(desire, boid.vel);
+            if (dot > 0.5)
+            {
+                desire += boid.forward * (dot - 0.5f) * 2.0f * classInfo.accelerationDesire;
+            }
 
             float3 force = desire - boid.vel;
 
@@ -278,6 +284,7 @@ public class BoidManager : MonoBehaviour
             {
                 force = math.normalize(force) * classInfo.maxForce;
             }
+            
 
             force += HoverForce(boid, classInfo);
 
@@ -510,8 +517,7 @@ public class BoidManager : MonoBehaviour
                 if (!float3.zero.Equals(boid.vel) && dot > 0.0)
                 { 
                     // Make a crude calculation of the time required to reach the enemy boid
-                    float timeToReach = 
-                            math.min(dist / math.lengthsq(boid.vel), 2f);
+                    float timeToReach = math.min(dist / math.lengthsq(boid.vel), classInfo.aggressionDistanceCap);
                     
                     expectedEnemyFlockPos += enemyFlock.avgVel * timeToReach;
                 }
@@ -534,9 +540,9 @@ public class BoidManager : MonoBehaviour
             // Finally, if the enemy flock is beside or behind the boid, it will try to break to more efficiently
             // turn in the direction of the enemy flock
             /*float d = math.dot(boid.vel, force);
-            if (d < 1.0)
+            if (d < 0.5)
             {
-                float breakScale = math.pow((1.0f - (d + 1.0f) / 2.0f), 2.0f);
+                float breakScale = math.pow((1.0f - (d + 1.0f) / 2.0f), 4.0f);
                 force += -boid.vel * breakScale;
             }*/
 
@@ -546,9 +552,18 @@ public class BoidManager : MonoBehaviour
         private float3 SearchForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo)
         {
             Player.FlockInfo flock = flocks[boid.flockId - 1];
+
+            if (flock.boidCount <= 1) return float3.zero;
+
+            // Use the median position for search force, unless the current boid
+            // is the boid which has the median position. In that case, use the average position.
+            float3 searchPosition = flock.medianPos;
+            if(searchPosition.Equals(boid.pos)) searchPosition = flock.avgPos;
             
-            if (flock.boidCount <= 1 || flock.medianPos.Equals(boid.pos)) return float3.zero;
-            return math.normalize(flock.medianPos - boid.pos) * classInfo.searchStrength;
+            // If the search position is still equal to the boids position, apply no force
+            if (searchPosition.Equals(boid.pos)) return float3.zero;
+            
+            return math.normalize(searchPosition - boid.pos) * classInfo.searchStrength;
         }
 
         private float3 FearForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours, NativeArray<float> distances)

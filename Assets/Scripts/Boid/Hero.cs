@@ -43,6 +43,8 @@ public class Hero : Boid {
             separationRadius = 0.42f,
             fearRadius = 0.5f,
             maxForce = 6.0f,
+            
+            accelerationDesire = 0.1f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,

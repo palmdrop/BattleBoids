@@ -103,6 +103,8 @@ public abstract class Boid : Selectable
         public float fearRadius;
         public float maxForce;
 
+        public float accelerationDesire;
+
         // Weights for the three basic flocking behaviors
         // NOTE: an exponent of 0.0 would make the behavior ignore the distance to the neighbouring boid
         public float alignmentStrength, alignmentExponent;

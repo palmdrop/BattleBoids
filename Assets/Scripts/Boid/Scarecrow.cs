@@ -27,6 +27,8 @@ public class Scarecrow : Boid {
             separationRadius = 0.4f,
             fearRadius = 0.5f,
             maxForce = 7.0f,
+            
+            accelerationDesire = 0.1f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,

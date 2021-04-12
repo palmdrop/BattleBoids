@@ -41,6 +41,8 @@ public class Healer : Boid
             separationRadius = 0.41f,
             fearRadius = 1.0f,
             maxForce = 7.0f,
+            
+            accelerationDesire = 0.1f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,

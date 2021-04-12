@@ -37,6 +37,8 @@ public class Ranged : Boid {
             separationRadius = 0.43f,
             fearRadius = 1.3f,
             maxForce = 6.5f,
+            
+            accelerationDesire = 0.1f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,

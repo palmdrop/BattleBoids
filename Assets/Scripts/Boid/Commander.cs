@@ -30,6 +30,8 @@ public class Commander : Boid
             separationRadius = 0.32f,
             fearRadius = 0.5f,
             maxForce = 7.0f,
+            
+            accelerationDesire = 0.1f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,
