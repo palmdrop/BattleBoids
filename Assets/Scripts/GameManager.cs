@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
     private List<Player> _players;
 
     [SerializeField] private Camera mainCamera;
+    [SerializeField] private Map.Map map;
 
 
     // Start is called before the first frame update
@@ -141,6 +142,11 @@ public class GameManager : MonoBehaviour
     public bool IsPaused()
     {
         return _paused;
+    }
+
+    public Map.Map GetMap()
+    {
+        return map;
     }
 
 }
