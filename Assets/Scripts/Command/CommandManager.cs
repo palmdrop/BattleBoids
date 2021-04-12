@@ -6,70 +6,93 @@ using UnityEngine;
 
 public class CommandManager : MonoBehaviour
 {
-    private static Dictionary<KeyCode, (Delegate, string)> _pressedActions;
-    private static Dictionary<KeyCode, (Delegate, string)> heldActions;
+    private static Dictionary<KeyCode, (Delegate, bool, string)> _pressedActions;
+    private static Dictionary<KeyCode, (Delegate, bool, string)> _heldActions;
 
     private void Awake()
     {
-        _pressedActions = new Dictionary<KeyCode, (Delegate, string)>();
-        heldActions = new Dictionary<KeyCode, (Delegate, string)>();
+        // We need two arrays, one for handling key down events
+        _pressedActions = new Dictionary<KeyCode, (Delegate, bool, string)>();
+        // ... the other to handle held down events
+        _heldActions = new Dictionary<KeyCode, (Delegate, bool, string)>();
         
+        // To register a key, you pass in the key code, the function you want to run and a optional description
+        // The description can be used to inform the user in-game
         RegisterPressedAction(KeyCode.H, PrintAllUsedKeys, "Prints all registered KeyCodes to the terminal");
     }
 
     private void Update()
     {
-        foreach (KeyValuePair<KeyCode, (Delegate, string)> entry in _pressedActions.Where(
+        // Here we check if any of the pressed key actions are issued
+        // If it is, invoke the function associated with that input
+        foreach (KeyValuePair<KeyCode, (Delegate, bool, string)> entry in _pressedActions.Where(
             entry => Input.GetKeyDown(entry.Key)))
         {
             entry.Value.Item1.DynamicInvoke();
         }
 
-        foreach ( KeyValuePair<KeyCode, (Delegate, string)> entry in heldActions.Where(
+        // Here we check if any of the held key actions are issued
+        // If it is, invoke the function associated with that input
+        foreach ( KeyValuePair<KeyCode, (Delegate, bool, string)> entry in _heldActions.Where(
             entry => Input.GetKey(entry.Key)))
         {
             entry.Value.Item1.DynamicInvoke();
         }
     }
     
-    public static void RegisterPressedAction(KeyCode key, Action action, string description = "No description")
+    public static void RegisterPressedAction(KeyCode key, Action action, string description = "No description", bool showAsTooltip = false)
     {
+        // If the key is already associated with another action, overwrite it
         if (_pressedActions.ContainsKey(key))
         {
-            _pressedActions[key] = (action, description);
+            _pressedActions[key] = (action, showAsTooltip, description);
             return;
         }
 
-        _pressedActions.Add(key, (action, description));
+        // If not, add it to the action dictionary 
+        _pressedActions.Add(key, (action, showAsTooltip, description));
     }
 
-    public static void RegisterHeldAction(KeyCode key, Delegate action, string description = "No description")
+    // Similar to RegisterPressedActions, but for held actions instead. See above.
+    public static void RegisterHeldAction(KeyCode key, Delegate action, string description = "No description", bool showAsTooltip = false)
     {
-        if (heldActions.ContainsKey(key))
+        if (_heldActions.ContainsKey(key))
         {
-            heldActions[key] = (action, description);
+            _heldActions[key] = (action, showAsTooltip, description);
             return;
         }
         
-        heldActions.Add(key, (action, description));
+        _heldActions.Add(key, (action, showAsTooltip, description));
     }
 
+    // Prints all registered keys to the console together with their description.
     public void PrintAllUsedKeys()
     {
         StringBuilder result = new StringBuilder();
 
         foreach (var entry in _pressedActions)
         {
-            result.Append("\n");
-            result.Append("Press ");
-            result.AppendFormat( entry.Key.ToString());
-            result.Append(": ");
-            result.Append(entry.Value.Item2);
+            AppendKeyAndDescription(result, entry.Key.ToString(), entry.Value.Item3, "Pressed");
+        }
+        
+        foreach (var entry in _heldActions)
+        {
+            AppendKeyAndDescription(result, entry.Key.ToString(), entry.Value.Item3, "Hold");
         }
 
         result.Insert(0, "Registered: ");
         
         Debug.Log(result.ToString());
+    }
+
+    private void AppendKeyAndDescription(StringBuilder result, string key, string description, string actionType)
+    {
+        result.Append("\n");
+        result.Append(actionType);
+        result.Append(" ");
+        result.AppendFormat(key);
+        result.Append(": ");
+        result.Append(description);
     }
    
 }
