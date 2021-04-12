@@ -77,7 +77,8 @@ public class GameUI : MonoBehaviour
                 button.GetComponent<Button>().interactable = false;
             }
 
-            button.GetComponent<UnitButton>().SetOnEnter(() => SetTooltip(button));
+            string tooltipContent = button.name.ToUpper() + "\n" + Boid.GetDescription(button.name);
+            button.GetComponent<UnitButton>().SetOnEnter(() => SetTooltip(button, tooltipContent));
             button.GetComponent<UnitButton>().SetOnExit(() => UnsetTooltip()); 
             unitImage.color = color;
         }
@@ -102,17 +103,20 @@ public class GameUI : MonoBehaviour
                 CommandManager.RunActionOnKeyCode(keyCodesAndDescription[x].Item1);
             });
             
-            //button.GetComponent<CommandButton>().SetOnEnter(()=>{Debug.Log("Hal");});
-            Debug.Log(keyCodesAndDescription[x].Item1.ToString());
+            
             button.GetComponentInChildren<Text>().text = keyCodesAndDescription[x].Item1.ToString();
+
+            string tooltipContent = keyCodesAndDescription[x].Item2;
+            button.GetComponentInChildren<UnitButton>().SetOnEnter(() => SetTooltip(button, tooltipContent));
+            button.GetComponentInChildren<UnitButton>().SetOnExit(() => UnsetTooltip()); 
         }
     }
     
-    void SetTooltip(GameObject button) 
+    void SetTooltip(GameObject button, string tooltipContent) 
     {
-        if (!button.GetComponent<Button>().interactable) return;
+        if (!button.GetComponentInChildren<Button>().interactable) return;
         tooltip.SetActive(true);
-        tooltipText.text = button.name.ToUpper() + "\n" + Boid.GetDescription(button.name);
+        tooltipText.text = tooltipContent;
     }
 
     public static bool IsMouseOverUI()
