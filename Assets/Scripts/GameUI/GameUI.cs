@@ -90,16 +90,21 @@ public class GameUI : MonoBehaviour
         
         for (int i = 0; i < keyCodesAndDescription.Count; i++)
         {
+            // The x variable is just a copy of i, it needs to be used to avoid closure problems when sending
+            // it down into the arrow function
             int x = i;
+            
             GameObject button = commandButtons.transform.GetChild(i).gameObject;
-            button.GetComponentInChildren<Text>().text = keyCodesAndDescription[i].Item1.ToString();
+            
             button.GetComponentInChildren<Button>().onClick.AddListener(()=>
             {
-                
                 Debug.Log(keyCodesAndDescription[x].Item2);
                 CommandManager.RunActionOnKeyCode(keyCodesAndDescription[x].Item1);
             });
-            //button.GetComponentInChildren<Button>().;
+            
+            //button.GetComponent<CommandButton>().SetOnEnter(()=>{Debug.Log("Hal");});
+            Debug.Log(keyCodesAndDescription[x].Item1.ToString());
+            button.GetComponentInChildren<Text>().text = keyCodesAndDescription[x].Item1.ToString();
         }
     }
     
