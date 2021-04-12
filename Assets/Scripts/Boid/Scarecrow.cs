@@ -36,7 +36,7 @@ public class Scarecrow : Boid {
             groundMask = (uint)this.groundMask.value,
             abilityDistance = this.abilityDistance,
 
-            alignmentStrength = 4.0f,
+            alignmentStrength = 2.5f,
             alignmentExponent = 0.0f, 
             
             cohesionStrength = 3.0f,
@@ -53,11 +53,11 @@ public class Scarecrow : Boid {
             attackDistRange = 2f,
             attackAngleRange = Mathf.PI,
             
-            approachMovementStrength = 3.1f,
+            approachMovementStrength = 0.5f,
             approachMovementExponent = 1.0f,
             
             aggressionStrength = 3.4f,
-            aggressionFalloff = 0.8f,
+            aggressionFalloff = 0.3f,
             aggressionDistanceCap = 10.0f,
             maxAggressionMultiplier = 2.2f,
 
@@ -65,9 +65,9 @@ public class Scarecrow : Boid {
 
             searchStrength = 5.4f,
 
-            avoidanceStrength = 20.0f,
+            avoidanceStrength = 10.0f,
             
-            randomMovements = 2.0f,
+            randomMovements = 0.5f,
 
             hoverKi = 2f,
             hoverKp = 10f,

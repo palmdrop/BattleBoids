@@ -39,7 +39,7 @@ public class Commander : Boid
             groundMask = (uint)this.groundMask.value,
             abilityDistance = this.abilityDistance,
 
-            alignmentStrength = 4.0f,
+            alignmentStrength = 2.5f,
             alignmentExponent = 0.0f,
 
             cohesionStrength = 3.0f,
@@ -56,7 +56,7 @@ public class Commander : Boid
             attackDistRange = 1f,
             attackAngleRange = Mathf.PI / 4.0f,
 
-            approachMovementStrength = 14.1f,
+            approachMovementStrength = 0.5f,
             approachMovementExponent = 0.5f,
 
             aggressionStrength = 3.4f,
@@ -70,7 +70,7 @@ public class Commander : Boid
 
             avoidCollisionWeight = 1000f,
 
-            randomMovements = 2.0f,
+            randomMovements = 0.4f,
 
             hoverKi = 2f,
             hoverKp = 10f,

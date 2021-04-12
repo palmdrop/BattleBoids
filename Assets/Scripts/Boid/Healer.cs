@@ -38,7 +38,7 @@ public class Healer : Boid
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
             viewRadius = 1.3f,
-            separationRadius = 0.41f,
+            separationRadius = 0.36f,
             fearRadius = 1.0f,
             maxForce = 7.0f,
             
@@ -50,7 +50,7 @@ public class Healer : Boid
             groundMask = (uint)this.groundMask.value,
             abilityDistance = this.abilityDistance,
 
-            alignmentStrength = 4.0f,
+            alignmentStrength = 2.5f,
             alignmentExponent = 0.0f, 
             
             cohesionStrength = 3.2f,
@@ -67,21 +67,21 @@ public class Healer : Boid
             attackDistRange = 0f,
             attackAngleRange = Mathf.PI / 4.0f,
             
-            approachMovementStrength = 10.0f,
+            approachMovementStrength = 1.0f,
             approachMovementExponent = 0.5f,
             
             aggressionStrength = 3.0f,
-            aggressionFalloff = 1.5f,
+            aggressionFalloff = 0.5f,
             aggressionDistanceCap = 10.0f,
             maxAggressionMultiplier = 2.0f,
 
-            avoidanceStrength = 40f,
+            avoidanceStrength = 20f,
 
             searchStrength = 5.4f,
 
             avoidCollisionWeight = 1000f,
             
-            randomMovements = 1.5f,
+            randomMovements = 0.3f,
 
             hoverKi = 2f,
             hoverKp = 10f,
