@@ -32,8 +32,8 @@ public class SelectionManager : MonoBehaviour
     
     private void Awake()
     {
-        CommandManager.RegisterPressedAction(KeyCode.K, PressedSellKey);
-        CommandManager.RegisterPressedAction(KeyCode.Q, PressedMoveSelectedKey);
+        CommandManager.RegisterPressedAction(KeyCode.K, PressedSellKey, "Sell the selected boids");
+        CommandManager.RegisterPressedAction(KeyCode.Q, PressedMoveSelectedKey, "Move the selected boids");
     }
     
 

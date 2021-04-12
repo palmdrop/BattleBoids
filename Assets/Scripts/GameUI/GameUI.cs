@@ -107,10 +107,10 @@ public class GameUI : MonoBehaviour
     }
 
     private void RegisterKeyInputs() {
-        CommandManager.RegisterPressedAction(KeyCode.Alpha1, () => SetActivePlayerId(1));
-        CommandManager.RegisterPressedAction(KeyCode.Alpha2, () => SetActivePlayerId(2));
-        CommandManager.RegisterPressedAction(KeyCode.R, () => players.ForEach(p => p.Ready()));
-        CommandManager.RegisterPressedAction(KeyCode.Y, () => showHealthBars = !showHealthBars);
+        CommandManager.RegisterPressedAction(KeyCode.Alpha1, () => SetActivePlayerId(1), "Change to the first player");
+        CommandManager.RegisterPressedAction(KeyCode.Alpha2, () => SetActivePlayerId(2), "Change to the second player");
+        CommandManager.RegisterPressedAction(KeyCode.R, () => players.ForEach(p => p.Ready()), "Start the game");
+        CommandManager.RegisterPressedAction(KeyCode.Y, () => showHealthBars = !showHealthBars, "Toggle health bars");
         CommandManager.RegisterPressedAction(KeyCode.M, () => AudioManager.instance.ToggleMute());
         CommandManager.RegisterPressedAction(KeyCode.U, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() + 0.1f));
         CommandManager.RegisterPressedAction(KeyCode.J, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() - 0.1f));
@@ -124,7 +124,7 @@ public class GameUI : MonoBehaviour
             } else {
                 Resume();
             }
-        });
+        }, "Open pause menu");
     }
 
     void UpdateReady()

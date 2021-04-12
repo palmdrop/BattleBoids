@@ -6,52 +6,52 @@ using UnityEngine;
 
 public class CommandManager : MonoBehaviour
 {
-    private static Dictionary<KeyCode, Delegate> _pressedActions;
-    private static Dictionary<KeyCode, Delegate> heldActions;
+    private static Dictionary<KeyCode, (Delegate, string)> _pressedActions;
+    private static Dictionary<KeyCode, (Delegate, string)> heldActions;
 
     private void Awake()
     {
-        _pressedActions = new Dictionary<KeyCode, Delegate>();
-        heldActions = new Dictionary<KeyCode, Delegate>();
-        Debug.Log("CAlled first");
-        RegisterPressedAction(KeyCode.H, PrintAllUsedKeys);
+        _pressedActions = new Dictionary<KeyCode, (Delegate, string)>();
+        heldActions = new Dictionary<KeyCode, (Delegate, string)>();
+        
+        RegisterPressedAction(KeyCode.H, PrintAllUsedKeys, "Prints all registered KeyCodes to the terminal");
     }
 
     private void Update()
     {
-        foreach (KeyValuePair<KeyCode, Delegate> entry in _pressedActions.Where(
+        foreach (KeyValuePair<KeyCode, (Delegate, string)> entry in _pressedActions.Where(
             entry => Input.GetKeyDown(entry.Key)))
         {
-            entry.Value.DynamicInvoke();
+            entry.Value.Item1.DynamicInvoke();
         }
 
-        foreach ( KeyValuePair<KeyCode, Delegate> entry in heldActions.Where(
+        foreach ( KeyValuePair<KeyCode, (Delegate, string)> entry in heldActions.Where(
             entry => Input.GetKey(entry.Key)))
         {
-            entry.Value.DynamicInvoke();
+            entry.Value.Item1.DynamicInvoke();
         }
     }
     
-    public static void RegisterPressedAction(KeyCode key, Action action)
+    public static void RegisterPressedAction(KeyCode key, Action action, string description = "No description")
     {
         if (_pressedActions.ContainsKey(key))
         {
-            _pressedActions[key] = action;
+            _pressedActions[key] = (action, description);
             return;
         }
 
-        _pressedActions.Add(key, action);
+        _pressedActions.Add(key, (action, description));
     }
 
-    public static void RegisterHeldAction(KeyCode key, Delegate action)
+    public static void RegisterHeldAction(KeyCode key, Delegate action, string description = "No description")
     {
         if (heldActions.ContainsKey(key))
         {
-            heldActions[key] = action;
+            heldActions[key] = (action, description);
             return;
         }
         
-        heldActions.Add(key, action);
+        heldActions.Add(key, (action, description));
     }
 
     public void PrintAllUsedKeys()
@@ -60,8 +60,11 @@ public class CommandManager : MonoBehaviour
 
         foreach (var entry in _pressedActions)
         {
+            result.Append("\n");
+            result.Append("Press ");
             result.AppendFormat( entry.Key.ToString());
-            result.Append(" ");
+            result.Append(": ");
+            result.Append(entry.Value.Item2);
         }
 
         result.Insert(0, "Registered: ");
