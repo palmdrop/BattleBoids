@@ -90,30 +90,16 @@ public class GameUI : MonoBehaviour
         
         for (int i = 0; i < keyCodesAndDescription.Count; i++)
         {
+            int x = i;
             GameObject button = commandButtons.transform.GetChild(i).gameObject;
             button.GetComponentInChildren<Text>().text = keyCodesAndDescription[i].Item1.ToString();
             button.GetComponentInChildren<Button>().onClick.AddListener(()=>
             {
-                Debug.Log(keyCodesAndDescription[0].Item2);
-                CommandManager.RunActionOnKeyCode(keyCodesAndDescription[0].Item1);
+                
+                Debug.Log(keyCodesAndDescription[x].Item2);
+                CommandManager.RunActionOnKeyCode(keyCodesAndDescription[x].Item1);
             });
             //button.GetComponentInChildren<Button>().;
-            
-            
-        }
-
-        foreach (Transform child in commandButtons.transform) {
-            
-            /*
-            if (Boolean.Parse(PlayerPrefs.GetString(_prefix + button.name, "true"))) {
-                button.GetComponent<Button>().onClick.AddListener(() => UnitButtonClick(button));
-            } else {
-                button.GetComponent<Button>().interactable = false;
-            }
-            */
-
-            //button.GetComponent<UnitButton>().SetOnEnter(() => SetTooltip(button));
-            //button.GetComponent<UnitButton>().SetOnExit(() => UnsetTooltip()); 
         }
     }
     
