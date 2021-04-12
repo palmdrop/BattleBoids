@@ -65,6 +65,36 @@ public class CommandManager : MonoBehaviour
         _heldActions.Add(key, (action, showAsTooltip, description));
     }
 
+    // Returns a list of all keycodes (and the their description) that is going to be displayed as a button in-game
+    public static List<(KeyCode, string)> GETPressedKeyCodesAndDescription()
+    {
+        List<(KeyCode, string)> tooltipCommands = new List<(KeyCode, string)>();
+        
+        foreach (KeyValuePair<KeyCode, (Delegate, bool, string)> entry in _pressedActions)
+        {
+            if (entry.Value.Item2)
+            {
+                tooltipCommands.Add((entry.Key, entry.Value.Item3));
+            }
+        }
+        
+        return tooltipCommands;
+    }
+
+    // If a the key code have a function attached, it will run that function
+    public static void RunActionOnKeyCode(KeyCode keyCode)
+    {
+        if (_pressedActions.ContainsKey(keyCode))
+        {
+            _pressedActions[keyCode].Item1.DynamicInvoke();
+        }
+
+        if (_heldActions.ContainsKey(keyCode))
+        {
+            _heldActions[keyCode].Item1.DynamicInvoke();
+        }
+    }
+
     // Prints all registered keys to the console together with their description.
     public void PrintAllUsedKeys()
     {
@@ -72,7 +102,7 @@ public class CommandManager : MonoBehaviour
 
         foreach (var entry in _pressedActions)
         {
-            AppendKeyAndDescription(result, entry.Key.ToString(), entry.Value.Item3, "Pressed");
+            AppendKeyAndDescription(result, entry.Key.ToString(), entry.Value.Item3, "Press");
         }
         
         foreach (var entry in _heldActions)

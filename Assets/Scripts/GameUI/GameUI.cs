@@ -49,6 +49,7 @@ public class GameUI : MonoBehaviour
         tooltip.SetActive(false);
         SetActivePlayerId(1);
         InitUnitButtons();
+        InitCommandButtons();
         InitReadyButton();
         InitVictoryMenu();
         Resume();
@@ -78,6 +79,31 @@ public class GameUI : MonoBehaviour
             button.GetComponent<UnitButton>().SetOnEnter(() => SetTooltip(button));
             button.GetComponent<UnitButton>().SetOnExit(() => UnsetTooltip()); 
             unitImage.color = color;
+        }
+    }
+    void InitCommandButtons()
+    {
+
+        List<(KeyCode, string)> keyCodesAndDescription = CommandManager.GETPressedKeyCodesAndDescription();
+        for (int i = 0; i < keyCodesAndDescription.Count; i++)
+        {
+            GameObject button = commandButtons.transform.GetChild(i).gameObject;
+            button.GetComponentInChildren<Text>().text = keyCodesAndDescription[i].Item1.ToString();
+            //button.GetComponent<Button>().onClick.AddListener(() => CommandManager.RunActionOnKeyCode(keyCodesAndDescription[i].Item1));
+        }
+
+        foreach (Transform child in commandButtons.transform) {
+            
+            /*
+            if (Boolean.Parse(PlayerPrefs.GetString(_prefix + button.name, "true"))) {
+                button.GetComponent<Button>().onClick.AddListener(() => UnitButtonClick(button));
+            } else {
+                button.GetComponent<Button>().interactable = false;
+            }
+            */
+
+            //button.GetComponent<UnitButton>().SetOnEnter(() => SetTooltip(button));
+            //button.GetComponent<UnitButton>().SetOnExit(() => UnsetTooltip()); 
         }
     }
     
