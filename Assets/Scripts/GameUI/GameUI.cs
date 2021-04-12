@@ -3,6 +3,7 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
@@ -85,11 +86,20 @@ public class GameUI : MonoBehaviour
     {
 
         List<(KeyCode, string)> keyCodesAndDescription = CommandManager.GETPressedKeyCodesAndDescription();
+
+        
         for (int i = 0; i < keyCodesAndDescription.Count; i++)
         {
             GameObject button = commandButtons.transform.GetChild(i).gameObject;
             button.GetComponentInChildren<Text>().text = keyCodesAndDescription[i].Item1.ToString();
-            //button.GetComponent<Button>().onClick.AddListener(() => CommandManager.RunActionOnKeyCode(keyCodesAndDescription[i].Item1));
+            button.GetComponentInChildren<Button>().onClick.AddListener(()=>
+            {
+                Debug.Log(keyCodesAndDescription[0].Item2);
+                CommandManager.RunActionOnKeyCode(keyCodesAndDescription[0].Item1);
+            });
+            //button.GetComponentInChildren<Button>().;
+            
+            
         }
 
         foreach (Transform child in commandButtons.transform) {
@@ -112,6 +122,11 @@ public class GameUI : MonoBehaviour
         if (!button.GetComponent<Button>().interactable) return;
         tooltip.SetActive(true);
         tooltipText.text = button.name.ToUpper() + "\n" + Boid.GetDescription(button.name);
+    }
+
+    public static bool IsMouseOverUI()
+    {
+        return  EventSystem.current.IsPointerOverGameObject();
     }
 
     void UnsetTooltip()

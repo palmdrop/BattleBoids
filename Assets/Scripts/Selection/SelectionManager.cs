@@ -125,6 +125,10 @@ public class SelectionManager : MonoBehaviour
     public void Deselect()
     {
 
+        if (GameUI.IsMouseOverUI())
+        {
+            return;
+        }
         inMoveState = false;
         // Remove the visual indicator from the deselected entities
         foreach (Selectable selected in GETSelectedEntities())
