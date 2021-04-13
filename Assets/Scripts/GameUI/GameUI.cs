@@ -182,6 +182,7 @@ public class GameUI : MonoBehaviour
             unitButtons.SetActive(false);
             commadsText.SetActive(false);
             commandButtons.SetActive(false);
+            tooltip.SetActive(false);
             hasStarted = true;
         }
     }

@@ -20,6 +20,7 @@ public class Scarecrow : Boid {
         timeBetweenActions = 1f;
         morale = moraleDefault = 1f;
         abilityDistance = 2f;
+        meshDefaultLayer = LayerMask.NameToLayer("OutlineWhite");
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
@@ -73,7 +74,9 @@ public class Scarecrow : Boid {
             hoverKp = 10f,
             targetHeight = 2f,
 
-            fearMultiplier = 100f
+            fearMultiplier = 100f,
+
+            colliderRadius = GetComponent<SphereCollider>().radius
         };
 
         SetColor();

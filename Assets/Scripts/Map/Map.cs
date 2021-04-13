@@ -59,7 +59,7 @@ namespace Map
             {
                 // Get rendered positions of each child
                 GameObject child = _ground[i].gameObject;
-                Bounds objectBound = child.GetComponent<Renderer>().bounds;
+                Bounds objectBound = child.GetComponent<Collider>().bounds;
 
 
                 // Find max and min x value
