@@ -566,7 +566,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_Font: {fileID: 12800000, guid: e3f659e66f5bfe0939f98acb2130aae3, type: 3}
     m_FontSize: 13
     m_FontStyle: 0
     m_BestFit: 0
@@ -578,8 +578,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: " tejfei iejf iejf eijf ei fjei jfei jfei jfie jfe ijfe ijfe ijfei jfei
-    \ne ijfe jif ejif ef \ne fjei feji fe e"
+  m_Text: When lorem ipsum is ipsum lorem in the atal daral ipsum.
 --- !u!1 &2544244654473297628
 GameObject:
   m_ObjectHideFlags: 0
