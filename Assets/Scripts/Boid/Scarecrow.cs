@@ -74,7 +74,7 @@ public class Scarecrow : Boid {
             hoverKp = 10f,
             targetHeight = 2f,
 
-            fearMultiplier = 10f,
+            fearMultiplier = 100f,
 
             colliderRadius = GetComponent<SphereCollider>().radius
         };

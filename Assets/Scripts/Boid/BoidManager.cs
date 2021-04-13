@@ -295,25 +295,34 @@ public class BoidManager : MonoBehaviour
             
             // Calculate the confidence of the current boid
             float confidence = CalculateConfidence(boid, neighbours);
-            
-            // Sum all the forces
-            float3 desire =
-                // Reynolds behaviors
-                AlignmentForce(boid, classInfo, neighbours, distances)
-                + CohesionForce(boid, classInfo, neighbours, distances)
-                + SeparationForce(boid, classInfo, neighbours, distances)
-                
-                // Additional behaviors
-                + (confidence >= classInfo.confidenceThreshold
-                    // If confidence is high, be aggressive and have normal fear levels
-                    ? AggressionForce(boid, classInfo) + 1 * FearForce(boid, classInfo, neighbours, distances) 
-                    // If confidence is low, search for the ally flock and duplicate fear levels
-                    : SearchForce(boid, classInfo)     + 2 * FearForce(boid, classInfo, neighbours, distances))
-                
-                // 
-                + ApproachForce(boid, classInfo, targetBoidIndex, targetViewDistance)
-                + AvoidanceForce(boid, classInfo, neighbours, distances) 
-                + RandomForce(index, classInfo.randomMovements);
+
+            float3 desire;
+
+            if (IsScared(boid, classInfo, neighbours))
+            {
+                desire = FearForce(boid, classInfo, neighbours, distances);
+            }
+            else
+            {
+                // Sum all the forces
+                desire =
+                    // Reynolds behaviors
+                    AlignmentForce(boid, classInfo, neighbours, distances)
+                    + CohesionForce(boid, classInfo, neighbours, distances)
+                    + SeparationForce(boid, classInfo, neighbours, distances)
+
+                    // Additional behaviors
+                    + (confidence >= classInfo.confidenceThreshold
+                        // If confidence is high, be aggressive and have normal fear levels
+                        ? AggressionForce(boid, classInfo) + 1 * FearForce(boid, classInfo, neighbours, distances)
+                        // If confidence is low, search for the ally flock and duplicate fear levels
+                        : SearchForce(boid, classInfo) + 2 * FearForce(boid, classInfo, neighbours, distances))
+
+                    // 
+                    + ApproachForce(boid, classInfo, targetBoidIndex, targetViewDistance)
+                    + AvoidanceForce(boid, classInfo, neighbours, distances)
+                    + RandomForce(index, classInfo.randomMovements);
+            }
 
             if (HeadedForCollisionWithMapBoundary(boid, classInfo))
             {
@@ -440,6 +449,18 @@ public class BoidManager : MonoBehaviour
             // Otherwise, calculate the confidence...
             // We add one to the ally counter, otherwise the boids will not count themselves
             return (float)(allyCounter + 1) / enemyCounter;
+        }
+
+        private bool IsScared(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours)
+        {
+            if (boid.type == Boid.Type.Scarecrow) return false;
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                Boid.BoidInfo neighbour = boids[neighbours[i]];
+                if (boid.flockId != neighbour.flockId && neighbour.type == Boid.Type.Scarecrow) return true;
+            }
+
+            return false;
         }
 
        
@@ -593,10 +614,9 @@ public class BoidManager : MonoBehaviour
                 // No fear for friendly boids
                 if (boid.flockId == neighbour.flockId) continue;
 
-                if (neighbour.flockId != boid.flockId           // Different flock
-                        && neighbour.type == Boid.Type.Scarecrow       // Is Scarecrow
-                        && boidClassInfos[(int)neighbour.type].abilityDistance > distances[i]) { // and dist < Scarecrow ability dist
-                    fearMultiplier = classInfo.fearMultiplier;
+                if (neighbour.type == Boid.Type.Scarecrow       // Is Scarecrow
+                    && boidClassInfos[(int)neighbour.type].abilityDistance > distances[i]) { // and dist < Scarecrow ability dist
+                    fearMultiplier = boidClassInfos[(int) neighbour.type].fearMultiplier;
                 }
                 
                 float distance = distances[i];
