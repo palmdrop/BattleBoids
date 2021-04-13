@@ -49,7 +49,7 @@ public class Commander : Boid
             separationStrength = 120.0f,
             separationExponent = 1.0f,
             
-            gravity = 40f,
+            gravity = 100f,
 
             fearStrength = 5.0f,
             fearExponent = 2.0f,
@@ -102,7 +102,7 @@ public class Commander : Boid
             base.UpdateBoid(force);
         } else {
             var pathVec = _path[0].transform.position - GetPos();
-            base.UpdateBoid(force + pathVec.normalized * 3f);
+            base.UpdateBoid(force + pathVec.normalized * 5f);
             if (pathVec.magnitude < 3f) {
                 _path.RemoveAt(0);
             }
