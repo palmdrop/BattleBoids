@@ -10,15 +10,7 @@ public class UnitButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     // Will be called when the pointer exits the button
     private Action _onExit;
 
-    void Start()
-    {
-    }
-
-    void Update()
-    {
-    }
-
-    public void SetOnEnter(Action callback)
+    public void SetOnEnter(Action callback=null)
     {
         this._onEnter = callback;
     }
@@ -37,4 +29,5 @@ public class UnitButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandl
     {
         _onExit.Invoke();
     }
+
 }

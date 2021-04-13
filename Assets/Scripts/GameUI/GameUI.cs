@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Entities;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -88,7 +89,15 @@ public class GameUI : MonoBehaviour
 
         List<(KeyCode, string)> keyCodesAndDescription = CommandManager.GETPressedKeyCodesAndDescription();
 
-        
+
+        // Defaults the actions on the buttons to do nothing
+        foreach (Transform child in commandButtons.transform)
+        {
+            child.GetComponentInChildren<UnitButton>().SetOnEnter(() => {});
+            child.GetComponentInChildren<UnitButton>().SetOnExit(() => {});
+        }
+
+        // Here we override the buttons with actual actions
         for (int i = 0; i < keyCodesAndDescription.Count; i++)
         {
             // The x variable is just a copy of i, it needs to be used to avoid closure problems when sending
@@ -96,7 +105,8 @@ public class GameUI : MonoBehaviour
             int x = i;
             
             GameObject button = commandButtons.transform.GetChild(i).gameObject;
-            
+            button.GetComponentInChildren<Button>().interactable = true;
+
             button.GetComponentInChildren<Button>().onClick.AddListener(()=>
             {
                 Debug.Log(keyCodesAndDescription[x].Item2);
@@ -107,12 +117,13 @@ public class GameUI : MonoBehaviour
             button.GetComponentInChildren<Text>().text = keyCodesAndDescription[x].Item1.ToString();
 
             string tooltipContent = keyCodesAndDescription[x].Item2;
+
             button.GetComponentInChildren<UnitButton>().SetOnEnter(() => SetTooltip(button, tooltipContent));
             button.GetComponentInChildren<UnitButton>().SetOnExit(() => UnsetTooltip()); 
         }
     }
     
-    void SetTooltip(GameObject button, string tooltipContent) 
+    void SetTooltip(GameObject button, string tooltipContent)
     {
         if (!button.GetComponentInChildren<Button>().interactable) return;
         tooltip.SetActive(true);
