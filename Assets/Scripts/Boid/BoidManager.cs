@@ -77,10 +77,6 @@ public class BoidManager : MonoBehaviour
 
     void FixedUpdate()
     {
-        //So the grid does not have to be populated more than once
-        if (!firstRun)
-            _grid.Dispose();
-        
         // Remove all dead boids
         ClearDeadBoids();
         // Allocate arrays for all the data required to calculate the boid behaviors
@@ -160,7 +156,7 @@ public class BoidManager : MonoBehaviour
         targetIndices.Dispose();
         friendlyTargetIndices.Dispose();
         DisposableBoidClassInfos.Dispose();
-        //_grid.Dispose();
+        _grid.Dispose();
 
         firstRun = false;
     }

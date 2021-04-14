@@ -12,10 +12,13 @@ public struct BoidGrid
     private NativeMultiHashMap<GridPoint, int> _grid;// = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.TempJob);
     private NativeList<Boid.BoidInfo> _boids;
 
+    private bool allocated;
 
     // Populates the grid by placing the indices of the boids in cells
     public void Populate(List<Boid> boids)
     {
+        if (allocated) return;
+        
         _boids = new NativeList<Boid.BoidInfo>(10, Allocator.Persistent);
         _grid = new NativeMultiHashMap<GridPoint, int>(10, Allocator.Persistent);
         float time = Time.time;
@@ -29,6 +32,7 @@ public struct BoidGrid
             //_grid.Add(gp, info);
             _grid.Add(gp, i);
         }
+        allocated = true;
     }
 
 
@@ -148,8 +152,10 @@ public struct BoidGrid
     // Disposes of temporary data
     public void Dispose()
     {
+        if (!allocated) return;
         _grid.Dispose();
         _boids.Dispose();
+        allocated = false;
     }
 
 
