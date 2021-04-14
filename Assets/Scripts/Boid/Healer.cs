@@ -23,7 +23,7 @@ public class Healer : Boid
 
         Cost = 20;
         type = Type.Healer;
-        health = maxHealth = 50;
+        health = maxHealth = 60;
         damage = 0;
         maxSpeed = 7f;
         avoidCollisionWeight = 5f;
@@ -32,9 +32,9 @@ public class Healer : Boid
         abilityDistance = 2.0f;
         meshDefaultLayer = LayerMask.NameToLayer("OutlineWhite");
 
-        timeBetweenActions = 0.2f;
-        _healAmount = 1;
-        _healRadius = 1.0f;
+        timeBetweenActions = 0.1f;
+        _healAmount = 2;
+        _healRadius = 2.0f;
 
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,

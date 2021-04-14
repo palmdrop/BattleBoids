@@ -14,7 +14,7 @@ public class Commander : Boid
         base.Start();
 
         type = Type.Commander;
-        Cost = 10;
+        Cost = 50;
         health = maxHealth = 100;
         damage = 1;
         maxSpeed = 4f;

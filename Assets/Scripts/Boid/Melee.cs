@@ -20,7 +20,7 @@ public class Melee : Boid {
         boostedDamage = 5;
         maxSpeed = 7f;
         avoidCollisionWeight = 5f;
-        timeBetweenActions = 0.05f;
+        timeBetweenActions = 0.1f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
         abilityDistance = 0;

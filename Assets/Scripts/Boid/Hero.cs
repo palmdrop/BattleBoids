@@ -28,9 +28,9 @@ public class Hero : Boid {
 
         type = Type.Hero;
         Cost = 100;
-        health = maxHealth = 200;
-        damage = 100;
-        maxSpeed = 6f;
+        health = maxHealth = 150;
+        damage = 70;
+        maxSpeed = 4f;
         avoidCollisionWeight = 5f;
         timeBetweenActions = 0.1f;
         emotionalState = 0f;
@@ -146,9 +146,7 @@ public class Hero : Boid {
         List<Boid> enemies = FindEnemiesInSphere(position, damageRadius, LayerMask.GetMask("Units"));
         foreach (Boid enemy in enemies) {
             enemy.GetRigidbody().AddExplosionForce(forcePower, position, damageRadius);
-            float sqrDist = (enemy.GetPos() - position).sqrMagnitude;
-            int takeDamage = (int) (damage / sqrDist);
-            enemy.TakeDamage(takeDamage);
+            enemy.TakeDamage(damage);
         }
     }
 
