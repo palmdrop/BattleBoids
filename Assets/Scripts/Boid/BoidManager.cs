@@ -274,25 +274,35 @@ public class BoidManager : MonoBehaviour
             }
             targetBoidIndex = FindEnemyTargetIndex(boid, classInfo, neighbours, distances);
             targetViewDistance = classInfo.attackDistRange;
-            
-            // Sum all the forces
-            float3 desire =
-                // Reynolds behaviors
-                AlignmentForce(boid, classInfo, neighbours, distances)
-                + CohesionForce(boid, classInfo, neighbours, distances)
-                + SeparationForce(boid, classInfo, neighbours, distances)
-                
-                // Additional behaviors
-                + (IsConfident(boid, neighbours)
-                    // If confidence is high, be aggressive and have normal fear levels
-                    ? AggressionForce(boid, classInfo, targetBoidIndex) + 1 * FearForce(boid, classInfo, neighbours, distances) 
-                    // If confidence is low, search for the ally flock and duplicate fear levels
-                    : SearchForce(boid, classInfo)     + 2 * FearForce(boid, classInfo, neighbours, distances))
-                
-                + ApproachForce(boid, classInfo, targetBoidIndex, targetViewDistance)
-                + AvoidanceForce(boid, classInfo, neighbours, distances) 
-                + RandomForce(index, classInfo.randomMovements);
 
+            float3 desire;
+
+            // If the boid is scared by a nearby scarecrow, only the fear behavior applies
+            if (IsScared(boid, classInfo, neighbours))
+            {
+                desire = FearForce(boid, classInfo, neighbours, distances, true);
+            }
+            // Otherwise, all behaviors apply
+            else
+            {
+                desire =
+                    // Reynolds behaviors
+                    AlignmentForce(boid, classInfo, neighbours, distances)
+                    + CohesionForce(boid, classInfo, neighbours, distances)
+                    + SeparationForce(boid, classInfo, neighbours, distances)
+                    
+                    // Additional behaviors
+                    + (IsConfident(boid, neighbours)
+                        // If confidence is high, be aggressive and have normal fear levels
+                        ? AggressionForce(boid, classInfo, targetBoidIndex) + 1 * FearForce(boid, classInfo, neighbours, distances, false) 
+                        // If confidence is low, search for the ally flock and duplicate fear levels
+                        : SearchForce(boid, classInfo)     + 2 * FearForce(boid, classInfo, neighbours, distances, false))
+                    
+                    + ApproachForce(boid, classInfo, targetBoidIndex, targetViewDistance)
+                    + AvoidanceForce(boid, classInfo, neighbours, distances) 
+                    + RandomForce(index, classInfo.randomMovements);
+            }
+            
             if (HeadedForCollisionWithMapBoundary(boid, classInfo))
             {
                 desire += AvoidCollisionDir(boid, classInfo) * classInfo.avoidCollisionWeight;
@@ -410,7 +420,18 @@ public class BoidManager : MonoBehaviour
             // If no ally is found, the boid becomes scared and tries to find its flock
             return false;
         }
+        
+        private bool IsScared(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours)
+        {
+            if (boid.type == Boid.Type.Scarecrow) return false;
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                Boid.BoidInfo neighbour = boids[neighbours[i]];
+                if (boid.flockId != neighbour.flockId && neighbour.type == Boid.Type.Scarecrow) return true;
+            }
 
+            return false;
+        }
        
         private float3 AlignmentForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours, NativeArray<float> distances)
         {
@@ -594,7 +615,7 @@ public class BoidManager : MonoBehaviour
             return math.normalize(searchPosition - boid.pos) * classInfo.searchStrength;
         }
 
-        private float3 FearForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours, NativeArray<float> distances)
+        private float3 FearForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours, NativeArray<float> distances, bool isScared)
         {
             // Fear force acting on the boid (a boid fears enemy boids)
             float3 avgFear = float3.zero;
@@ -608,19 +629,22 @@ public class BoidManager : MonoBehaviour
                 // No fear for friendly boids
                 if (boid.flockId == neighbour.flockId) continue;
 
-                if (neighbour.flockId != boid.flockId           // Different flock
-                        && neighbour.type == Boid.Type.Scarecrow       // Is Scarecrow
-                        && boidClassInfos[(int)neighbour.type].abilityDistance > distances[i]) { // and dist < Scarecrow ability dist
-                    fearMultiplier = classInfo.fearMultiplier;
+                Boid.ClassInfo neighbourClassInfo = boidClassInfos[(int) neighbour.type];
+                if (neighbour.type == Boid.Type.Scarecrow       // Is Scarecrow
+                    && neighbourClassInfo.abilityDistance > distances[i]) { // and dist < Scarecrow ability dist
+                    fearMultiplier = neighbourClassInfo.fearMultiplier;
                 }
                 
                 float distance = distances[i];
+
+                // If the boid is scared, use the view radius, otherwise, use the regular fear radius
+                float radius = isScared ? classInfo.viewRadius : classInfo.fearRadius;
                 
                 // Continue if outside fear radius
-                if (distance > classInfo.fearRadius) continue;
+                if (distance > radius) continue;
                 
                 // Normalize distance with respect to fear radius
-                float normalizedFearDistance = distance / classInfo.fearRadius;
+                float normalizedFearDistance = distance / radius;
                     
                 // Calculate the strength of the fear. This is inversely proportional to some exponent of the normalized distance
                 float amount =
