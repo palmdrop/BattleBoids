@@ -301,9 +301,9 @@ MonoBehaviour:
   lockLaser: {fileID: 4879893858670308561}
   laserDoneWidth: 0.02
   hitAnimationPrefab: {fileID: 4196262253894622696, guid: 27b0d01362b09801e9a78f89bab7cb75, type: 3}
-  aimLockTime: 3
+  aimLockTime: 1.5
   laserDrawTime: 0.01
-  damageRadius: 1.5
+  damageRadius: 1
   forcePower: 500
   boostTime: 0
 --- !u!1001 &1338041178563443894
