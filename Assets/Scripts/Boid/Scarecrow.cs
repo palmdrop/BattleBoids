@@ -12,7 +12,7 @@ public class Scarecrow : Boid {
         base.Start();
 
         type = Type.Scarecrow;
-        Cost = 50;
+        Cost = 30;
         health = maxHealth = 100;
         damage = 1;
         maxSpeed = 6f;
