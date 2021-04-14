@@ -73,12 +73,14 @@ public class SpawnArea : MonoBehaviour
                 int i = x * gridSizeY + z;
                 GameObject currentEntity = holding[i];
 
+                Vector3 position = new Vector3(gridStart.x + dirX * x * unitWidth, 0, gridStart.z + dirY * z * unitWidth);
+
                 // Find correct y-position
                 float y = 0;
-                Ray ray = new Ray(currentEntity.transform.position + new Vector3(0f, 10f, 0f), Vector3.down);
+                Ray ray = new Ray(position + new Vector3(0f, 10f, 0f), Vector3.down);
                 RaycastHit hit;
                 if (Physics.Raycast(ray, out hit, 1000f, groundMask)) y = hit.point.y;
-                Vector3 position = new Vector3(gridStart.x + dirX * x * unitWidth, y + 1f, gridStart.z + dirY * z * unitWidth);
+                position.y = y + 1f;
                 currentEntity.transform.position = position;
 
                 // Check if within spawn area
