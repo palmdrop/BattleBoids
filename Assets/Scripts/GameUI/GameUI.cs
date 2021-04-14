@@ -30,6 +30,7 @@ public class GameUI : MonoBehaviour
     [SerializeField] private GameObject victoryMenu;
     [SerializeField] private GameObject pauseMenu;
     [SerializeField] private GameObject optionsMenu;
+    [SerializeField] private CommandManager commandManager;
 
     private GameManager _gameManager;
     private string _prefix;
@@ -39,7 +40,6 @@ public class GameUI : MonoBehaviour
 
     private void Awake()
     {
-        RegisterKeyInputs();
     }
 
     // Start is called before the first frame update
@@ -55,6 +55,7 @@ public class GameUI : MonoBehaviour
         InitReadyButton();
         InitVictoryMenu();
         Resume();
+        RegisterKeyInputs();
     }
 
     // Update is called once per frame
@@ -87,7 +88,7 @@ public class GameUI : MonoBehaviour
     void InitCommandButtons()
     {
 
-        List<(KeyCode, string)> keyCodesAndDescription = CommandManager.GETPressedKeyCodesAndDescription();
+        List<(KeyCode, string)> keyCodesAndDescription = commandManager.GETPressedKeyCodesAndDescription();
 
 
         // Defaults the actions on the buttons to do nothing
@@ -110,7 +111,7 @@ public class GameUI : MonoBehaviour
             button.GetComponentInChildren<Button>().onClick.AddListener(()=>
             {
                 Debug.Log(keyCodesAndDescription[x].Item2);
-                CommandManager.RunActionOnKeyCode(keyCodesAndDescription[x].Item1);
+                commandManager.RunActionOnKeyCode(keyCodesAndDescription[x].Item1);
             });
             
             
@@ -153,19 +154,24 @@ public class GameUI : MonoBehaviour
         }
     }
 
+    public CommandManager GETCommandManager()
+    {
+        return commandManager;
+    }
+
     private void RegisterKeyInputs() {
-        CommandManager.RegisterPressedAction(KeyCode.Alpha1, () => SetActivePlayerId(1), "Change to the first player");
-        CommandManager.RegisterPressedAction(KeyCode.Alpha2, () => SetActivePlayerId(2), "Change to the second player");
-        CommandManager.RegisterPressedAction(KeyCode.R, () => players.ForEach(p => p.Ready()), "Start the game");
-        CommandManager.RegisterPressedAction(KeyCode.Y, () => showHealthBars = !showHealthBars, "Toggle health bars");
-        CommandManager.RegisterPressedAction(KeyCode.M, () => AudioManager.instance.ToggleMute());
-        CommandManager.RegisterPressedAction(KeyCode.U, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() + 0.1f));
-        CommandManager.RegisterPressedAction(KeyCode.J, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() - 0.1f));
-        CommandManager.RegisterPressedAction(KeyCode.I, () => AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() + 0.1f));
-        CommandManager.RegisterPressedAction(KeyCode.P, () => AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() - 0.1f));
-        CommandManager.RegisterPressedAction(KeyCode.O, () => AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() + 0.1f));
-        CommandManager.RegisterPressedAction(KeyCode.L, () => AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() - 0.1f));
-        CommandManager.RegisterPressedAction(KeyCode.Escape, () => {
+        commandManager.RegisterPressedAction(KeyCode.Alpha1, () => SetActivePlayerId(1), "Change to the first player");
+        commandManager.RegisterPressedAction(KeyCode.Alpha2, () => SetActivePlayerId(2), "Change to the second player");
+        commandManager.RegisterPressedAction(KeyCode.R, () => players.ForEach(p => p.Ready()), "Start the game");
+        commandManager.RegisterPressedAction(KeyCode.Y, () => showHealthBars = !showHealthBars, "Toggle health bars");
+        commandManager.RegisterPressedAction(KeyCode.M, () => AudioManager.instance.ToggleMute());
+        commandManager.RegisterPressedAction(KeyCode.U, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() + 0.1f));
+        commandManager.RegisterPressedAction(KeyCode.J, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() - 0.1f));
+        commandManager.RegisterPressedAction(KeyCode.I, () => AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() + 0.1f));
+        commandManager.RegisterPressedAction(KeyCode.P, () => AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() - 0.1f));
+        commandManager.RegisterPressedAction(KeyCode.O, () => AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() + 0.1f));
+        commandManager.RegisterPressedAction(KeyCode.L, () => AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() - 0.1f));
+        commandManager.RegisterPressedAction(KeyCode.Escape, () => {
             if (!_gameManager.IsPaused()) {
                 Pause();
             } else {

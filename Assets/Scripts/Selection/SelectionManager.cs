@@ -6,6 +6,8 @@ public class SelectionManager : MonoBehaviour
 {
     // The UI component used to get the active player
     private GameManager _gameManager;
+    private CommandManager _commandManager;
+
     private GameUI _gameUI;
     
     private LayerMask ground;
@@ -30,12 +32,6 @@ public class SelectionManager : MonoBehaviour
     private bool mouseOverGround;
     
     
-    private void Awake()
-    {
-        CommandManager.RegisterPressedAction(KeyCode.K, PressedSellKey, "Sell the selected boids", true);
-        CommandManager.RegisterPressedAction(KeyCode.Q, PressedMoveSelectedKey, "Move the selected boids", true);
-    }
-    
 
     private void Start()
     { 
@@ -43,6 +39,9 @@ public class SelectionManager : MonoBehaviour
         _gameManager = GetComponentInParent<GameManager>();
         _gameUI = _gameManager.GetGameUI();
         activePlayer = _gameUI.GetActivePlayer();
+        _commandManager = _gameUI.GETCommandManager();
+        _commandManager.RegisterPressedAction(KeyCode.K, PressedSellKey, "Sell the selected boids", true);
+        _commandManager.RegisterPressedAction(KeyCode.Q, PressedMoveSelectedKey, "Move the selected boids", true);
         
     }
 

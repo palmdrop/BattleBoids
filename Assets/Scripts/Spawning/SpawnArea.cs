@@ -5,8 +5,9 @@ using UnityEngine;
 public class SpawnArea : MonoBehaviour
 {
     public GameObject entityToSpawn;
-    public Camera camera;
-    public Map.Map map;
+    private GameManager _gameManager;
+    private Camera camera;
+    private Map.Map map;
 
     private Player _owner;
 
@@ -29,7 +30,10 @@ public class SpawnArea : MonoBehaviour
     void Start()
     {
         _owner = GetComponentInParent<Player>();
+        _gameManager = GetComponentInParent<GameManager>();
         spawned = _owner.GetFlock();
+        camera = _gameManager.GetMainCamera();
+        map = _gameManager.GetMap();
     }
 
     private void Awake()

@@ -15,7 +15,7 @@ public class Scarecrow : Boid {
         Cost = 50;
         health = maxHealth = 100;
         damage = 1;
-        maxSpeed = 3f;
+        maxSpeed = 6f;
         avoidCollisionWeight = 5f;
         timeBetweenActions = 1f;
         morale = moraleDefault = 1f;
@@ -25,9 +25,11 @@ public class Scarecrow : Boid {
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
             viewRadius = 1f,
-            separationRadius = 0.5f,
-            fearRadius = 1.0f,
-            maxForce = 6.5f,
+            separationRadius = 0.4f,
+            fearRadius = 0.5f,
+            maxForce = 7.0f,
+            
+            accelerationDesire = 0.1f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,
@@ -35,46 +37,44 @@ public class Scarecrow : Boid {
             groundMask = (uint)this.groundMask.value,
             abilityDistance = this.abilityDistance,
 
-            confidenceThreshold = 0.4f,
-            
-            alignmentStrength = 3.6f,
+            alignmentStrength = 2.5f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 2.0f,
+            cohesionStrength = 3.0f,
             cohesionExponent = 0.0f,
             
-            separationStrength = 120.0f,
+            separationStrength = 220.0f,
             separationExponent = 1.0f,
             
             gravity = 1f,
             
-            fearStrength = 5.0f,
-            fearExponent = 2.0f,
+            fearStrength = 7.0f,
+            fearExponent = 1.0f,
             
             attackDistRange = 2f,
             attackAngleRange = Mathf.PI,
             
-            approachMovementStrength = 20.1f,
-            approachMovementExponent = 0.5f,
+            approachMovementStrength = 0.5f,
+            approachMovementExponent = 1.0f,
             
-            aggressionStrength = 4.4f,
-            aggressionFalloff = 2.0f,
+            aggressionStrength = 3.4f,
+            aggressionFalloff = 0.1f,
             aggressionDistanceCap = 10.0f,
-            maxAggressionMultiplier = 1.6f,
+            maxAggressionMultiplier = 2.2f,
 
             avoidCollisionWeight = 1000f,
 
-            searchStrength = 10.4f,
+            searchStrength = 5.4f,
 
-            avoidanceStrength = 30.0f,
+            avoidanceStrength = 10.0f,
             
-            randomMovements = 3.0f,
+            randomMovements = 0.5f,
 
             hoverKi = 2f,
             hoverKp = 10f,
             targetHeight = 2f,
 
-            fearMultiplier = 10f,
+            fearMultiplier = 1000f,
 
             colliderRadius = GetComponent<SphereCollider>().radius
         };

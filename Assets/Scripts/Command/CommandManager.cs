@@ -6,8 +6,8 @@ using UnityEngine;
 
 public class CommandManager : MonoBehaviour
 {
-    private static Dictionary<KeyCode, (Delegate, bool, string)> _pressedActions;
-    private static Dictionary<KeyCode, (Delegate, bool, string)> _heldActions;
+    private Dictionary<KeyCode, (Delegate, bool, string)> _pressedActions;
+    private Dictionary<KeyCode, (Delegate, bool, string)> _heldActions;
 
     private void Awake()
     {
@@ -40,7 +40,7 @@ public class CommandManager : MonoBehaviour
         }
     }
     
-    public static void RegisterPressedAction(KeyCode key, Action action, string description = "No description", bool showAsTooltip = false)
+    public void RegisterPressedAction(KeyCode key, Action action, string description = "No description", bool showAsTooltip = false)
     {
         // If the key is already associated with another action, overwrite it
         if (_pressedActions.ContainsKey(key))
@@ -54,7 +54,7 @@ public class CommandManager : MonoBehaviour
     }
 
     // Similar to RegisterPressedActions, but for held actions instead. See above.
-    public static void RegisterHeldAction(KeyCode key, Delegate action, string description = "No description", bool showAsTooltip = false)
+    public void RegisterHeldAction(KeyCode key, Delegate action, string description = "No description", bool showAsTooltip = false)
     {
         if (_heldActions.ContainsKey(key))
         {
@@ -66,7 +66,7 @@ public class CommandManager : MonoBehaviour
     }
 
     // Returns a list of all keycodes (and the their description) that is going to be displayed as a button in-game
-    public static List<(KeyCode, string)> GETPressedKeyCodesAndDescription()
+    public List<(KeyCode, string)> GETPressedKeyCodesAndDescription()
     {
         List<(KeyCode, string)> tooltipCommands = new List<(KeyCode, string)>();
         
@@ -82,7 +82,7 @@ public class CommandManager : MonoBehaviour
     }
 
     // If a the key code have a function attached, it will run that function
-    public static void RunActionOnKeyCode(KeyCode keyCode)
+    public void RunActionOnKeyCode(KeyCode keyCode)
     {
         if (_pressedActions.ContainsKey(keyCode))
         {

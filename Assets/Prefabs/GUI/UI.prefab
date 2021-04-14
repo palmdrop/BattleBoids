@@ -2900,6 +2900,7 @@ MonoBehaviour:
   victoryMenu: {fileID: 3112504305369445001}
   pauseMenu: {fileID: 1742426638248557906}
   optionsMenu: {fileID: 4212522896477563934}
+  commandManager: {fileID: 0}
 --- !u!222 &7854776976437878691
 CanvasRenderer:
   m_ObjectHideFlags: 0
