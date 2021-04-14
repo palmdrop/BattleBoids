@@ -25,7 +25,7 @@ public class Healer : Boid
         type = Type.Healer;
         health = maxHealth = 50;
         damage = 0;
-        maxSpeed = 4f;
+        maxSpeed = 7f;
         avoidCollisionWeight = 5f;
         emotionalState = 0f;
         morale = moraleDefault = 1f;
@@ -39,9 +39,11 @@ public class Healer : Boid
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
             viewRadius = 1.3f,
-            separationRadius = 0.4f,
+            separationRadius = 0.36f,
             fearRadius = 1.0f,
             maxForce = 7.0f,
+            
+            accelerationDesire = 0.1f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,
@@ -49,40 +51,38 @@ public class Healer : Boid
             groundMask = (uint)this.groundMask.value,
             abilityDistance = this.abilityDistance,
 
-            confidenceThreshold = 2.0f,
-            
-            alignmentStrength = 3.0f,
+            alignmentStrength = 2.5f,
             alignmentExponent = 0.0f, 
             
-            cohesionStrength = 3.0f,
+            cohesionStrength = 3.2f,
             cohesionExponent = 0.0f,
             
-            separationStrength = 120.0f,
+            separationStrength = 220.0f,
             separationExponent = 1.5f,
 
             gravity = 1f,
             
-            fearStrength = 10.0f,
-            fearExponent = 1.4f,
+            fearStrength = 12.0f,
+            fearExponent = 0.8f,
             
             attackDistRange = 0f,
             attackAngleRange = Mathf.PI / 4.0f,
             
-            approachMovementStrength = 35.0f,
+            approachMovementStrength = 1.0f,
             approachMovementExponent = 0.5f,
             
             aggressionStrength = 3.0f,
-            aggressionFalloff = 2.0f,
+            aggressionFalloff = 0.5f,
             aggressionDistanceCap = 10.0f,
-            maxAggressionMultiplier = 1.4f,
+            maxAggressionMultiplier = 2.0f,
 
-            avoidanceStrength = 60f,
+            avoidanceStrength = 20f,
 
-            searchStrength = 7.4f,
+            searchStrength = 5.4f,
 
             avoidCollisionWeight = 1000f,
             
-            randomMovements = 2.0f,
+            randomMovements = 0.3f,
 
             hoverKi = 2f,
             hoverKp = 10f,
