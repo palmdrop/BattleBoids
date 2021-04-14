@@ -68,7 +68,7 @@ public class Ranged : Boid {
             approachMovementExponent = 0.5f,
             
             aggressionStrength = 3.4f,
-            aggressionFalloff = 0.5f,
+            aggressionFalloff = 0.2f,
             aggressionDistanceCap = 10.0f,
             maxAggressionMultiplier = 2.2f,
 

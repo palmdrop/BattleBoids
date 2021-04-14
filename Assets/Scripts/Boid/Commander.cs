@@ -61,7 +61,7 @@ public class Commander : Boid
             approachMovementExponent = 0.5f,
 
             aggressionStrength = 3.4f,
-            aggressionFalloff = 0.8f,
+            aggressionFalloff = 0.3f,
             aggressionDistanceCap = 10.0f,
             maxAggressionMultiplier = 2.2f,
 

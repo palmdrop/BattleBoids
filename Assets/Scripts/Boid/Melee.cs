@@ -62,7 +62,7 @@ public class Melee : Boid {
             approachMovementExponent = 1.0f,
             
             aggressionStrength = 3.4f,
-            aggressionFalloff = 0.5f,
+            aggressionFalloff = 0.0f,
             aggressionDistanceCap = 10.0f,
             maxAggressionMultiplier = 1.3f,
 
