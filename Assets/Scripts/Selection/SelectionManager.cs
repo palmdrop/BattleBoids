@@ -1,12 +1,13 @@
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
 using UnityEngine;
 
 public class SelectionManager : MonoBehaviour
 {
     // The UI component used to get the active player
     private GameManager _gameManager;
+    private CommandManager _commandManager;
+
     private GameUI _gameUI;
     
     private LayerMask ground;
@@ -15,8 +16,6 @@ public class SelectionManager : MonoBehaviour
     
     private readonly List<Selectable> selected = new List<Selectable>();
     
-    //private static Vector3 min;
-    //private static Vector3 max;
     private Selectable _anchorPoint;
     
 
@@ -32,67 +31,64 @@ public class SelectionManager : MonoBehaviour
     // We want to check if the mouse is currently hovering over ground tiles
     private bool mouseOverGround;
     
+    
 
-private void Start()
-{ 
-    ground = LayerMask.GetMask("Ground");
-    _gameManager = GetComponentInParent<GameManager>();
-    _gameUI = _gameManager.GetGameUI();
-    activePlayer = _gameUI.GetActivePlayer();
-}
+    private void Start()
+    { 
+        ground = LayerMask.GetMask("Ground");
+        _gameManager = GetComponentInParent<GameManager>();
+        _gameUI = _gameManager.GetGameUI();
+        activePlayer = _gameUI.GetActivePlayer();
+        _commandManager = _gameUI.GETCommandManager();
+        _commandManager.RegisterPressedAction(KeyCode.K, PressedSellKey, "Sell the selected boids", true);
+        _commandManager.RegisterPressedAction(KeyCode.Q, PressedMoveSelectedKey, "Move the selected boids", true);
+        
+    }
 
-private void Update()
-{
-    // You can't edit if the game is currently running
-    if (_gameUI.AllPlayersReady())
+    private void Update()
     {
-        if (selected.Count > 0)
+        // You can't edit if the game is currently running
+        if (_gameUI.AllPlayersReady())
+        {
+            if (selected.Count > 0)
+            {
+                UndoChanges();
+            }
+            
+            return;
+        }
+
+        // Undo every non-confirmed changes when the player change
+        if (!activePlayer.Equals(_gameUI.GetActivePlayer()))
         {
             UndoChanges();
         }
         
-        return;
-    }
-
-    // Undo every non-confirmed changes when the player change
-    if (!activePlayer.Equals(_gameUI.GetActivePlayer()))
-    {
-        UndoChanges();
-    }
-    
-    // Stop if nothing is selected 
-    if (selected.Count == 0) 
-    {
-        Cursor.visible = true;
-        return; 
-    } 
-    // Update mouse position
-    mouseOverGround = Physics.Raycast(_gameManager.GetMainCamera().ScreenPointToRay(Input.mousePosition), out _mousePositionInWorld, 1000f, ground);
-    
-    // Sell the selected entities
-    if (Input.GetKeyDown("k"))
-    {
-        SellSelected();
-        return;
-    }
-    
-    // Move entities around the world
-    if (Input.GetKeyDown("q"))
-    {
-        inMoveState = true;
-        Cursor.visible = false;
-    }
+        // Stop if nothing is selected 
+        if (selected.Count == 0) 
+        {
+            Cursor.visible = true;
+            return; 
+        } 
+        // Update mouse position
+        mouseOverGround = Physics.Raycast(_gameManager.GetMainCamera().ScreenPointToRay(Input.mousePosition), out _mousePositionInWorld, 1000f, ground);
+        
+        // Sell the selected entities
+        /*
+        if (Input.GetKeyDown("k"))
+        {
+            SellSelected();
+            return;
+        }
+        */
 
 
-    // Move the selected entities
-    if (inMoveState)
-    {
-        MoveSelected();
+        // Move the selected entities
+        if (inMoveState)
+        {
+            MoveSelected();
+        }
     }
-    else
-    {
-    }
-}
 
     private void UndoChanges()
     {
@@ -123,35 +119,15 @@ private void Update()
         // Sets the offset in relation to the first selectable registered in the _selected array
         selectable.SetOffset(_anchorPoint.transform.position);
         
-        /*
-        Vector3 selectedPosition = selected.transform.position;
-        
-        if (selectedPosition.x < min.x)
-        {
-            min.x = selectedPosition.x;
-        } 
-        
-        if (selectedPosition.x > max.x)
-        {
-            max.x = selectedPosition.x;
-        }
-
-        if (selectedPosition.z < min.z)
-        {
-            min.z = selectedPosition.z;
-        } 
-        
-        if (selectedPosition.z > max.z)
-        {
-            max.z = selectedPosition.z;
-        }
-        */
-        
     }
 
     public void Deselect()
     {
 
+        if (GameUI.IsMouseOverUI())
+        {
+            return;
+        }
         inMoveState = false;
         // Remove the visual indicator from the deselected entities
         foreach (Selectable selected in GETSelectedEntities())
@@ -212,6 +188,7 @@ private void Update()
     private void SellSelected()
     {
         inMoveState = false;
+        Debug.Log(selected.Count.ToString());
 
         for (int i = selected.Count; i --> 0; )
         {
@@ -248,4 +225,26 @@ private void Update()
         get => canSelect;
         set => canSelect = value;
     }
+
+    private void PressedSellKey()
+    {
+        if (selected.Count > 0)
+        {
+            SellSelected();
+        }
+    }
+
+    private void PressedMoveSelectedKey()
+    {
+        if (selected.Count > 0)
+        {
+            inMoveState = true;
+            Cursor.visible = false;
+        }
+        else
+        {
+            inMoveState = false;
+        }
+    }
+
 }
