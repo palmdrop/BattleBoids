@@ -119,7 +119,8 @@ public class BoidManager : MonoBehaviour
         }
         NativeArray<int> targetIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
         NativeArray<int> friendlyTargetIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
-        NativeArray<Boid.ClassInfo>  DisposableBoidClassInfos = new NativeArray<Boid.ClassInfo>(ClassInfos.infos, Allocator.TempJob);
+        NativeArray<Boid.ClassInfo> DisposableBoidClassInfos = new NativeArray<Boid.ClassInfo>(ClassInfos.infos, Allocator.TempJob);
+        NativeArray<bool> falling = new NativeArray<bool>(_boids.Count, Allocator.TempJob);
 
         BoidStructJob boidJob = new BoidStructJob
         {
@@ -131,7 +132,8 @@ public class BoidManager : MonoBehaviour
             friendlyTargetIndices = friendlyTargetIndices,
             grid = _grid,
             cw = _bpw.PhysicsWorld.CollisionWorld,
-            boidClassInfos = DisposableBoidClassInfos
+            boidClassInfos = DisposableBoidClassInfos,
+            falling = falling
         };
 
         // Schedule job
@@ -147,6 +149,7 @@ public class BoidManager : MonoBehaviour
         // Update boids with forces and target
         for (int i = 0; i < _boids.Count; i++)
         {
+            _boids[i].SetFalling(falling[i]);
             _boids[i].UpdateBoid(forces[i]);
             _boids[i].SetTarget(targetIndices[i] != -1 ? _boids[targetIndices[i]] : null);
             _boids[i].SetFriendlyTarget(friendlyTargetIndices[i] != -1 ? _boids[friendlyTargetIndices[i]] : null);
@@ -160,6 +163,7 @@ public class BoidManager : MonoBehaviour
         targetIndices.Dispose();
         friendlyTargetIndices.Dispose();
         DisposableBoidClassInfos.Dispose();
+        falling.Dispose();
         //_grid.Dispose();
 
         firstRun = false;
@@ -252,6 +256,7 @@ public class BoidManager : MonoBehaviour
         [WriteOnly] public NativeArray<int> friendlyTargetIndices;
         [ReadOnly] public BoidGrid grid;
         [ReadOnly] public Unity.Physics.CollisionWorld cw;
+        [WriteOnly] public NativeArray<bool> falling;
 
         public void Execute(int index)
         {
@@ -323,8 +328,9 @@ public class BoidManager : MonoBehaviour
                 force = math.normalize(force) * classInfo.maxForce;
             }
             
-
-            force += HoverForce(boid, classInfo);
+            float3 hoverForce = HoverForce(boid, classInfo);
+            if (hoverForce.y == 0) falling[index] = true;
+            force += hoverForce;
 
             forces[index] = force;
 
