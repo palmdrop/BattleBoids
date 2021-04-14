@@ -10,6 +10,7 @@ public class SpawnArea : MonoBehaviour
     private Map.Map map;
 
     private Player _owner;
+    private Collider _collider;
 
     private int instanceNumber = 1;
 
@@ -31,6 +32,7 @@ public class SpawnArea : MonoBehaviour
     {
         _owner = GetComponentInParent<Player>();
         _gameManager = GetComponentInParent<GameManager>();
+        _collider = GetComponent<Collider>();
         spawned = _owner.GetFlock();
         camera = _gameManager.GetMainCamera();
         map = _gameManager.GetMap();
@@ -131,18 +133,12 @@ public class SpawnArea : MonoBehaviour
         }
     }
 
-    public bool IsInside(GameObject gameObject)
+    public bool IsInside(GameObject currentEntity)
     {
-        Vector3 goTransformPosition = gameObject.transform.position;
-        Vector2 goPosition = new Vector2(goTransformPosition.x, goTransformPosition.z);
-
-
-        Rect bounds2D = new Rect(minBoundPosition.x, minBoundPosition.z, boundSize.x * 2, boundSize.z * 2);
-
-        Boid boid = gameObject.GetComponent<Boid>();
-
-        if (bounds2D.Contains(goPosition))
-        {
+        Ray ray = new Ray(currentEntity.transform.position + new Vector3(0f, 100f, 0f), Vector3.down);
+        RaycastHit hit;
+        Boid boid = currentEntity.GetComponent<Boid>();
+        if (_collider.Raycast(ray, out hit, 1000f)) {
             boid.SetColor(_owner.color);
             return true;
         }
