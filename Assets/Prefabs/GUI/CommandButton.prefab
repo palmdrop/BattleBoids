@@ -342,4 +342,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   border: {fileID: 8000344514698678217}
-  borderHoverColor: {r: 1, g: 1, b: 1, a: 0}
+  borderHoverColor: {r: 1, g: 1, b: 1, a: 0.5019608}
