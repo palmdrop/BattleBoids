@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 public class RangedProjectile : MonoBehaviour
 {
@@ -12,8 +13,15 @@ public class RangedProjectile : MonoBehaviour
     private GameObject _hitAnimation;
     private Vector3 vel;
     private Vector3 gravity = Physics.gravity;
-    public static float projectileRadius = 0.05f;
+    public static float projectileRadius = 0.09f;
     private static List<Material> materials = new List<Material>();
+
+    private float V0;
+    private float theta;
+    private float t0;
+    private Vector3 origin;
+    private Vector3 xy;
+    private Vector3 relativeSpeed;
 
     void Update() {
         // If under map destroy
@@ -23,20 +31,39 @@ public class RangedProjectile : MonoBehaviour
         //}
     }
 
-    public void SetForce(Vector3 force)
+    /*public void SetForce(Vector3 force)
     {
         vel = force;
-    }
+    }*/
     public Vector3 GetVel()
     {
-        return vel;
+        return relativeSpeed
+            + xy * V0
+            + new Vector3(0, 1, 0) * (V0 * math.sin(theta) + -gravity.magnitude * (Time.time - t0));
+        //return new Vector3(0,0,0); //TODO
     }
 
+    public void Fire(float Vmax, Vector3 origin, float theta, Vector3 xy, Vector3 relativeSpeed)
+    {
+        transform.position = origin;
+        this.origin = origin;
+        V0 = Vmax;
+        this.theta = theta;
+        t0 = Time.time;
+        this.xy = xy;
+        this.relativeSpeed = relativeSpeed;
+    }
 
     private void fastPhysicsUpdate(float dt)
     {
-        vel += gravity * dt;
-        transform.position += vel * dt;
+        /*vel += gravity * dt;
+        transform.position += vel * dt;*/
+
+        float t = (Time.time - t0);
+        transform.position = origin
+            + xy * V0 * math.cos(theta) * (Time.time - t0)
+            + new Vector3(0, 1, 0) * (V0 * t * math.sin(theta) + (1f / 2) * -gravity.magnitude * t * t)
+            + relativeSpeed * t;
     }
 
     public void ManagedFixedUpdate()
