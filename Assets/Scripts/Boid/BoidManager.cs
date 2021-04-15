@@ -119,7 +119,8 @@ public class BoidManager : MonoBehaviour
         }
         NativeArray<int> targetIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
         NativeArray<int> friendlyTargetIndices = new NativeArray<int>(_boids.Count, Allocator.TempJob);
-        NativeArray<Boid.ClassInfo>  DisposableBoidClassInfos = new NativeArray<Boid.ClassInfo>(ClassInfos.infos, Allocator.TempJob);
+        NativeArray<Boid.ClassInfo> DisposableBoidClassInfos = new NativeArray<Boid.ClassInfo>(ClassInfos.infos, Allocator.TempJob);
+        NativeArray<bool> falling = new NativeArray<bool>(_boids.Count, Allocator.TempJob);
 
         BoidStructJob boidJob = new BoidStructJob
         {
@@ -131,7 +132,8 @@ public class BoidManager : MonoBehaviour
             friendlyTargetIndices = friendlyTargetIndices,
             grid = _grid,
             cw = _bpw.PhysicsWorld.CollisionWorld,
-            boidClassInfos = DisposableBoidClassInfos
+            boidClassInfos = DisposableBoidClassInfos,
+            falling = falling
         };
 
         // Schedule job
@@ -147,6 +149,7 @@ public class BoidManager : MonoBehaviour
         // Update boids with forces and target
         for (int i = 0; i < _boids.Count; i++)
         {
+            _boids[i].SetFalling(falling[i]);
             _boids[i].UpdateBoid(forces[i]);
             _boids[i].SetTarget(targetIndices[i] != -1 ? _boids[targetIndices[i]] : null);
             _boids[i].SetFriendlyTarget(friendlyTargetIndices[i] != -1 ? _boids[friendlyTargetIndices[i]] : null);
@@ -160,6 +163,7 @@ public class BoidManager : MonoBehaviour
         targetIndices.Dispose();
         friendlyTargetIndices.Dispose();
         DisposableBoidClassInfos.Dispose();
+        falling.Dispose();
         //_grid.Dispose();
 
         firstRun = false;
@@ -252,6 +256,7 @@ public class BoidManager : MonoBehaviour
         [WriteOnly] public NativeArray<int> friendlyTargetIndices;
         [ReadOnly] public BoidGrid grid;
         [ReadOnly] public Unity.Physics.CollisionWorld cw;
+        [WriteOnly] public NativeArray<bool> falling;
 
         public void Execute(int index)
         {
@@ -259,22 +264,6 @@ public class BoidManager : MonoBehaviour
             Boid.BoidInfo boid = boids[index];
             Boid.ClassInfo classInfo = boidClassInfos[(int)boid.type];
             NativeArray<int> neighbours = grid.FindBoidsWithinRadius(boid, classInfo.viewRadius);
-
-            /*NativeList<int> tmp = new NativeList<int>(10, Allocator.Temp);
-            for (int i = 0; i < boids.Length; i++)
-            {
-                float3 horizontalDistance = boids[i].pos - boid.pos;
-                if (horizontalDistance.x * horizontalDistance.x + horizontalDistance.z * horizontalDistance.z < classInfo.viewRadius * classInfo.viewRadius && !boid.Equals(boids[i]))
-                {
-                    tmp.Add(i);
-                }
-            }
-            NativeArray<int> result = new NativeArray<int>(tmp.Length, Allocator.Temp);
-            for (int i = 0; i < tmp.Length; i++)
-            {
-                result[i] = tmp[i];
-            }
-            NativeArray<int> neighbours = result;*/
 
             // Calculate the distances between the current boid and the neighbours once at the start,
             // and send these distances to each behavior function. This avoids having to recalculate the distances for
@@ -284,42 +273,52 @@ public class BoidManager : MonoBehaviour
             int targetBoidIndex = -1;
             int friendlyTargetBoidIndex = -1;
             float targetViewDistance = 0.0f;
-            float friendlyTargetViewDistance = 0.0f;
             if (boid.type == Boid.Type.Healer || boid.type == Boid.Type.Hero)
             {
                 friendlyTargetBoidIndex = FindFriendlyTargetIndex(boid, classInfo, neighbours, distances);
-                friendlyTargetViewDistance = classInfo.viewRadius;
             }
             targetBoidIndex = FindEnemyTargetIndex(boid, classInfo, neighbours, distances);
             targetViewDistance = classInfo.attackDistRange;
-            
-            // Calculate the confidence of the current boid
-            float confidence = CalculateConfidence(boid, neighbours);
-            
-            // Sum all the forces
-            float3 desire =
-                // Reynolds behaviors
-                AlignmentForce(boid, classInfo, neighbours, distances)
-                + CohesionForce(boid, classInfo, neighbours, distances)
-                + SeparationForce(boid, classInfo, neighbours, distances)
-                
-                // Additional behaviors
-                + (confidence >= classInfo.confidenceThreshold
-                    // If confidence is high, be aggressive and have normal fear levels
-                    ? AggressionForce(boid, classInfo) + 1 * FearForce(boid, classInfo, neighbours, distances) 
-                    // If confidence is low, search for the ally flock and duplicate fear levels
-                    : SearchForce(boid, classInfo)     + 2 * FearForce(boid, classInfo, neighbours, distances))
-                
-                // 
-                + ApproachForce(boid, classInfo, targetBoidIndex, targetViewDistance)
-                + AvoidanceForce(boid, classInfo, neighbours, distances) 
-                + RandomForce(index, classInfo.randomMovements);
 
+            float3 desire;
+
+            // If the boid is scared by a nearby scarecrow, only the fear behavior applies
+            if (IsScared(boid, classInfo, neighbours))
+            {
+                desire = FearForce(boid, classInfo, neighbours, distances, true);
+            }
+            // Otherwise, all behaviors apply
+            else
+            {
+                desire =
+                    // Reynolds behaviors
+                    AlignmentForce(boid, classInfo, neighbours, distances)
+                    + CohesionForce(boid, classInfo, neighbours, distances)
+                    + SeparationForce(boid, classInfo, neighbours, distances)
+                    
+                    // Additional behaviors
+                    + (IsConfident(boid, neighbours)
+                        // If confidence is high, be aggressive and have normal fear levels
+                        ? AggressionForce(boid, classInfo, targetBoidIndex) + 1 * FearForce(boid, classInfo, neighbours, distances, false) 
+                        // If confidence is low, search for the ally flock and duplicate fear levels
+                        : SearchForce(boid, classInfo)     + 2 * FearForce(boid, classInfo, neighbours, distances, false))
+                    
+                    + ApproachForce(boid, classInfo, targetBoidIndex, targetViewDistance)
+                    + AvoidanceForce(boid, classInfo, neighbours, distances) 
+                    + RandomForce(index, classInfo.randomMovements);
+            }
+            
             if (HeadedForCollisionWithMapBoundary(boid, classInfo))
             {
                 desire += AvoidCollisionDir(boid, classInfo) * classInfo.avoidCollisionWeight;
             }
 
+            // Boids will accelerate if they are moving in their desired direction
+            float dot = math.dot(desire, boid.vel);
+            if (dot > 0.5)
+            {
+                desire += boid.forward * (dot - 0.5f) * 2.0f * classInfo.accelerationDesire;
+            }
 
             float3 force = desire - boid.vel;
 
@@ -328,8 +327,10 @@ public class BoidManager : MonoBehaviour
             {
                 force = math.normalize(force) * classInfo.maxForce;
             }
-
-            force += HoverForce(boid, classInfo);
+            
+            float3 hoverForce = HoverForce(boid, classInfo);
+            if (hoverForce.y == 0) falling[index] = true;
+            force += hoverForce;
 
             forces[index] = force;
 
@@ -400,48 +401,43 @@ public class BoidManager : MonoBehaviour
             return distances;
         }
         
-        private float CalculateConfidence(Boid.BoidInfo boid, NativeArray<int> neighbours)
+        private bool IsConfident(Boid.BoidInfo boid, NativeArray<int> neighbours)
         {
-            // Count the number of neighbouring allies and enemies
-            int allyCounter = 0;
-            int enemyCounter = 0;
+            // If the boid is the last one left, they will automatically become confident.
+            // The last boid has nothing to loose, and might as well be aggressive.
+            // This also avoids stalemates
+            if (flocks[boid.flockId - 1].boidCount == 1)
+            {
+                return true;
+            }
 
+            // Iterate over all the neighbouring boids and check if at least one of them are friendly
             for (int i = 0; i < neighbours.Length; i++)
             {
                 int index = neighbours[i];
                 Boid.BoidInfo neighbour = boids[index];
+                // If a friendly boid is found, then the current boid grows confident (it is not alone)
                 if (boid.flockId == neighbour.flockId)
                 {
-                    allyCounter++;
-                }
-                else
-                {
-                    enemyCounter++;
+                    return true;
                 }
             }
 
-            // We need to handle the case of there being no neighbouring enemies separately, to avoid
-            // dividing by zero, and because we might want to set the confidence differently in this case,
-            // to avoid stalemate situations.
-            if (enemyCounter == 0)
-            {
-                // If the boid is alone in its flock, it has nothing to lose and will be confident anyway
-                if(flocks[boid.flockId - 1].boidCount == 1)
-                {
-                    return 1;
-                }
-
-                // Otherwise, set the confidence level to the number of allies around the current boid
-                // This will ensure a confidence level of 0.0 for boids that are alone (and there are allies still
-                // on the field)
-                return allyCounter;
-            }
-            
-            // Otherwise, calculate the confidence...
-            // We add one to the ally counter, otherwise the boids will not count themselves
-            return (float)(allyCounter + 1) / enemyCounter;
+            // If no ally is found, the boid becomes scared and tries to find its flock
+            return false;
         }
+        
+        private bool IsScared(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours)
+        {
+            if (boid.type == Boid.Type.Scarecrow) return false;
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                Boid.BoidInfo neighbour = boids[neighbours[i]];
+                if (boid.flockId != neighbour.flockId && neighbour.type == Boid.Type.Scarecrow) return true;
+            }
 
+            return false;
+        }
        
         private float3 AlignmentForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours, NativeArray<float> distances)
         {
@@ -548,38 +544,84 @@ public class BoidManager : MonoBehaviour
             return (avgSeparation / separationDivider) * classInfo.separationStrength;
         }
 
-        private float3 AggressionForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo)
+        private float3 AggressionForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, int targetIndex)
         {
+            // If the boid has found a target, disable aggression force (the approach force will then take precedence)
+            if (targetIndex != -1) return float3.zero;
+            
             // Calculate aggression force
             // TODO this line assumes there's only two flocks and that the ID of the flock corresponds to the index 
             // TODO in the flocks array. Find better solution
             Player.FlockInfo enemyFlock = flocks[boid.flockId == 1 ? 1 : 0];
 
-            if (enemyFlock.boidCount == 0 || enemyFlock.avgPos.Equals(boid.pos)) return float3.zero;
-
+            // If there are no enemy boids or if the median enemy flock position is equal to that of the current boid,
+            // then return a zero vector
+            if (enemyFlock.boidCount == 0 || enemyFlock.medianPos.Equals(boid.pos)) return float3.zero;
+            
+            // Calculate the distance between the current boid and the enemy flock
             float dist = math.distance(boid.pos, enemyFlock.medianPos);
+            
+            // Calculate expected future location of enemy flock
+            float3 expectedEnemyFlockPos = enemyFlock.medianPos;
+            {
+                // Compare the position of the current boid in relation to the position of the enemy flock
+                // If the boid is moving away from the enemy flock, do no prediction, just try to turn
+                float3 directionToEnemyFlock = enemyFlock.avgPos - boid.pos;
+                float dot = math.dot(boid.vel, directionToEnemyFlock);
+                
+                if (!float3.zero.Equals(boid.vel) && dot > 0.0)
+                { 
+                    // Make a crude calculation of the time required to reach the enemy boid
+                    float timeToReach = math.min(dist / math.lengthsq(boid.vel), classInfo.aggressionDistanceCap);
+                    
+                    expectedEnemyFlockPos += enemyFlock.avgVel * timeToReach;
+                }
+            }
 
+            // If the boid is closer than the aggression distance cap, then apply aggression falloff
             float scale = 1.0f;
             if (dist < classInfo.aggressionDistanceCap)
             {
                 scale = math.pow(dist / classInfo.aggressionDistanceCap, classInfo.aggressionFalloff);
             }
 
+            // Scale the aggression based on the difference between the flock sizes. Make sure the scaling is at least 1.0,
+            // and not more than the max aggression multiplier
             scale *= math.max(1.0f, math.min(classInfo.maxAggressionMultiplier, (float) flocks[boid.flockId - 1].boidCount / enemyFlock.boidCount));
             
-            return math.normalize(enemyFlock.avgPos - boid.pos) * classInfo.aggressionStrength * scale;
+            // Calculate the initial aggression force
+            float3 force = math.normalize(expectedEnemyFlockPos - boid.pos) * classInfo.aggressionStrength * scale;
+            
+            // Finally, if the enemy flock is beside or behind the boid, it will try to break to more efficiently
+            // turn in the direction of the enemy flock
+            /*float d = math.dot(boid.vel, force);
+            if (d < 0.5)
+            {
+                float breakScale = math.pow((1.0f - (d + 1.0f) / 2.0f), 4.0f);
+                force += -boid.vel * breakScale;
+            }*/
+
+            return force;
         }
         
         private float3 SearchForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo)
         {
             Player.FlockInfo flock = flocks[boid.flockId - 1];
-            
+
             if (flock.boidCount <= 1) return float3.zero;
-            //TODO do not use aggression strength for search as well?
-            return math.normalize(flock.avgPos - boid.pos) * classInfo.searchStrength;
+
+            // Use the median position for search force, unless the current boid
+            // is the boid which has the median position. In that case, use the average position.
+            float3 searchPosition = flock.medianPos;
+            if(searchPosition.Equals(boid.pos)) searchPosition = flock.avgPos;
+            
+            // If the search position is still equal to the boids position, apply no force
+            if (searchPosition.Equals(boid.pos)) return float3.zero;
+            
+            return math.normalize(searchPosition - boid.pos) * classInfo.searchStrength;
         }
 
-        private float3 FearForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours, NativeArray<float> distances)
+        private float3 FearForce(Boid.BoidInfo boid, Boid.ClassInfo classInfo, NativeArray<int> neighbours, NativeArray<float> distances, bool isScared)
         {
             // Fear force acting on the boid (a boid fears enemy boids)
             float3 avgFear = float3.zero;
@@ -593,19 +635,22 @@ public class BoidManager : MonoBehaviour
                 // No fear for friendly boids
                 if (boid.flockId == neighbour.flockId) continue;
 
-                if (neighbour.flockId != boid.flockId           // Different flock
-                        && neighbour.type == Boid.Type.Scarecrow       // Is Scarecrow
-                        && boidClassInfos[(int)neighbour.type].abilityDistance > distances[i]) { // and dist < Scarecrow ability dist
-                    fearMultiplier = classInfo.fearMultiplier;
+                Boid.ClassInfo neighbourClassInfo = boidClassInfos[(int) neighbour.type];
+                if (neighbour.type == Boid.Type.Scarecrow       // Is Scarecrow
+                    && neighbourClassInfo.abilityDistance > distances[i]) { // and dist < Scarecrow ability dist
+                    fearMultiplier = neighbourClassInfo.fearMultiplier;
                 }
                 
                 float distance = distances[i];
+
+                // If the boid is scared, use the view radius, otherwise, use the regular fear radius
+                float radius = isScared ? classInfo.viewRadius : classInfo.fearRadius;
                 
                 // Continue if outside fear radius
-                if (distance > classInfo.fearRadius) continue;
+                if (distance > radius) continue;
                 
                 // Normalize distance with respect to fear radius
-                float normalizedFearDistance = distance / classInfo.fearRadius;
+                float normalizedFearDistance = distance / radius;
                     
                 // Calculate the strength of the fear. This is inversely proportional to some exponent of the normalized distance
                 float amount =
@@ -704,7 +749,7 @@ public class BoidManager : MonoBehaviour
             float dist = math.length(vector);
             return vector * 
                    CalculatePower(classInfo.approachMovementStrength, 
-                       dist / targetDistRange, 
+                       1.0f - dist / targetDistRange,
                        classInfo.approachMovementExponent);
         }
 

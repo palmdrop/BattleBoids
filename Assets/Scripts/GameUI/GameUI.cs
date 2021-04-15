@@ -2,7 +2,9 @@ using System;
 using System.Text;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Entities;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
@@ -28,12 +30,17 @@ public class GameUI : MonoBehaviour
     [SerializeField] private GameObject victoryMenu;
     [SerializeField] private GameObject pauseMenu;
     [SerializeField] private GameObject optionsMenu;
+    [SerializeField] private CommandManager commandManager;
 
     private GameManager _gameManager;
     private string _prefix;
     private bool hasStarted = false;
     private List<Player> players;
     private int _activePlayerId;
+
+    private void Awake()
+    {
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -44,15 +51,16 @@ public class GameUI : MonoBehaviour
         tooltip.SetActive(false);
         SetActivePlayerId(1);
         InitUnitButtons();
+        InitCommandButtons();
         InitReadyButton();
         InitVictoryMenu();
         Resume();
+        RegisterKeyInputs();
     }
 
     // Update is called once per frame
     void Update()
     {
-        ManageKeyInput();
         UpdateBoins();
         UpdateReady();
         UpdateButtonColors(activePlayer.color);
@@ -71,17 +79,61 @@ public class GameUI : MonoBehaviour
                 button.GetComponent<Button>().interactable = false;
             }
 
-            button.GetComponent<UnitButton>().SetOnEnter(() => SetTooltip(button));
+            string tooltipContent = button.name.ToUpper() + "\n" + Boid.GetDescription(button.name);
+            button.GetComponent<UnitButton>().SetOnEnter(() => SetTooltip(button, tooltipContent));
             button.GetComponent<UnitButton>().SetOnExit(() => UnsetTooltip()); 
             unitImage.color = color;
         }
     }
-    
-    void SetTooltip(GameObject button) 
+    void InitCommandButtons()
     {
-        if (!button.GetComponent<Button>().interactable) return;
+
+        List<(KeyCode, string)> keyCodesAndDescription = commandManager.GETPressedKeyCodesAndDescription();
+
+
+        // Defaults the actions on the buttons to do nothing
+        foreach (Transform child in commandButtons.transform)
+        {
+            child.GetComponentInChildren<UnitButton>().SetOnEnter(() => {});
+            child.GetComponentInChildren<UnitButton>().SetOnExit(() => {});
+        }
+
+        // Here we override the buttons with actual actions
+        for (int i = 0; i < keyCodesAndDescription.Count; i++)
+        {
+            // The x variable is just a copy of i, it needs to be used to avoid closure problems when sending
+            // it down into the arrow function
+            int x = i;
+            
+            GameObject button = commandButtons.transform.GetChild(i).gameObject;
+            button.GetComponentInChildren<Button>().interactable = true;
+
+            button.GetComponentInChildren<Button>().onClick.AddListener(()=>
+            {
+                Debug.Log(keyCodesAndDescription[x].Item2);
+                commandManager.RunActionOnKeyCode(keyCodesAndDescription[x].Item1);
+            });
+            
+            
+            button.GetComponentInChildren<Text>().text = keyCodesAndDescription[x].Item1.ToString();
+
+            string tooltipContent = keyCodesAndDescription[x].Item2;
+
+            button.GetComponentInChildren<UnitButton>().SetOnEnter(() => SetTooltip(button, tooltipContent));
+            button.GetComponentInChildren<UnitButton>().SetOnExit(() => UnsetTooltip()); 
+        }
+    }
+    
+    void SetTooltip(GameObject button, string tooltipContent)
+    {
+        if (!button.GetComponentInChildren<Button>().interactable) return;
         tooltip.SetActive(true);
-        tooltipText.text = button.name.ToUpper() + "\n" + Boid.GetDescription(button.name);
+        tooltipText.text = tooltipContent;
+    }
+
+    public static bool IsMouseOverUI()
+    {
+        return  EventSystem.current.IsPointerOverGameObject();
     }
 
     void UnsetTooltip()
@@ -102,54 +154,30 @@ public class GameUI : MonoBehaviour
         }
     }
 
-    void ManageKeyInput() {
-        if (Input.GetKey("1")) {
-            // Select player 1
-            SetActivePlayerId(1);
-        } else if (Input.GetKey("2")) {
-            // Select player 2
-            SetActivePlayerId(2);
-        } else if (Input.GetKeyDown("r"))
-        {
-            // Run game
-            players.ForEach(p => p.Ready());
-        } else if (Input.GetKeyDown("y")) {
-            showHealthBars = !showHealthBars;
-        } else if (Input.GetKeyDown("m")) {
-            AudioManager.instance.ToggleMute();
-        }
-        else if (Input.GetKeyDown("u"))
-        {
-            AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() + 0.1f);
-        }
-        else if (Input.GetKeyDown("j"))
-        {
-            AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() - 0.1f);
-        }
-        else if (Input.GetKeyDown("i"))
-        {
-            AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() + 0.1f);
-        }
-        else if (Input.GetKeyDown("k"))
-        {
-            AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() - 0.1f);
-        }
-        else if (Input.GetKeyDown("o"))
-        {
-            AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() + 0.1f);
-        }
-        else if (Input.GetKeyDown("l"))
-        {
-            AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() - 0.1f);
-        }
-        else if (Input.GetKeyDown(KeyCode.Escape))
-        {
+    public CommandManager GETCommandManager()
+    {
+        return commandManager;
+    }
+
+    private void RegisterKeyInputs() {
+        commandManager.RegisterPressedAction(KeyCode.Alpha1, () => SetActivePlayerId(1), "Change to the first player");
+        commandManager.RegisterPressedAction(KeyCode.Alpha2, () => SetActivePlayerId(2), "Change to the second player");
+        commandManager.RegisterPressedAction(KeyCode.R, () => players.ForEach(p => p.Ready()), "Start the game");
+        commandManager.RegisterPressedAction(KeyCode.Y, () => showHealthBars = !showHealthBars, "Toggle health bars");
+        commandManager.RegisterPressedAction(KeyCode.M, () => AudioManager.instance.ToggleMute());
+        commandManager.RegisterPressedAction(KeyCode.U, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() + 0.1f));
+        commandManager.RegisterPressedAction(KeyCode.J, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() - 0.1f));
+        commandManager.RegisterPressedAction(KeyCode.I, () => AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() + 0.1f));
+        commandManager.RegisterPressedAction(KeyCode.P, () => AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() - 0.1f));
+        commandManager.RegisterPressedAction(KeyCode.O, () => AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() + 0.1f));
+        commandManager.RegisterPressedAction(KeyCode.L, () => AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() - 0.1f));
+        commandManager.RegisterPressedAction(KeyCode.Escape, () => {
             if (!_gameManager.IsPaused()) {
                 Pause();
             } else {
                 Resume();
             }
-        }
+        }, "Open pause menu");
     }
 
     void UpdateReady()

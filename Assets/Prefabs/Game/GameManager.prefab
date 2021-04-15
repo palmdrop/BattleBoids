@@ -1,5 +1,48 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4511238373860145917
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5033635221089685416}
+  - component: {fileID: 9022786962673763936}
+  m_Layer: 0
+  m_Name: CommandManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5033635221089685416
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4511238373860145917}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1111.7356, y: 137.11621, z: -26.938477}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 5808091797877736248}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9022786962673763936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4511238373860145917}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01df9e2b1fa54698b56fbc219cfc8d22, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5808091797163084854
 GameObject:
   m_ObjectHideFlags: 0
@@ -244,8 +287,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entityToSpawn: {fileID: 2443752135027256508, guid: e9e3dcb9dd635214586135fe1826b09f, type: 3}
-  camera: {fileID: 0}
-  map: {fileID: 0}
 --- !u!1 &5808091797697551075
 GameObject:
   m_ObjectHideFlags: 0
@@ -332,6 +373,7 @@ Transform:
   - {fileID: 4439347176809111815}
   - {fileID: 5808091799132497689}
   - {fileID: 5808091797163084855}
+  - {fileID: 5033635221089685416}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -349,6 +391,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 1
   mainCamera: {fileID: 0}
+  map: {fileID: 0}
 --- !u!1 &5808091797945141320
 GameObject:
   m_ObjectHideFlags: 0
@@ -503,8 +546,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entityToSpawn: {fileID: 2443752135027256508, guid: e9e3dcb9dd635214586135fe1826b09f, type: 3}
-  camera: {fileID: 0}
-  map: {fileID: 0}
 --- !u!1 &5808091798388419359
 GameObject:
   m_ObjectHideFlags: 0
@@ -628,6 +669,10 @@ PrefabInstance:
       propertyPath: activePlayer
       value: 
       objectReference: {fileID: 5808091798388419356}
+    - target: {fileID: 7854776976437878689, guid: 3c9de0462a3284133befb28a2fff4b3b, type: 3}
+      propertyPath: commandManager
+      value: 
+      objectReference: {fileID: 9022786962673763936}
     - target: {fileID: 7854776976437878689, guid: 3c9de0462a3284133befb28a2fff4b3b, type: 3}
       propertyPath: unitButtonCols
       value: 3

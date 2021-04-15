@@ -79,7 +79,9 @@ public class GameManager : MonoBehaviour
 
         InstantiateProjectiles();
         InstantiateDeathAnimations();
-		GetComponentInChildren<SelectionManager>().gameObject.SetActive(false);
+        SelectionManager selectionManager = GetComponentInChildren<SelectionManager>();
+        selectionManager.Deselect();
+        selectionManager.gameObject.SetActive(false);
     }
 
     //Instantiate one projectile for each ranged boid

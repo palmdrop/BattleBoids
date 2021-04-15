@@ -98,6 +98,10 @@ public abstract class Boid : Selectable
 
     public float3 hoverForce;
 
+    public bool isFalling = false;
+    private double startedFalling;
+    private double fallTimeBeforeDeath = 2;
+
     public struct ClassInfo {
         public Type type;
         // The field of view of the boid
@@ -105,11 +109,8 @@ public abstract class Boid : Selectable
         public float separationRadius;
         public float fearRadius;
         public float maxForce;
-        
-        // The confidence threshold controls how friendly boids / enemy boids are required
-        // for the boid to remain confident. When a boid looses confidence, they will no longer be
-        // aggressive and will start searching for friendly boids instead.
-        public float confidenceThreshold;
+
+        public float accelerationDesire;
 
         // Weights for the three basic flocking behaviors
         // NOTE: an exponent of 0.0 would make the behavior ignore the distance to the neighbouring boid
@@ -252,6 +253,11 @@ public abstract class Boid : Selectable
         if (velocity != Vector3.zero)
         {
             transform.forward = new Vector3(velocity.x, 0, velocity.z);
+        }
+
+        if (isFalling && Time.time - startedFalling > fallTimeBeforeDeath)
+        {
+            Die();
         }
     }
 
@@ -471,4 +477,19 @@ public abstract class Boid : Selectable
     }
 
     protected abstract void Act();
+
+    public void SetFalling(bool isFalling)
+    {
+        if (!isFalling)
+        {
+            startedFalling = -1;
+        }
+        else
+        {
+            if (this.isFalling) return;
+            startedFalling = Time.time;
+        }
+        
+        this.isFalling = isFalling;
+    }
 }

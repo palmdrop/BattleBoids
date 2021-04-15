@@ -28,8 +28,8 @@ public class Hero : Boid {
 
         type = Type.Hero;
         Cost = 100;
-        health = maxHealth = 200;
-        damage = 100;
+        health = maxHealth = 150;
+        damage = 70;
         maxSpeed = 4f;
         avoidCollisionWeight = 5f;
         timeBetweenActions = 0.1f;
@@ -41,9 +41,11 @@ public class Hero : Boid {
         ClassInfos.infos[(int)type] = new ClassInfo {
             type = this.type,
             viewRadius = 1f,
-            separationRadius = 0.5f,
-            fearRadius = 1.0f,
+            separationRadius = 0.40f,
+            fearRadius = 0.5f,
             maxForce = 6.0f,
+            
+            accelerationDesire = 0.1f,
 
             maxHealth = this.maxHealth,
             collisionAvoidanceDistance = 3f,
@@ -51,40 +53,38 @@ public class Hero : Boid {
             groundMask = (uint)this.groundMask.value,
             abilityDistance = this.abilityDistance,
 
-            confidenceThreshold = 0.5f,
-
-            alignmentStrength = 3.6f,
+            alignmentStrength = 2.5f,
             alignmentExponent = 0.0f, 
 
-            cohesionStrength = 2.0f,
+            cohesionStrength = 3.0f,
             cohesionExponent = 0.0f,
 
-            separationStrength = 120.0f,
+            separationStrength = 220.0f,
             separationExponent = 1.0f,
 
-            fearStrength = 3.0f,
-            fearExponent = 2.1f,
+            fearStrength = 5.0f,
+            fearExponent = 1.1f,
 
             gravity = 1f,
 
             attackDistRange = 3f,
             attackAngleRange = 2f * Mathf.PI / 3f,
 
-            approachMovementStrength = 30.1f,
-            approachMovementExponent = 0.5f,
+            approachMovementStrength = 2.1f,
+            approachMovementExponent = 1.0f,
 
-            aggressionStrength = 4.4f,
-            aggressionFalloff = 2.0f,
+            aggressionStrength = 3.4f,
+            aggressionFalloff = 0.2f,
             aggressionDistanceCap = 10.0f,
-            maxAggressionMultiplier = 1.7f,
+            maxAggressionMultiplier = 2.2f,
 
-            searchStrength = 10.4f,
+            searchStrength = 6.4f,
 
-            avoidanceStrength = 40f,
+            avoidanceStrength = 10f,
 
             avoidCollisionWeight = 1000f,
 
-            randomMovements = 3.0f,
+            randomMovements = 0.5f,
 
             hoverKi = 2f,
             hoverKp = 10f,
@@ -146,9 +146,7 @@ public class Hero : Boid {
         List<Boid> enemies = FindEnemiesInSphere(position, damageRadius, LayerMask.GetMask("Units"));
         foreach (Boid enemy in enemies) {
             enemy.GetRigidbody().AddExplosionForce(forcePower, position, damageRadius);
-            float sqrDist = (enemy.GetPos() - position).sqrMagnitude;
-            int takeDamage = (int) (damage / sqrDist);
-            enemy.TakeDamage(takeDamage);
+            enemy.TakeDamage(damage);
         }
     }
 
