@@ -106,6 +106,19 @@ public class Melee : Boid {
             return true;
         } else {
             laser.SetActive(false);
+            return false;
+        }
+    }
+
+    private void Update()
+    {
+        if (HasTarget() && !target.IsDead())
+        {
+            SetLaser(this.GetPos(), target.GetPos());
+        }
+        else
+        {
+            laser.SetActive(false);
         }
     }
 
