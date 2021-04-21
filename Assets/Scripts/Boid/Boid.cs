@@ -101,6 +101,12 @@ public abstract class Boid : Selectable
     public bool isFalling = false;
     private double startedFalling;
     private double fallTimeBeforeDeath = 2;
+    private float timeDamageTaken = 0;
+    private float damageFadeTime = 0.5f;
+    private bool takingDamage = false;
+    private Color color;
+    static Dictionary<Color, ColorFade> fades = new Dictionary<Color, ColorFade>();
+    private int fadeDepth = 10;
 
     public struct ClassInfo {
         public Type type;
@@ -241,6 +247,37 @@ public abstract class Boid : Selectable
     {
         hoverForce = new float3(0,force.y,0);
         _rigidbody.AddForce(RemoveYComp(force), ForceMode.Acceleration);
+        float tmpTime = Time.time;
+        if(timeDamageTaken + damageFadeTime >= tmpTime)
+        {
+            int index = (int)(((timeDamageTaken + damageFadeTime - tmpTime) / damageFadeTime)*fadeDepth);
+            index = index >= fadeDepth ? fadeDepth-1 : index ;
+            //Debug.Log(color.r + " : " + color.g + " : " + color.g);
+            //Debug.Log(color);
+            //foreach (Color c in fades.Keys)
+            //{
+            //    Debug.Log(c.r + " : " + c.g + " : " + c.g);
+            //    Debug.Log(c);
+            //}
+            //Debug.Log("^^ABOVE^^");
+            //Debug.Log("Index: " + index);
+            SetMaterial(fades[color].materials[index]);
+
+            /*Debug.Log(((int)((colorDepth - owner.color.r * colorDepth) * percentage)) / colorDepth);
+            Material tmp = new Material(baseMaterial);
+            tmp.color = new Color(
+                owner.color.r + ((int)((colorDepth - owner.color.r * colorDepth) * percentage)) / colorDepth,
+                owner.color.g + ((int)((colorDepth - owner.color.g * colorDepth) * percentage)) / colorDepth,
+                owner.color.b + ((int)((colorDepth - owner.color.b * colorDepth) * percentage)) / colorDepth);
+            materials.Add(tmp);
+            transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material = tmp;*/
+
+        }
+        else if (takingDamage)
+        {
+            SetColor(owner.color);
+            takingDamage = false;
+        }
 
         if (_rigidbody.velocity.sqrMagnitude > maxSpeed * maxSpeed)
         {
@@ -376,6 +413,8 @@ public abstract class Boid : Selectable
 
     public void TakeDamage(int damageTaken)
     {
+        timeDamageTaken = Time.time;
+        takingDamage = true;
         health = math.max(health - damageTaken, 0);
         if (health <= 0)
         {
@@ -437,12 +476,25 @@ public abstract class Boid : Selectable
         return new Vector3(v.x, 0, v.z);
     }
 
+    bool EqualColor(Color a, Color b)
+    {
+        float eps = 0.005f;
+        if (
+            math.abs(a.r - b.r) < eps &&
+            math.abs(a.g - b.g) < eps &&
+            math.abs(a.b - b.b) < eps)
+            return true;
+        return false;
+    }
+
     public void SetColor(Color color)
     {
+        //Debug.Log("materials: " + materials.Count);
         foreach (Material material in materials)
         {
-            if (color.Equals(material.color))
+            if (EqualColor(color, material.color))
             {
+                this.color = material.color;
                 transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material = material;
                 return;
             }
@@ -450,10 +502,17 @@ public abstract class Boid : Selectable
         Material tmp = new Material(baseMaterial);
         tmp.color = color;
         materials.Add(tmp);
+        this.color = tmp.color;
+        fades[color] = new ColorFade(tmp.color, baseMaterial, fadeDepth);
         transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material = tmp;
     }
 
-    public void SetMeshLayer(int layer)
+    public void SetMaterial(Material m)
+    {
+        transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material = m;
+    }
+
+        public void SetMeshLayer(int layer)
     {
         transform.GetChild(0).transform.GetChild(0).gameObject.layer = layer;
     } 
@@ -491,5 +550,23 @@ public abstract class Boid : Selectable
         }
         
         this.isFalling = isFalling;
+    }
+}
+class ColorFade
+{
+    public Material[] materials;
+
+    public ColorFade(Color color, Material material, int n)
+    {
+        materials = new Material[n];
+        for (int i = 0; i < n; i++)
+        {
+            Material tmp = new Material(material);
+            tmp.color = new Color(
+                color.r + ((int)((255 - color.r * 255) * (i / (float)n))) / 255f,
+                color.g + ((int)((255 - color.g * 255) * (i / (float)n))) / 255f,
+                color.b + ((int)((255 - color.b * 255) * (i / (float)n))) / 255f);
+            materials[i] = tmp;
+        }
     }
 }
