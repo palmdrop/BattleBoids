@@ -2370,7 +2370,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-81710
+  m_Name: pb_Mesh-1308
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -2534,7 +2534,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-82054
+  m_Name: pb_Mesh-1342
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -3578,7 +3578,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh-81726
+  m_Name: pb_Mesh-1324
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -4206,15 +4206,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boidToTest: {fileID: 4796491495174897739, guid: e9e3dcb9dd635214586135fe1826b09f, type: 3}
+  player1BoidAmount: 500
+  player2BoidAmount: 500
+  timeToTest: 10
   _gameManager: {fileID: 115425117}
   player1: {fileID: 1408127873}
   player2: {fileID: 3869541}
-  player1BoidAmount: 100
   player1SpawningLocation: {fileID: 1207210374}
   player1SpawningStop: {fileID: 1592865525}
-  player2BoidAmount: 100
   player2SpawningLocation: {fileID: 1085226356}
   player2SpawningStop: {fileID: 294937218}
+  logFile: {fileID: 4900000, guid: 7a3d78127262344468471dccacbcf26e, type: 3}
 --- !u!1001 &1462854889
 PrefabInstance:
   m_ObjectHideFlags: 0
