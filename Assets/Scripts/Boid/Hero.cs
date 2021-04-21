@@ -98,16 +98,19 @@ public class Hero : Boid {
         SetLaserColor();
     }
 
-    protected override void Act() {
+    protected override bool Act() {
         if (HasTarget() && !target.IsDead() && _aiming == false) {
             _aiming = true;
             _aimLockCompleteTime = Time.time + aimLockTime;
             IEnumerator aimAndFire = AimAndFire(target, laserDrawTime);
             StartCoroutine(aimAndFire);
+            return true;
         }
         if (HasFriendlyTarget() && !friendlyTarget.IsDead()) {
             friendlyTarget.GiveBoost(boostTime);
+            return true;
         }
+        return false;
     }
 
     private IEnumerator AimAndFire(Boid target, float waitTime) {

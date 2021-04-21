@@ -233,9 +233,9 @@ public abstract class Boid : Selectable
         _rigidbody.AddForce(hoverForce, ForceMode.Acceleration);
 
         // Wait until next action is ready
-        if ((Time.time - _previousActionTime) >= timeBetweenActions)
+        if ((Time.time - _previousActionTime) >= timeBetweenActions && _hasTarget && Act())
         {
-            Act();
+            //Act();
             _previousActionTime = Time.time;
         }
 
@@ -528,6 +528,11 @@ public abstract class Boid : Selectable
         return _rigidbody;
     }
 
+    public float GetMaxSpeed()
+    {
+        return maxSpeed;
+    }
+
     public virtual void SetHidden(bool hidden)
     {
         foreach (Renderer r in GetComponentsInChildren<Renderer>()) {
@@ -535,7 +540,7 @@ public abstract class Boid : Selectable
         }
     }
 
-    protected abstract void Act();
+    protected abstract bool Act();
 
     public void SetFalling(bool isFalling)
     {
