@@ -109,7 +109,6 @@ public class Ranged : Boid
 
             if (t1 < 0)
             {
-                Debug.Log("T1 found, bad value: " + t1);
                 return false;
             }
             aimPos = (float3)target.transform.position + velOffset * t1;
@@ -124,15 +123,10 @@ public class Ranged : Boid
             if (projectile != null)
             {
                 projectile.gameObject.SetActive(true);
-                //Physics.IgnoreCollision(projectile.GetComponent<Collider>(), GetComponent<Collider>());
                 RangedProjectile p = projectile.GetComponent<RangedProjectile>();
                 p.Fire(_projSpeed, transform.position, theta, new UnityEngine.Vector3(offset.x, 0, offset.z).normalized, GetVel());
                 p.SetOwner(owner);
                 p.SetDamage(IsBoosted() ? boostedDamage : damage);
-                //Rigidbody body = projectile.GetComponent<Rigidbody>();
-                //body.velocity = new Vector3(0,0,0);
-                //body.angularVelocity = new Vector3(0,0,0);
-                //body.AddForce(launchVector, ForceMode.VelocityChange);
                 p.SetColor();
             }
 
@@ -152,15 +146,12 @@ public class Ranged : Boid
         float vy = targetVel.z;
         float vz = targetVel.y;
         g = -g;
-        //double gsqr = sqr(g);
 
         float a = sqr(g) / 4;
         float b = (vz * g);
         float c = (pz * g + sqr(vz) - sqr(v0) + sqr(vy) + sqr(vx));
         float d = (2 * pz * vz + 2 * py * vy + 2 * px * vx);
         float e = (sqr(pz) + sqr(py) + sqr(px));
-
-        //Debug.Log(a + " : " + b + " : " + c + " : " + d + " : " + e + " : ");
 
         if (math.abs(a) < 0.1f)
             if (a == 0f)
@@ -182,7 +173,6 @@ public class Ranged : Boid
             + (c * sqr(b)) / (16 * cube(a))
             - (b * d) / (4 * sqr(a))
             + e / a;
-        //assume beta != 0
 
         float p =
             -(sqr(alpha) / 12)
@@ -192,39 +182,28 @@ public class Ranged : Boid
             -(cube(alpha) / 108)
             + (alpha * gamma) / 3
             - sqr(beta) / 8;
-        //UnityEngine.Debug.Log(q);
         Complex r = (-q / 2) + Complex.Sqrt((sqr(q)) / 4 + (cube(p)) / 27);
         Complex u = Complex.Pow(r, 1.0f / 3.0f);
-        //Debug.Log(R.ToString());
-        //Debug.Log(U.ToString());
 
         Complex y;
         if (Complex.Abs(u) < 0.001f)
             y = -(5f / 6f) * alpha + u - Complex.Pow(q, 1.0f / 3.0f);
         else
             y = -(5f / 6f) * alpha + u - p / (3 * u);
-        //Debug.Log(y.ToString());
         Complex w = Complex.Sqrt(alpha + 2 * y);
-        /*float X = -b / (4 * a);
-        Complex y2 = 3 * alpha + 2 * y;
-        Complex z = (2 * beta) / w;*/
+
         double tBest = double.MaxValue;
 
         for (int i = 0; i < 4; i++)
         {
             Complex tmp = -b / (4 * a) + ((i / 2) * 2 - 1) * 1f / 2 * w + ((i % 2) * 2 - 1) * 1f / 2 * Complex.Sqrt(-(3 * alpha + 2 * y + ((2 * beta / w) * ((i / 2) * 2 - 1))));
-            //Debug.Log(tmp);
             if (math.abs(tmp.Imaginary) < 0.05d)
             {
                 if (tmp.Real != System.Double.NaN && tmp.Real > 0 && tmp.Real < tBest)
                     tBest = tmp.Real;
             }
         }
-        //Debug.Log("Best: " + tBest);
         return (float)tBest;
-
-        //Debug.Log(sqr(-128 * cube(sqr(v0) - sqr(vx) - sqr(vy) - g * pz) + 1152 * gsqr * (sqr(px) + sqr(py) + sqr(pz)) * (sqr(v0) - sqr(vx) - sqr(vy) - g * sqr(pz)) + 1728 * gsqr * sqr(px * vx + py * vy)) - 4 * cube(48 * (sqr(px) + sqr(py) + sqr(pz)) * gsqr + 16 * sqr(sqr(v0) - sqr(vx) - sqr(vy) - g * pz)));
-
 
     }
 

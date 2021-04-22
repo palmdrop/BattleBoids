@@ -61,7 +61,6 @@ public abstract class Boid : Selectable
     private GameObject cachedDeath;
     protected int meshDefaultLayer;
     // Cache shader property to avoid expensive shader uniform lookups
-    //private static readonly int Color = Shader.PropertyToID("_Color");
     [SerializeField] private AudioClip collisionAudio;
     
     private Map.Map _map;
@@ -217,7 +216,6 @@ public abstract class Boid : Selectable
             this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
         _localScale = transform.GetChild(0).transform.localScale;
-        //_healthBar = Instantiate(healthBarPrefab, transform);
     }
 
     public void StartBoid()
@@ -235,7 +233,6 @@ public abstract class Boid : Selectable
         // Wait until next action is ready
         if ((Time.time - _previousActionTime) >= timeBetweenActions && _hasTarget && Act())
         {
-            //Act();
             _previousActionTime = Time.time;
         }
 
@@ -252,26 +249,7 @@ public abstract class Boid : Selectable
         {
             int index = (int)(((timeDamageTaken + damageFadeTime - tmpTime) / damageFadeTime)*fadeDepth);
             index = index >= fadeDepth ? fadeDepth-1 : index ;
-            //Debug.Log(color.r + " : " + color.g + " : " + color.g);
-            //Debug.Log(color);
-            //foreach (Color c in fades.Keys)
-            //{
-            //    Debug.Log(c.r + " : " + c.g + " : " + c.g);
-            //    Debug.Log(c);
-            //}
-            //Debug.Log("^^ABOVE^^");
-            //Debug.Log("Index: " + index);
             SetMaterial(fades[color].materials[index]);
-
-            /*Debug.Log(((int)((colorDepth - owner.color.r * colorDepth) * percentage)) / colorDepth);
-            Material tmp = new Material(baseMaterial);
-            tmp.color = new Color(
-                owner.color.r + ((int)((colorDepth - owner.color.r * colorDepth) * percentage)) / colorDepth,
-                owner.color.g + ((int)((colorDepth - owner.color.g * colorDepth) * percentage)) / colorDepth,
-                owner.color.b + ((int)((colorDepth - owner.color.b * colorDepth) * percentage)) / colorDepth);
-            materials.Add(tmp);
-            transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material = tmp;*/
-
         }
         else if (takingDamage)
         {
@@ -448,11 +426,6 @@ public abstract class Boid : Selectable
     }
 
     private void AnimateDeath() {
-        //GameObject death = Instantiate(deathAnimationPrefab, transform.position, transform.rotation);
-        //ParticleSystem.MainModule psMain = death.GetComponent<ParticleSystem>().main;
-        //psMain.startColor = owner.color;
-        //death.GetComponent<Rigidbody>().velocity = gameObject.GetComponent<Rigidbody>().velocity;
-        //Destroy(death, psMain.duration);
 
         GameObject death = ParticlePoolManager.SharedInstance.getPooledObject(ParticlePoolManager.Type.Death);
         if (death != null)
@@ -489,7 +462,6 @@ public abstract class Boid : Selectable
 
     public void SetColor(Color color)
     {
-        //Debug.Log("materials: " + materials.Count);
         foreach (Material material in materials)
         {
             if (EqualColor(color, material.color))

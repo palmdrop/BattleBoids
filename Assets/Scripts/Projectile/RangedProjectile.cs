@@ -81,10 +81,6 @@ public class RangedProjectile : MonoBehaviour
                 return;
             }
         }
-        /*else
-        {
-            gameObject.SetActive(false);
-        }*/
     }
 
     public void SetColor(Color color)
