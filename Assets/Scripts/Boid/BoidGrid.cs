@@ -10,23 +10,20 @@ public struct BoidGrid
     [SerializeField] private static readonly float cellWidth = 1f, cellDepth = 1f;
     private static readonly int cellXAmount = 100;
     private NativeMultiHashMap<GridPoint, int> _grid;// = new NativeMultiHashMap<GridPoint, Boid.BoidInfo>(10, Allocator.TempJob);
-    private NativeList<Boid.BoidInfo> _boids;
+    private NativeArray<Boid.BoidInfo> _boids;
 
 
     // Populates the grid by placing the indices of the boids in cells
-    public void Populate(List<Boid> boids)
+    public void Populate(NativeArray<Boid.BoidInfo> boids)
     {
-        _boids = new NativeList<Boid.BoidInfo>(10, Allocator.Persistent);
+        _boids = new NativeArray<Boid.BoidInfo>(boids, Allocator.Persistent);
         _grid = new NativeMultiHashMap<GridPoint, int>(10, Allocator.Persistent);
-        float time = Time.time;
-        for (int i = 0; i < boids.Count; i++) 
+        for (int i = 0; i < _boids.Length; i++)
         {
-            Boid.BoidInfo info = boids[i].GetInfo();
-            _boids.Add(info);
+            Boid.BoidInfo info = _boids[i];
             int xIndex = (int)(math.floor(info.pos.x) / cellWidth);
             int zIndex = (int)(math.floor(info.pos.z) / cellDepth);
             GridPoint gp = new GridPoint(xIndex, zIndex, cellXAmount);
-            //_grid.Add(gp, info);
             _grid.Add(gp, i);
         }
     }
