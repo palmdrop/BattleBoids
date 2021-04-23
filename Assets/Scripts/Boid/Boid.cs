@@ -220,27 +220,11 @@ public abstract class Boid : Selectable
         _rigidbody.useGravity = true;
     }
 
-    public void FixedUpdate()
-    {
-        if(_dead)
-            return;
-        _rigidbody.AddForce(hoverForce, ForceMode.Acceleration);
-
-        // Wait until next action is ready
-        if ((Time.time - _previousActionTime) >= timeBetweenActions)
-        {
-            Act();
-            _previousActionTime = Time.time;
-        }
-
-    }
-
     // Called by the boid manager
     // Updates the boid according to the standard flocking behaviour
     public virtual void UpdateBoid(Vector3 force)
     {
-        hoverForce = new float3(0,force.y,0);
-        _rigidbody.AddForce(RemoveYComp(force), ForceMode.Acceleration);
+        _rigidbody.AddForce(force, ForceMode.Acceleration);
 
         if (_rigidbody.velocity.sqrMagnitude > maxSpeed * maxSpeed)
         {
@@ -253,6 +237,13 @@ public abstract class Boid : Selectable
         if (velocity != Vector3.zero)
         {
             transform.forward = new Vector3(velocity.x, 0, velocity.z);
+        }
+
+        // Wait until next action is ready
+        if ((Time.time - _previousActionTime) >= timeBetweenActions)
+        {
+            Act();
+            _previousActionTime = Time.time;
         }
 
         if (isFalling && Time.time - startedFalling > fallTimeBeforeDeath)
