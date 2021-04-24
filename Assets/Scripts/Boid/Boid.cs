@@ -56,6 +56,7 @@ public abstract class Boid : Selectable
     private Rigidbody _rigidbody;
     private Collider _collider;
     private Material _material;
+    private TrailRenderer _trail;
     private Vector3 _localScale;
     private bool _hasMaterial = false;
     private GameObject cachedDeath;
@@ -203,6 +204,10 @@ public abstract class Boid : Selectable
         _rigidbody = GetComponent<Rigidbody>();
         _collider = GetComponent<Collider>();
         _collider.enabled = false;
+        _trail = GetComponent<TrailRenderer>();
+        _trail.startColor = owner.color;
+        _trail.endColor = new Color(0f, 0f, 0f, 0f);
+        _trail.enabled = false;
         
         GameObject map = GameObject.FindGameObjectWithTag("Map");
         if (map != null)
@@ -218,6 +223,7 @@ public abstract class Boid : Selectable
     {
         _collider.enabled = true;
         _rigidbody.useGravity = true;
+        _trail.enabled = true;
     }
 
     public void FixedUpdate()
