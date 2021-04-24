@@ -98,7 +98,7 @@ public class BoidManager : MonoBehaviour
 
         // Construct and populate the grid to do efficient neighbour queries
         _grid = new BoidGrid();
-        _grid.Populate(_boids);
+        _grid.Populate(boidInfos);
 
         // Allocate a struct job for calculating flock info
         FlockStructJob flockJob = new FlockStructJob()

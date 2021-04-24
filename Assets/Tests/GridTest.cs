@@ -34,7 +34,11 @@ public class GridTest
         }
 
         BoidGrid grid = new BoidGrid();
-        grid.Populate(boids);
+        NativeArray<Boid.BoidInfo> boidInfos = new NativeArray<Boid.BoidInfo>(boids.Count, Allocator.TempJob);
+        for (int i = 0; i < boids.Count; i++)
+            boidInfos[i] = boids[i].GetInfo();
+        grid.Populate(boidInfos);
+        boidInfos.Dispose();
 
         NativeMultiHashMap<int, int> gridNeighbours = grid.GetNeighbours();
 
