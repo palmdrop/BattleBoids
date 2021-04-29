@@ -27,7 +27,7 @@ public class ParticlePoolManager : MonoBehaviour
         SharedInstance = this;
         deathActiveTime = DeathAnimPrefab.GetComponent<ParticleSystem>().main.duration;
         hitActiveTime = HitAnimPrefab.GetComponent<ParticleSystem>().main.duration;
-        Debug.Log(deathActiveTime);
+        //Debug.Log(deathActiveTime);
     }
 
     public void InstancePoolObjects(int amountToPool, Type type)

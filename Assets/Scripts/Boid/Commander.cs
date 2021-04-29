@@ -124,6 +124,7 @@ public class Commander : Boid
         }
     }
 
-    protected override void Act() {
+    protected override bool Act() {
+        return true;
     }
 }

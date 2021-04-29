@@ -94,13 +94,13 @@ public class Healer : Boid
         _healBeamRenderer = healBeam.GetComponent<LineRenderer>();
     }
 
-    protected override void Act()
+    protected override bool Act()
     {
         // Healers cannot attack
-        Heal();
+        return Heal();
     }
 
-    private void Heal()
+    private bool Heal()
     {
         // Do not heal if there is no target or if the target has max health
         // Do not heal if target is out of range
@@ -111,7 +111,7 @@ public class Healer : Boid
             )
         {
             healBeam.SetActive(false);
-            return;
+            return false;
         }
         
         friendlyTarget.ReceiveHealth(_healAmount);
@@ -121,7 +121,9 @@ public class Healer : Boid
         {
             AudioManager.instance.PlaySoundEffectAtPoint(healingAudio, GetPos(), healingAudioVolume);
             _previousAudioTime = Time.time;
+            return true;
         }
+        return false;
     }
 
     private void AnimateHeal(Vector3 fromPos, Vector3 toPos) {

@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Mathematics;
+using System.Numerics;
 
-public class Ranged : Boid {
+public class Ranged : Boid
+{
 
     [SerializeField] private GameObject projectilePrefeb;
     [SerializeField] private AudioClip rangedFireAudio;
@@ -11,12 +13,13 @@ public class Ranged : Boid {
 
     private float _projSpeed = 8;
 
-    private Vector3 _p;
-    private Vector3 _v;
-    private Vector3 _g = Physics.gravity;
+    private UnityEngine.Vector3 _p;
+    private UnityEngine.Vector3 _v;
+    private UnityEngine.Vector3 _g = Physics.gravity;
 
     // Start is called before the first frame update
-    void Start() {
+    void Start()
+    {
         base.Start();
 
         type = Type.Ranged;
@@ -32,13 +35,14 @@ public class Ranged : Boid {
         abilityDistance = 0;
         meshDefaultLayer = LayerMask.NameToLayer("OutlineWhite");
 
-        ClassInfos.infos[(int)type] = new ClassInfo {
+        ClassInfos.infos[(int)type] = new ClassInfo
+        {
             type = this.type,
             viewRadius = 1.6f,
             separationRadius = 0.38f,
             fearRadius = 1.3f,
             maxForce = 6.5f,
-            
+
             accelerationDesire = 0.1f,
 
             maxHealth = this.maxHealth,
@@ -48,25 +52,25 @@ public class Ranged : Boid {
             abilityDistance = this.abilityDistance,
 
             alignmentStrength = 2.5f,
-            alignmentExponent = 0.0f, 
-            
+            alignmentExponent = 0.0f,
+
             cohesionStrength = 3.0f,
             cohesionExponent = 0.0f,
-            
+
             separationStrength = 120.0f,
             separationExponent = 1.0f,
 
             gravity = 1f,
-            
+
             fearStrength = 20.0f,
             fearExponent = 1.0f,
 
             attackDistRange = 3f,
             attackAngleRange = Mathf.PI,
-            
+
             approachMovementStrength = 0.3f,
             approachMovementExponent = 0.5f,
-            
+
             aggressionStrength = 3.4f,
             aggressionFalloff = 0.2f,
             aggressionDistanceCap = 10.0f,
@@ -77,7 +81,7 @@ public class Ranged : Boid {
             searchStrength = 5.4f,
 
             avoidanceStrength = 20.0f,
-            
+
             randomMovements = 0.5f,
 
             hoverKi = 2f,
@@ -88,104 +92,153 @@ public class Ranged : Boid {
         };
     }
 
-    protected override void Act()
+    protected override bool Act()
     {
-        Attack();
+        return Attack();
     }
 
-    private void Attack() {
-        if (HasTarget() && !target.IsDead()) {
-            _p = target.GetPos() - GetPos();
-            _v = target.GetVel() - GetVel();
-
-            float t = FindTimeToImpact();
-            Vector3 aimPos = _p + _v * t + _g * (0.5f * t * t);
-
-            // Set spawn position of projectile
-            Vector3 launchPos = GetPos();
-
-            // Calc launch inclination
-            float inclination = Inclination(aimPos);
-            if (float.IsNaN(inclination)) { // Not possible to fire on target
-                return;
-            }
+    private bool Attack()
+    {
+        if (HasTarget() && !target.IsDead())
+        {
             
-            // Set launch vector
-            Vector3 launchVector = RemoveYComp(aimPos);
-            launchVector.y = launchVector.magnitude * Mathf.Tan(inclination);
-            launchVector = launchVector.normalized * _projSpeed;
+            float3 velOffset = target.GetVel() - GetVel();
+            float3 aimPos;
 
-            // Spawn and fire - old code
-            /*GameObject projectile = Instantiate(projectilePrefeb, launchPos, transform.rotation);
-            Physics.IgnoreCollision(projectile.GetComponent<Collider>(), GetComponent<Collider>());
-            projectile.GetComponent<RangedProjectile>().SetOwner(owner);
-            projectile.GetComponent<RangedProjectile>().SetDamage(IsBoosted() ? boostedDamage : damage);
-            projectile.GetComponent<Rigidbody>().AddForce(launchVector, ForceMode.VelocityChange);*/
+            float t1 = CalculateTime(transform.position, target.transform.position, velOffset, _g.y, _projSpeed);
+
+            if (t1 < 0)
+            {
+                return false;
+            }
+            aimPos = (float3)target.transform.position + velOffset * t1;
+
+            float theta = CalculateAngle(transform.position, aimPos, -_g.magnitude, _projSpeed);
+            if (theta < -math.PI / 2 || theta > math.PI / 2)
+                return false;
+            float3 offset = aimPos - (float3)transform.position;
+
 
             GameObject projectile = ProjectilePoolManager.SharedInstance.getPooledObject();
             if (projectile != null)
             {
-                projectile.transform.position = launchPos;
-                projectile.transform.rotation = transform.rotation;
                 projectile.gameObject.SetActive(true);
-                //Physics.IgnoreCollision(projectile.GetComponent<Collider>(), GetComponent<Collider>());
                 RangedProjectile p = projectile.GetComponent<RangedProjectile>();
+                p.Fire(_projSpeed, transform.position, theta, new UnityEngine.Vector3(offset.x, 0, offset.z).normalized, GetVel());
                 p.SetOwner(owner);
                 p.SetDamage(IsBoosted() ? boostedDamage : damage);
-                //Rigidbody body = projectile.GetComponent<Rigidbody>();
-                //body.velocity = new Vector3(0,0,0);
-                //body.angularVelocity = new Vector3(0,0,0);
-                //body.AddForce(launchVector, ForceMode.VelocityChange);
-                p.SetForce(launchVector);
                 p.SetColor();
             }
 
             AudioManager.instance.PlaySoundEffectAtPoint(rangedFireAudio, GetPos(), rangedFireAudioVolume);
+            return true;
         }
+        return false;
     }
 
 
-    private float FindTimeToImpact() {
-        float minSpeed = _projSpeed * Mathf.Cos(Mathf.PI / 4f);
-        float maxDst = (minSpeed * minSpeed) / _g.magnitude;
-        float maxTime = minSpeed / maxDst;
+    float CalculateTime(float3 origin, float3 target, float3 targetVel, float g, float v0)
+    {
+        float px = target.x - origin.x;
+        float py = target.z - origin.z;
+        float pz = target.y - origin.y;
+        float vx = targetVel.x;
+        float vy = targetVel.z;
+        float vz = targetVel.y;
+        g = -g;
 
-        float t = 0;
-        float ft;
-        float e = 0.1f;
-        while (t < maxTime) { // Implement better solution for finding first non-negative root than linear search?
-            ft = QuarticEquation(t);
-            if (ft < e) {
-                return t;
-            } else {
-                t += e;
+        float a = sqr(g) / 4;
+        float b = (vz * g);
+        float c = (pz * g + sqr(vz) - sqr(v0) + sqr(vy) + sqr(vx));
+        float d = (2 * pz * vz + 2 * py * vy + 2 * px * vx);
+        float e = (sqr(pz) + sqr(py) + sqr(px));
+
+        if (math.abs(a) < 0.1f)
+            if (a == 0f)
+                a = 0.1f;
+            else
+                a = math.sign(a) * 0.1f;
+
+        float alpha =
+            -(3 * sqr(b)) / (8 * sqr(a))
+            + c / a;
+
+        float beta =
+            +cube(b) / (8 * cube(a))
+            - (b * c) / (2 * sqr(a))
+            + d / a;
+
+        float gamma =
+            -(3 * quadr(b)) / (256 * quadr(a))
+            + (c * sqr(b)) / (16 * cube(a))
+            - (b * d) / (4 * sqr(a))
+            + e / a;
+
+        float p =
+            -(sqr(alpha) / 12)
+            - gamma;
+
+        float q =
+            -(cube(alpha) / 108)
+            + (alpha * gamma) / 3
+            - sqr(beta) / 8;
+        Complex r = (-q / 2) + Complex.Sqrt((sqr(q)) / 4 + (cube(p)) / 27);
+        Complex u = Complex.Pow(r, 1.0f / 3.0f);
+
+        Complex y;
+        if (Complex.Abs(u) < 0.001f)
+            y = -(5f / 6f) * alpha + u - Complex.Pow(q, 1.0f / 3.0f);
+        else
+            y = -(5f / 6f) * alpha + u - p / (3 * u);
+        Complex w = Complex.Sqrt(alpha + 2 * y);
+
+        double tBest = double.MaxValue;
+
+        for (int i = 0; i < 4; i++)
+        {
+            Complex tmp = -b / (4 * a) + ((i / 2) * 2 - 1) * 1f / 2 * w + ((i % 2) * 2 - 1) * 1f / 2 * Complex.Sqrt(-(3 * alpha + 2 * y + ((2 * beta / w) * ((i / 2) * 2 - 1))));
+            if (math.abs(tmp.Imaginary) < 0.05d)
+            {
+                if (tmp.Real != System.Double.NaN && tmp.Real > 0 && tmp.Real < tBest)
+                    tBest = tmp.Real;
             }
         }
+        return (float)tBest;
 
-        return 0; // No roots found, aim at current position
     }
 
-    private float QuarticEquation(float t) {
-        float a = 0.25f * Vector3.Dot(_g, _g);
-        float b = Vector3.Dot(_v, _g);
-        float c = Vector3.Dot(_p, _g) + Vector3.Dot(_v, _v) - _projSpeed * _projSpeed;
-        float d = 2f * Vector3.Dot(_p, _v);
-        float e = Vector3.Dot(_p, _p);
-
-        return a * Mathf.Pow(t, 4) + b * Mathf.Pow(t, 3) + c * Mathf.Pow(t, 2) + d * t + e;
+    float sqr(float v)
+    {
+        return v * v;
+    }
+    float cube(float v)
+    {
+        return v * v * v;
+    }
+    float quadr(float v)
+    {
+        return v * v * v * v;
     }
 
-    private float Inclination(Vector3 aimPos) {
-        float g = _g.magnitude;
-        float h = aimPos.y;
-        float h2 = h * h;
-        float x = RemoveYComp(aimPos).magnitude;
-        float x2 = x * x;
-        float v = _projSpeed;
-        float v2 = v * v;
-        float phase = Mathf.Atan2(x, h);
-        float cos = (((g * x2) / v2) - h) / (Mathf.Sqrt(h2 + x2));
-        float inclination = (Mathf.Acos(cos) + phase) / 2f;
-        return (Mathf.PI / 2f) - inclination; // Pick the smaller solution
+    float CalculateAngle(float3 origin, float3 target, float g, float v0)
+    {
+        float3 m = target - origin;
+        float2 Mxz = new float2(m.x, m.z);
+        float Mx = math.sqrt(math.dot(Mxz, Mxz));
+        float My = m.y;
+        float t1;
+
+        float a = -(Mx * Mx * g * g) + 2 * My * v0 * v0 * g + v0 * v0 * v0 * v0;
+        if (a < 0)
+            return math.PI;
+        float b = math.sqrt(a) / (g * g);
+        float c = My / g + (v0 * v0) / (g * g);
+        if (-b + c > 0)
+            t1 = math.SQRT2 * math.sqrt(-b + c);
+        else if (b + c > 0)
+            t1 = math.SQRT2 * math.sqrt(b + c);
+        else
+            return math.PI;
+        return math.asin((My - (g * t1 * t1) / 2) / (t1 * v0));
     }
 }

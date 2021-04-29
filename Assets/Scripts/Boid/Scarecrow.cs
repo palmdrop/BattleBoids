@@ -82,7 +82,8 @@ public class Scarecrow : Boid {
         SetColor();
     }
 
-    protected override void Act() {
+    protected override bool Act() {
+        return true;
     }
 
     private void SetColor() {
