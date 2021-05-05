@@ -30,6 +30,7 @@ public class GameUI : MonoBehaviour
     [SerializeField] private GameObject victoryMenu;
     [SerializeField] private GameObject pauseMenu;
     [SerializeField] private GameObject optionsMenu;
+    [SerializeField] private List<GameObject> healthBars;
     [SerializeField] private CommandManager commandManager;
 
     private GameManager _gameManager;
@@ -163,7 +164,7 @@ public class GameUI : MonoBehaviour
         commandManager.RegisterPressedAction(KeyCode.Alpha1, () => SetActivePlayerId(1), "Change to the first player");
         commandManager.RegisterPressedAction(KeyCode.Alpha2, () => SetActivePlayerId(2), "Change to the second player");
         commandManager.RegisterPressedAction(KeyCode.R, () => players.ForEach(p => p.Ready()), "Start the game");
-        commandManager.RegisterPressedAction(KeyCode.Y, () => showHealthBars = !showHealthBars, "Toggle health bars");
+        commandManager.RegisterPressedAction(KeyCode.Y, () => ToggleHealthBars(), "Toggle health bars");
         commandManager.RegisterPressedAction(KeyCode.M, () => AudioManager.instance.ToggleMute());
         commandManager.RegisterPressedAction(KeyCode.U, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() + 0.1f));
         commandManager.RegisterPressedAction(KeyCode.J, () => AudioManager.instance.SetMasterVolume(AudioManager.instance.GetMasterVolume() - 0.1f));
@@ -340,6 +341,12 @@ public class GameUI : MonoBehaviour
     public Button GetReadyButton()
     {
         return ready;
+    }
+
+    public void ToggleHealthBars()
+    {
+        showHealthBars = !showHealthBars;
+        healthBars.ForEach((bar) => bar.SetActive(showHealthBars));
     }
 
     public bool ShowHealthBars()
