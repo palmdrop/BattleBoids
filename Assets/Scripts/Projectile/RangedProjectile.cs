@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Mathematics;
 
 public class RangedProjectile : MonoBehaviour
 {
@@ -12,31 +13,43 @@ public class RangedProjectile : MonoBehaviour
     private GameObject _hitAnimation;
     private Vector3 vel;
     private Vector3 gravity = Physics.gravity;
-    public static float projectileRadius = 0.05f;
+    public static float projectileRadius = 0.1f;
+    public float created;
     private static List<Material> materials = new List<Material>();
 
-    void Update() {
-        // If under map destroy
-        //if (transform.position.y < 0f) {
-        //    gameObject.SetActive(false);
-            //Destroy(gameObject);
-        //}
-    }
+    private float V0;
+    private float theta;
+    private float t0;
+    private Vector3 origin;
+    private Vector3 xy;
+    private Vector3 relativeSpeed;
 
-    public void SetForce(Vector3 force)
-    {
-        vel = force;
-    }
     public Vector3 GetVel()
     {
-        return vel;
+        return relativeSpeed
+            + xy * V0
+            + new Vector3(0, 1, 0) * (V0 * math.sin(theta) + -gravity.magnitude * (Time.time - t0));
     }
 
+    public void Fire(float Vmax, Vector3 origin, float theta, Vector3 xy, Vector3 relativeSpeed)
+    {
+        transform.position = origin;
+        this.origin = origin;
+        V0 = Vmax;
+        this.theta = theta;
+        t0 = Time.time;
+        this.xy = xy;
+        this.relativeSpeed = relativeSpeed;
+    }
 
     private void fastPhysicsUpdate(float dt)
     {
-        vel += gravity * dt;
-        transform.position += vel * dt;
+
+        float t = (Time.time - t0);
+        transform.position = origin
+            + xy * V0 * math.cos(theta) * (Time.time - t0)
+            + new Vector3(0, 1, 0) * (V0 * t * math.sin(theta) + (1f / 2) * -gravity.magnitude * t * t)
+            + relativeSpeed * t;
     }
 
     public void ManagedFixedUpdate()
@@ -44,21 +57,14 @@ public class RangedProjectile : MonoBehaviour
         fastPhysicsUpdate(Time.fixedDeltaTime);
     }
 
-    public void ManagedOnTriggerEnter(Boid boid) {
+    public void ManagedOnTriggerEnter(Boid boid)
+    {
 
-        if (boid != null) { // Collision with boid
-            if (boid.GetOwner() != _owner) { // Enemy
+        if (boid != null)
+        {
+            if (boid.GetOwner() != _owner)
+            {
                 boid.TakeDamage(_damage);
-
-                /*_hitAnimation = Instantiate(
-                    hitAnimation,
-                    gameObject.transform.position,
-                    gameObject.transform.rotation
-                );
-                _hitAnimation.GetComponent<ParticleSystem>().startColor = _owner.color;
-                Destroy(_hitAnimation,
-                    _hitAnimation.GetComponent<ParticleSystem>().main.duration
-                );*/
                 GameObject hit = ParticlePoolManager.SharedInstance.getPooledObject(ParticlePoolManager.Type.Hit);
                 if (hit != null)
                 {
@@ -68,26 +74,14 @@ public class RangedProjectile : MonoBehaviour
                     hit.GetComponent<ParticleSystem>().startColor = _owner.color;
                 }
 
-                //Destroy(gameObject);
                 gameObject.SetActive(false);
-            } else { // Friendly
+            }
+            else
+            {
                 return;
             }
-        } else { // Collision with environment
-            //Destroy(gameObject);
-            gameObject.SetActive(false);
         }
     }
-
-    //private void SetColor() {
-    /*foreach (GameObject particleObject in particleObjects) {
-        particleObject.GetComponent<ParticleSystem>().startColor = _owner.color;
-    }
-    TrailRenderer tr = gameObject.GetComponent<TrailRenderer>();
-    Color trColor = new Color(_owner.color.r, _owner.color.g, _owner.color.b, 0.1f);
-    tr.startColor = trColor;
-    tr.endColor = trColor;*/
-    //}
 
     public void SetColor(Color color)
     {
@@ -115,11 +109,13 @@ public class RangedProjectile : MonoBehaviour
         SetColor(_owner.color);
     }
 
-    public void SetOwner(Player owner) {
+    public void SetOwner(Player owner)
+    {
         _owner = owner;
     }
 
-    public void SetDamage(int damage) {
+    public void SetDamage(int damage)
+    {
         _damage = damage;
     }
 }

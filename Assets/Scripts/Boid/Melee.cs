@@ -86,15 +86,15 @@ public class Melee : Boid {
         SetLaserColor();
     }
 
-    protected override void Act()
+    protected override bool Act()
     {
-        Attack();
+        return Attack();
     }
 
-    private void Attack() 
+    private bool Attack() 
     {
         if (HasTarget() && !target.IsDead()) {
-            SetLaser(this.GetPos(), target.GetPos());
+            //SetLaser(this.GetPos(), target.GetPos());
             target.TakeDamage(IsBoosted() ? boostedDamage : damage);
             laser.SetActive(true);
 
@@ -103,7 +103,21 @@ public class Melee : Boid {
                 AudioManager.instance.PlaySoundEffectAtPoint(laserAudio, GetPos(), laserAudioVolume);
                 _previousAudioTime = Time.time;
             }
+            return true;
         } else {
+            laser.SetActive(false);
+            return false;
+        }
+    }
+
+    private void Update()
+    {
+        if (HasTarget() && !target.IsDead())
+        {
+            SetLaser(this.GetPos(), target.GetPos());
+        }
+        else
+        {
             laser.SetActive(false);
         }
     }

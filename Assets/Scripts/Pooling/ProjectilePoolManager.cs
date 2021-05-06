@@ -48,6 +48,7 @@ public class ProjectilePoolManager : MonoBehaviour
             {
                 pooledObjects[i].gameObject.GetComponent<TrailRenderer>().Clear();
                 StartCoroutine(DeactivateAfterTime(pooledObjects[i].gameObject, maxAliveTime));
+                pooledObjects[i].created = Time.time;
                 return pooledObjects[i].gameObject;
             }
         }
@@ -57,7 +58,8 @@ public class ProjectilePoolManager : MonoBehaviour
     public IEnumerator DeactivateAfterTime(GameObject o, float time)
     {
         yield return new WaitForSeconds(time);
-        o.SetActive(false);
+        if ((Time.time - o.GetComponent<RangedProjectile>().created) >= time)
+            o.SetActive(false);
     }
 
     public void FixedUpdate()

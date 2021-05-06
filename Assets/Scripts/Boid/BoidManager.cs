@@ -277,7 +277,15 @@ public class BoidManager : MonoBehaviour
             {
                 friendlyTargetBoidIndex = FindFriendlyTargetIndex(boid, classInfo, neighbours, distances);
             }
-            targetBoidIndex = FindEnemyTargetIndex(boid, classInfo, neighbours, distances);
+
+            if (classInfo.attackDistRange > classInfo.viewRadius)
+            {
+                NativeArray<int> tmp = grid.FindBoidsWithinRadius(boid, classInfo.attackDistRange);
+                targetBoidIndex = FindEnemyTargetIndex(boid, classInfo, tmp, CalculateDistances(boid, tmp));
+            }
+            else
+                targetBoidIndex = FindEnemyTargetIndex(boid, classInfo, neighbours, distances);
+
             targetViewDistance = classInfo.attackDistRange;
 
             float3 desire;

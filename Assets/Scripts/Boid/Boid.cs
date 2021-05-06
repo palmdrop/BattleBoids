@@ -62,7 +62,6 @@ public abstract class Boid : Selectable
     private GameObject cachedDeath;
     protected int meshDefaultLayer;
     // Cache shader property to avoid expensive shader uniform lookups
-    //private static readonly int Color = Shader.PropertyToID("_Color");
     [SerializeField] private AudioClip collisionAudio;
     
     private Map.Map _map;
@@ -102,6 +101,12 @@ public abstract class Boid : Selectable
     public bool isFalling = false;
     private double startedFalling;
     private double fallTimeBeforeDeath = 2;
+    private float timeDamageTaken = 0;
+    private float damageFadeTime = 0.5f;
+    private bool takingDamage = false;
+    private Color color;
+    static Dictionary<Color, ColorFade> fades = new Dictionary<Color, ColorFade>();
+    private int fadeDepth = 10;
 
     public struct ClassInfo {
         public Type type;
@@ -216,7 +221,6 @@ public abstract class Boid : Selectable
             this._map = (Map.Map)map.GetComponent(typeof(Map.Map));
         }
         _localScale = transform.GetChild(0).transform.localScale;
-        //_healthBar = Instantiate(healthBarPrefab, transform);
     }
 
     public void StartBoid()
@@ -233,9 +237,8 @@ public abstract class Boid : Selectable
         _rigidbody.AddForce(hoverForce, ForceMode.Acceleration);
 
         // Wait until next action is ready
-        if ((Time.time - _previousActionTime) >= timeBetweenActions)
+        if ((Time.time - _previousActionTime) >= timeBetweenActions && _hasTarget && Act())
         {
-            Act();
             _previousActionTime = Time.time;
         }
 
@@ -247,6 +250,18 @@ public abstract class Boid : Selectable
     {
         hoverForce = new float3(0,force.y,0);
         _rigidbody.AddForce(RemoveYComp(force), ForceMode.Acceleration);
+        float tmpTime = Time.time;
+        if(timeDamageTaken + damageFadeTime >= tmpTime)
+        {
+            int index = (int)(((timeDamageTaken + damageFadeTime - tmpTime) / damageFadeTime)*fadeDepth);
+            index = index >= fadeDepth ? fadeDepth-1 : index ;
+            SetMaterial(fades[color].materials[index]);
+        }
+        else if (takingDamage)
+        {
+            SetColor(owner.color);
+            takingDamage = false;
+        }
 
         if (_rigidbody.velocity.sqrMagnitude > maxSpeed * maxSpeed)
         {
@@ -382,6 +397,8 @@ public abstract class Boid : Selectable
 
     public void TakeDamage(int damageTaken)
     {
+        timeDamageTaken = Time.time;
+        takingDamage = true;
         health = math.max(health - damageTaken, 0);
         if (health <= 0)
         {
@@ -415,11 +432,6 @@ public abstract class Boid : Selectable
     }
 
     private void AnimateDeath() {
-        //GameObject death = Instantiate(deathAnimationPrefab, transform.position, transform.rotation);
-        //ParticleSystem.MainModule psMain = death.GetComponent<ParticleSystem>().main;
-        //psMain.startColor = owner.color;
-        //death.GetComponent<Rigidbody>().velocity = gameObject.GetComponent<Rigidbody>().velocity;
-        //Destroy(death, psMain.duration);
 
         GameObject death = ParticlePoolManager.SharedInstance.getPooledObject(ParticlePoolManager.Type.Death);
         if (death != null)
@@ -443,12 +455,24 @@ public abstract class Boid : Selectable
         return new Vector3(v.x, 0, v.z);
     }
 
+    bool EqualColor(Color a, Color b)
+    {
+        float eps = 0.005f;
+        if (
+            math.abs(a.r - b.r) < eps &&
+            math.abs(a.g - b.g) < eps &&
+            math.abs(a.b - b.b) < eps)
+            return true;
+        return false;
+    }
+
     public void SetColor(Color color)
     {
         foreach (Material material in materials)
         {
-            if (color.Equals(material.color))
+            if (EqualColor(color, material.color))
             {
+                this.color = material.color;
                 transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material = material;
                 return;
             }
@@ -456,10 +480,17 @@ public abstract class Boid : Selectable
         Material tmp = new Material(baseMaterial);
         tmp.color = color;
         materials.Add(tmp);
+        this.color = tmp.color;
+        fades[color] = new ColorFade(tmp.color, baseMaterial, fadeDepth);
         transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material = tmp;
     }
 
-    public void SetMeshLayer(int layer)
+    public void SetMaterial(Material m)
+    {
+        transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material = m;
+    }
+
+        public void SetMeshLayer(int layer)
     {
         transform.GetChild(0).transform.GetChild(0).gameObject.layer = layer;
     } 
@@ -475,6 +506,11 @@ public abstract class Boid : Selectable
         return _rigidbody;
     }
 
+    public float GetMaxSpeed()
+    {
+        return maxSpeed;
+    }
+
     public virtual void SetHidden(bool hidden)
     {
         foreach (Renderer r in GetComponentsInChildren<Renderer>()) {
@@ -482,7 +518,7 @@ public abstract class Boid : Selectable
         }
     }
 
-    protected abstract void Act();
+    protected abstract bool Act();
 
     public void SetFalling(bool isFalling)
     {
@@ -497,5 +533,23 @@ public abstract class Boid : Selectable
         }
         
         this.isFalling = isFalling;
+    }
+}
+class ColorFade
+{
+    public Material[] materials;
+
+    public ColorFade(Color color, Material material, int n)
+    {
+        materials = new Material[n];
+        for (int i = 0; i < n; i++)
+        {
+            Material tmp = new Material(material);
+            tmp.color = new Color(
+                color.r + ((int)((255 - color.r * 255) * (i / (float)n))) / 255f,
+                color.g + ((int)((255 - color.g * 255) * (i / (float)n))) / 255f,
+                color.b + ((int)((255 - color.b * 255) * (i / (float)n))) / 255f);
+            materials[i] = tmp;
+        }
     }
 }
