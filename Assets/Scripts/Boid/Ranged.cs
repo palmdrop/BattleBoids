@@ -65,7 +65,7 @@ public class Ranged : Boid
             fearStrength = 20.0f,
             fearExponent = 1.0f,
 
-            attackDistRange = 3f,
+            attackDistRange = 4f,
             attackAngleRange = Mathf.PI,
 
             approachMovementStrength = 0.3f,
