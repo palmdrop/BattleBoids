@@ -18,6 +18,7 @@ public class ProjectilePoolManager : MonoBehaviour
 
     private void Awake()
     {
+        //Trick for easy reference if there is only one script per scene.
         SharedInstance = this;
         maxBoidRadius = 0;
         foreach (Boid.ClassInfo info in ClassInfos.infos)
@@ -28,6 +29,7 @@ public class ProjectilePoolManager : MonoBehaviour
 
     public void InstancePoolObjects(int amountToPool)
     {
+        //Handles pre-instancing.
         pooledObjects = new List<RangedProjectile>();
         GameObject tmp;
         for (int i = 0; i < amountToPool; i++)
@@ -41,6 +43,7 @@ public class ProjectilePoolManager : MonoBehaviour
 
     public GameObject getPooledObject()
     {
+        //Return any pooled object as long as it's not active.
         int count = pooledObjects.Count;
         for (int i = 0; i < count; i++)
         {
@@ -57,6 +60,7 @@ public class ProjectilePoolManager : MonoBehaviour
 
     public IEnumerator DeactivateAfterTime(GameObject o, float time)
     {
+        //We can safely deactivate the projectile if it falls out of the map after some time.
         yield return new WaitForSeconds(time);
         if ((Time.time - o.GetComponent<RangedProjectile>().created) >= time)
             o.SetActive(false);
@@ -74,7 +78,7 @@ public class ProjectilePoolManager : MonoBehaviour
             }
         }
 
-
+        //Info about projectiles and boids in burst-compatible arrays.
         NativeArray<float3> projectilePositions = new NativeArray<float3>(activeCount, Allocator.TempJob);
         NativeArray<float3> projectileVelocities = new NativeArray<float3>(activeCount, Allocator.TempJob);
         int indexCount = 0;
@@ -108,7 +112,7 @@ public class ProjectilePoolManager : MonoBehaviour
 
         NativeArray<int> hitIndexes = new NativeArray<int>(activeCount, Allocator.TempJob);
 
-
+   
         ProjectileCollisionJob collisionJob = new ProjectileCollisionJob()
         {
             projectiles = projectilePositions,
@@ -129,6 +133,7 @@ public class ProjectilePoolManager : MonoBehaviour
         JobHandle jobHandle = collisionJob.Schedule(activeCount, activeCount / 10);
         jobHandle.Complete();
 
+        //Update projectiles and damage hit boids etc.
         int tmpCount = 0;
         for (int i = 0; i < pooledObjects.Count; i++)
         {
@@ -144,7 +149,7 @@ public class ProjectilePoolManager : MonoBehaviour
             }
         }
 
-
+        //Dispose to avoid errors.
         projectilePositions.Dispose();
         projectileVelocities.Dispose();
         boidPositionsArray.Dispose();
@@ -156,6 +161,9 @@ public class ProjectilePoolManager : MonoBehaviour
     [BurstCompile]
     private struct ProjectileCollisionJob : IJobParallelFor
     {
+        //To know if we have collided with a boid, all boids nearby have to be checked.
+        //The problem is identical to the boid neighbor-checking so we might as well use
+        //the already implemented grid.
         [ReadOnly] public NativeArray<float3> projectiles;
         [ReadOnly] public NativeArray<float3> projectileVelocities;
         [ReadOnly] public NativeArray<float3> boidPositions;
@@ -177,6 +185,8 @@ public class ProjectilePoolManager : MonoBehaviour
                 float boidRadius = boidClassInfos[typeInfo[boid]].colliderRadius;
                 float3 offset = boidPositions[boid] - projectiles[index];
                 float collisionDistance = boidRadius + projectileRadius;
+
+                //Only checks distance. A spherecast would be optimal but this works as long as the speeds are not too high.
                 if (math.dot(offset, offset) < collisionDistance * collisionDistance)
                 {
                     hitIndexes[index] = boid;
@@ -185,6 +195,7 @@ public class ProjectilePoolManager : MonoBehaviour
                 }
             }
 
+            //We also check if the projectile is about to collide with the ground or other obstacles
             Unity.Physics.RaycastInput ray = new Unity.Physics.RaycastInput
             {
                 Start = projectiles[index],

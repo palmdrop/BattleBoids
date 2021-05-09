@@ -32,6 +32,7 @@ public class ParticlePoolManager : MonoBehaviour
 
     public void InstancePoolObjects(int amountToPool, Type type)
     {
+        //Instantiate the different types of animations.
         if (type == Type.Death)
         {
             pooledDeathAnim = new List<GameObject>();
@@ -61,6 +62,7 @@ public class ParticlePoolManager : MonoBehaviour
 
     public GameObject getPooledObject(Type type)
     {
+        //Similar to projectile pool
         if (type == Type.Death && pooledDeathAnim != null)
         {
             int count = pooledDeathAnim.Count;

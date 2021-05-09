@@ -251,6 +251,9 @@ public abstract class Boid : Selectable
         hoverForce = new float3(0,force.y,0);
         _rigidbody.AddForce(RemoveYComp(force), ForceMode.Acceleration);
         float tmpTime = Time.time;
+
+        //Used for the fade effect when taking damage. May look intimidating but we need to limit
+        //the amount of fade colors as each unique color requires a new material.
         if(timeDamageTaken + damageFadeTime >= tmpTime)
         {
             int index = (int)(((timeDamageTaken + damageFadeTime - tmpTime) / damageFadeTime)*fadeDepth);
@@ -457,6 +460,7 @@ public abstract class Boid : Selectable
 
     bool EqualColor(Color a, Color b)
     {
+        //If they are close enough we can assume equality.
         float eps = 0.005f;
         if (
             math.abs(a.r - b.r) < eps &&
@@ -470,6 +474,8 @@ public abstract class Boid : Selectable
     {
         foreach (Material material in materials)
         {
+            //If color exists in materials we use that. Materials are set instead of colors to enable instancing,
+            //as setting the color creates a unique copy of the material instead.
             if (EqualColor(color, material.color))
             {
                 this.color = material.color;
@@ -477,6 +483,7 @@ public abstract class Boid : Selectable
                 return;
             }
         }
+        //Else create a new material with the given color.
         Material tmp = new Material(baseMaterial);
         tmp.color = color;
         materials.Add(tmp);
@@ -487,10 +494,11 @@ public abstract class Boid : Selectable
 
     public void SetMaterial(Material m)
     {
+        //Bad solution, but works for our implementation.
         transform.GetChild(0).transform.GetChild(0).GetComponent<MeshRenderer>().material = m;
     }
 
-        public void SetMeshLayer(int layer)
+    public void SetMeshLayer(int layer)
     {
         transform.GetChild(0).transform.GetChild(0).gameObject.layer = layer;
     } 
@@ -542,6 +550,7 @@ class ColorFade
     public ColorFade(Color color, Material material, int n)
     {
         materials = new Material[n];
+        //Create a fade array for a color from white to the chosen color.
         for (int i = 0; i < n; i++)
         {
             Material tmp = new Material(material);

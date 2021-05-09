@@ -105,15 +105,21 @@ public class Ranged : Boid
             float3 velOffset = target.GetVel() - GetVel();
             float3 aimPos;
 
+            //Get the time to the target. If time is given all other parameters are set.
             float t1 = CalculateTime(transform.position, target.transform.position, velOffset, _g.y, _projSpeed);
 
+            //May yield complex or negative results, so discard and don't shoot in that case.
             if (t1 < 0)
             {
                 return false;
             }
-            aimPos = (float3)target.transform.position + velOffset * t1;
 
+
+            aimPos = (float3)target.transform.position + velOffset * t1;
+            //Simple calculation to get the horizontal firing angle.
             float theta = CalculateAngle(transform.position, aimPos, -_g.magnitude, _projSpeed);
+
+            //Make sure it's not firing backwards.
             if (theta < -math.PI / 2 || theta > math.PI / 2)
                 return false;
             float3 offset = aimPos - (float3)transform.position;
@@ -139,6 +145,8 @@ public class Ranged : Boid
 
     float CalculateTime(float3 origin, float3 target, float3 targetVel, float g, float v0)
     {
+        //In reality a quartic equation solver using ferarri's method.
+        //First some constant calculations to fit typical formula. Se paper for more information.
         float px = target.x - origin.x;
         float py = target.z - origin.z;
         float pz = target.y - origin.y;
@@ -153,6 +161,8 @@ public class Ranged : Boid
         float d = (2 * pz * vz + 2 * py * vy + 2 * px * vx);
         float e = (sqr(pz) + sqr(py) + sqr(px));
 
+        //We now have the proper constants. As g is constant and not zero this won't be a problem,
+        //but typically this check is needed so as to not divide by zero.
         if (math.abs(a) < 0.1f)
             if (a == 0f)
                 a = 0.1f;
@@ -182,6 +192,8 @@ public class Ranged : Boid
             -(cube(alpha) / 108)
             + (alpha * gamma) / 3
             - sqr(beta) / 8;
+
+        //We need to go into the complex plane here. Not sure as to why but some real solutions require this.
         Complex r = (-q / 2) + Complex.Sqrt((sqr(q)) / 4 + (cube(p)) / 27);
         Complex u = Complex.Pow(r, 1.0f / 3.0f);
 
@@ -197,6 +209,7 @@ public class Ranged : Boid
         for (int i = 0; i < 4; i++)
         {
             Complex tmp = -b / (4 * a) + ((i / 2) * 2 - 1) * 1f / 2 * w + ((i % 2) * 2 - 1) * 1f / 2 * Complex.Sqrt(-(3 * alpha + 2 * y + ((2 * beta / w) * ((i / 2) * 2 - 1))));
+            //Floating point errors may have accumulated in the imaginary part, so we check if we have something close to a real solution.
             if (math.abs(tmp.Imaginary) < 0.05d)
             {
                 if (tmp.Real != System.Double.NaN && tmp.Real > 0 && tmp.Real < tBest)
