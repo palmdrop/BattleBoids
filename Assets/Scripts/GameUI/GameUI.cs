@@ -10,6 +10,8 @@ using UnityEngine.SceneManagement;
 
 public class GameUI : MonoBehaviour
 {
+    public static GameUI SharedInstance;
+
     [SerializeField] private Text boins;
     
     [SerializeField] private GameObject currentCost;
@@ -40,6 +42,7 @@ public class GameUI : MonoBehaviour
 
     private void Awake()
     {
+        SharedInstance = this;
     }
 
     // Start is called before the first frame update
@@ -111,7 +114,7 @@ public class GameUI : MonoBehaviour
             button.GetComponentInChildren<Button>().onClick.AddListener(()=>
             {
                 Debug.Log(keyCodesAndDescription[x].Item2);
-                commandManager.RunActionOnKeyCode(keyCodesAndDescription[x].Item1);
+                commandManager.RunActionOnKeyCode(keyCodesAndDescription[x].Item1, KeyCode.None);
             });
             
             
@@ -171,13 +174,26 @@ public class GameUI : MonoBehaviour
         commandManager.RegisterPressedAction(KeyCode.P, () => AudioManager.instance.SetSoundEffectsVolume(AudioManager.instance.GetSoundEffectsVolume() - 0.1f));
         commandManager.RegisterPressedAction(KeyCode.O, () => AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() + 0.1f));
         commandManager.RegisterPressedAction(KeyCode.L, () => AudioManager.instance.SetMusicVolume(AudioManager.instance.GetMusicVolume() - 0.1f));
-        commandManager.RegisterPressedAction(KeyCode.Escape, () => {
-            if (!_gameManager.IsPaused()) {
+        commandManager.RegisterPressedAction(KeyCode.Escape, () => PressedEscape(), "Open pause menu");
+    }
+
+    public void PressedEscape()
+    {
+        if (GetActivePlayer().GetSpawnArea().IsInPlacingPhase())
+        {
+            GetActivePlayer().GetSpawnArea().CancelPlacingPhase();
+        }
+        else
+        {
+            if (!_gameManager.IsPaused())
+            {
                 Pause();
-            } else {
+            }
+            else
+            {
                 Resume();
             }
-        }, "Open pause menu");
+        }
     }
 
     void UpdateReady()
@@ -261,7 +277,7 @@ public class GameUI : MonoBehaviour
         activePlayer.GetSpawnArea().SetPlacing(true);
     }
 
-    GameObject FindUnitByName(string name)
+    public GameObject FindUnitByName(string name)
     {
         foreach (GameObject unit in unitPrefabs)
         {
