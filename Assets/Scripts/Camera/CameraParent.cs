@@ -36,6 +36,7 @@ public class CameraParent : MonoBehaviour
 
     private bool _rightMouseButtonHeld = false;
     private bool _cameraFollowGameObject = false;
+    private float followDistance = 10f;
 
     private Transform selectedObject;
     
@@ -80,12 +81,7 @@ public class CameraParent : MonoBehaviour
         if (selectedObject)
         {
             // Get its positions, this is used to track where the object is
-            Vector3 selectedObjectPosition = selectedObject.position;
-            _selectedGameObjectPosition = new Vector3(
-                selectedObjectPosition.x,
-                _parentCamera.position.y,
-                selectedObjectPosition.z
-            ); 
+            _selectedGameObjectPosition = selectedObject.position;
         }
         
         // Checks if you clicked the button 
@@ -120,9 +116,16 @@ public class CameraParent : MonoBehaviour
 
     private void FixedUpdate()
     {
-        LockCameraToGameObject();
+        _parentCameraPosition = transform.position;
         RotateCamera();
-        MoveCamera();
+        if (_cameraFollowGameObject)
+        {
+            LockCameraToGameObject();
+        }
+        else
+        {
+            MoveCamera();
+        }
     }
 
     private void OnCollisionEnter(Collision other)
@@ -142,8 +145,7 @@ public class CameraParent : MonoBehaviour
             _parentCamera.velocity = Vector3.zero;
             return;
         }
-        
-        _parentCameraPosition = transform.position;
+
 
         // Movement is faster the higher up you are
         float zoomOutMultiplier = Mathf.Max(2f, _parentCameraPosition.y/2);
@@ -229,7 +231,12 @@ public class CameraParent : MonoBehaviour
         }
         
         // Else transition smoothly to the objects location
-        _parentCamera.position = Vector3.Lerp(_parentCameraPosition, _selectedGameObjectPosition, .2f);
+
+        followDistance -= scrollCount;
+        scrollCount = 0;
+        var targetPosition = _selectedGameObjectPosition - _childCamera.forward * followDistance;
+
+        _parentCamera.position = Vector3.Lerp(_parentCameraPosition, targetPosition, .2f);
     }
 
     // This is used to make sure mouse scroll speed is consistent between a trackpad and an external mouse 
