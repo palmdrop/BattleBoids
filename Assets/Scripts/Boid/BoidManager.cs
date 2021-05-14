@@ -277,7 +277,8 @@ public class BoidManager : MonoBehaviour
             {
                 friendlyTargetBoidIndex = FindFriendlyTargetIndex(boid, classInfo, neighbours, distances);
             }
-
+            //Some units may have attack ranges larger than their view radius, so we increase their view radius temporarily for this calculation.
+            //Does not severely impact performance as FindEnemyTargetIndex is not too intensive.
             if (classInfo.attackDistRange > classInfo.viewRadius)
             {
                 NativeArray<int> tmp = grid.FindBoidsWithinRadius(boid, classInfo.attackDistRange);
@@ -815,6 +816,7 @@ public class BoidManager : MonoBehaviour
                 float angle = ((i + 1) / 2) * rayCastTheta;    // series 0, theta, theta, 2*theta, 2*theta...
                 int sign = i % 2 == 0 ? 1 : -1;                 // series 1, -1, 1, -1...
 
+                //Rotate around the y-axis.
                 float3 dir = math.normalize(RotationMatrix_y(angle * sign, boid.vel));
 
                 Unity.Physics.RaycastInput ray = new Unity.Physics.RaycastInput
@@ -897,6 +899,7 @@ public class BoidManager : MonoBehaviour
 
         private float3 RotationMatrix_y(float angle, float3 vector)
         {
+            //Simple rotation around y-axis.
             float cos = math.cos(angle * math.PI / 180);
             float sin = math.sin(angle * math.PI / 180);
 

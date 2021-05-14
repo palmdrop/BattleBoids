@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class SelectionManager : MonoBehaviour
 {
+    public static SelectionManager SharedInstance;
+
     // The UI component used to get the active player
     private GameManager _gameManager;
     private CommandManager _commandManager;
@@ -30,10 +33,13 @@ public class SelectionManager : MonoBehaviour
     private static RaycastHit _mousePositionInWorld;
     // We want to check if the mouse is currently hovering over ground tiles
     private bool mouseOverGround;
-    
-    
 
-    private void Start()
+    private void Awake()
+    {
+        SharedInstance = this;
+    }
+
+        private void Start()
     { 
         ground = LayerMask.GetMask("Ground");
         _gameManager = GetComponentInParent<GameManager>();
@@ -42,7 +48,7 @@ public class SelectionManager : MonoBehaviour
         _commandManager = _gameUI.GETCommandManager();
         _commandManager.RegisterPressedAction(KeyCode.K, PressedSellKey, "Sell the selected boids", true);
         _commandManager.RegisterPressedAction(KeyCode.Q, PressedMoveSelectedKey, "Move the selected boids", true);
-        
+        _commandManager.RegisterCommandAction(KeyCode.LeftControl, KeyCode.C, PressedCopySelectedKey, "Copy selected boids", false);
     }
 
     private void Update()
@@ -65,7 +71,7 @@ public class SelectionManager : MonoBehaviour
         }
         
         // Stop if nothing is selected 
-        if (selected.Count == 0) 
+        if (selected.Count == 0 && !activePlayer.GetSpawnArea().IsInPlacingPhase()) 
         {
             Cursor.visible = true;
             return; 
@@ -177,6 +183,7 @@ public class SelectionManager : MonoBehaviour
         }
     }
 
+
     private void ReturnToOriginalPosition()
     {
         foreach (Selectable selectable in selected)
@@ -228,23 +235,67 @@ public class SelectionManager : MonoBehaviour
 
     private void PressedSellKey()
     {
-        if (selected.Count > 0)
+        if (activePlayer.GetSpawnArea().IsInPlacingPhase())
         {
-            SellSelected();
+            activePlayer.GetSpawnArea().CancelPlacingPhase();
+        }
+        else
+        {
+            if (selected.Count > 0)
+            {
+                SellSelected();
+            }
         }
     }
 
     private void PressedMoveSelectedKey()
     {
-        if (selected.Count > 0)
+        if (activePlayer.GetSpawnArea().IsInPlacingPhase())
         {
-            inMoveState = true;
+            activePlayer.GetSpawnArea().CancelPlacingPhase();
+        }
+        else
+        {
+            if (selected.Count > 0)
+            {
+                inMoveState = true;
+                Cursor.visible = false;
+            }
+            else
+            {
+                inMoveState = false;
+            }
+        }
+    }
+
+    private void PressedCopySelectedKey()
+    {
+        /*if (selected.Count > 0)
+        {
+            
+
             Cursor.visible = false;
         }
         else
         {
-            inMoveState = false;
-        }
+            //inCopyState = false;
+        }*/
+        activePlayer.GetSpawnArea().PressedCopySelectedKey(selected);
+    }
+
+    public bool IsMouseOverGround()
+    {
+        return mouseOverGround;
+    }
+
+    public Vector3 GetMousePosInWorld()
+    {
+        return _mousePositionInWorld.point;
+    }
+
+    public List<Selectable> GetSelected()
+    {
+        return selected;
     }
 
 }

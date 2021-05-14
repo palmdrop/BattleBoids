@@ -26,6 +26,8 @@ public class RangedProjectile : MonoBehaviour
 
     public Vector3 GetVel()
     {
+        //Since projectiles actually follow a parabola they do not have or require a speed variable,
+        //so the speed actually has to be calculated.
         return relativeSpeed
             + xy * V0
             + new Vector3(0, 1, 0) * (V0 * math.sin(theta) + -gravity.magnitude * (Time.time - t0));
@@ -44,7 +46,8 @@ public class RangedProjectile : MonoBehaviour
 
     private void fastPhysicsUpdate(float dt)
     {
-
+        //Reduce number of rigidbodies. Does not need further updatig.
+        //Also remove potential accumulation of floating point errors.
         float t = (Time.time - t0);
         transform.position = origin
             + xy * V0 * math.cos(theta) * (Time.time - t0)
@@ -85,6 +88,7 @@ public class RangedProjectile : MonoBehaviour
 
     public void SetColor(Color color)
     {
+        //Similar to boid setcolor.
         TrailRenderer tr = gameObject.GetComponent<TrailRenderer>();
         Color trColor = new Color(color.r, color.g, color.b, 0.1f);
         tr.startColor = trColor;

@@ -40,13 +40,14 @@ public class Outline : MonoBehaviour
 
     void OnRenderImage(RenderTexture src, RenderTexture dst)
 	{
-        if (renderOutlines && !EditorApplication.isPaused) //For some reason can't be compiled during building. Comment out second conditional.
+        if (renderOutlines) //For some reason can't be compiled during building. Comment out second conditional.
         {
 			RenderTexture tmp = RenderTexture.GetTemporary(src.descriptor);
 			RenderTexture lastOutput = RenderTexture.GetTemporary(tmp.descriptor); //Don't ask.
 			RenderTexture rt = null;
 			foreach (OutlineMaterial m in outlines)
 			{
+				//Copy main camera to ignore ui and effects.
 				tempCam.CopyFrom(Camera.current);
 				tempCam.backgroundColor = Color.black;
 				tempCam.clearFlags = CameraClearFlags.Color;
@@ -56,15 +57,22 @@ public class Outline : MonoBehaviour
 				rt = RenderTexture.GetTemporary(src.width, src.height, 0, RenderTextureFormat.R8);
 				tempCam.targetTexture = rt;
 
+				//Render from main camera, but only the units and only as one color
 				tempCam.RenderWithShader(drawAsSolidColor, "");
 
 				m._outlineMaterial.SetTexture("_SceneTex", lastOutput);
 
 				rt.filterMode = FilterMode.Point;
 				RenderTexture tx = RenderTexture.GetTemporary(src.descriptor);
+
+				//Use the outline shader material to transform the previous image into outlines
 				Graphics.Blit(rt, tx, m._outlineMaterial);
+
+				//Rendertextures are released to prevent memory leak. Garbage collector does not free rendertextures.
 				RenderTexture.ReleaseTemporary(lastOutput);
 				RenderTexture.ReleaseTemporary(rt);
+
+				//Rendertextures are bugged in conjunction with descriptors, so we flip the image as a workaround on some operating systems.
                 if (SystemInfo.graphicsUVStartsAtTop)
                     Graphics.Blit(tx, lastOutput, new Vector2(1.0f, -1.0f), new Vector2(0.0f, 1.0f));
                 else
@@ -88,6 +96,7 @@ public class Outline : MonoBehaviour
 
 	public static float[] Calculate(double sigma, int size)
 	{
+		//Generates a sine-like peak to smoothe outlines
 		float[] ret = new float[size];
 		double sum = 0;
 		int half = size / 2;

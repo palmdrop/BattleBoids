@@ -24,6 +24,7 @@ public class HealthBar_V2 : MonoBehaviour
         if (_boid.GetHealth() < _boid.GetMaxHealth())
         {
             Vector3 relativeCameraVector = transform.position - Camera.main.transform.position;
+            //render if camera is close enough
             if (relativeCameraVector.sqrMagnitude < renderDistance * renderDistance)
             {
                 _renderer.enabled = true;
@@ -54,6 +55,7 @@ public class HealthBar_V2 : MonoBehaviour
 
     private void AlignCamera(Vector3 relativeCameraVector)
     {
+        //Align quad towards the camera
         Vector3 forward = relativeCameraVector.normalized;
         Vector3 up = Vector3.Cross(forward, Camera.main.transform.right);
         transform.rotation = Quaternion.LookRotation(forward, up);
